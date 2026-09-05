@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
-import type { DirectorManualEditImpact, DirectorManualEditImpactLevel } from "@ai-novel/shared/types/directorRuntime";
-import type { UnifiedTaskDetail } from "@ai-novel/shared/types/task";
+import type { DirectorManualEditImpact, DirectorManualEditImpactLevel } from "@write-now/shared/types/directorRuntime";
+import type { UnifiedTaskDetail } from "@write-now/shared/types/task";
 import { getDirectorManualEditImpact } from "@/api/novelDirector";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

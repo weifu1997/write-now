@@ -5,7 +5,7 @@ import type {
   DirectorRuntimeProjectionEvent,
   DirectorRuntimeProjection,
   DirectorRuntimeSnapshot,
-} from "@ai-novel/shared/types/directorRuntime";
+} from "@write-now/shared/types/directorRuntime";
 import { prisma } from "../../../../db/prisma";
 import { buildDefaultDirectorPolicy } from "../runtime/directorRuntimeDefaults";
 import { DirectorEventProjectionService, parseDirectorIssueEventMetadata } from "../runtime/DirectorEventProjectionService";
@@ -15,7 +15,7 @@ import type { DirectorWorkflowSeedPayload } from "../runtime/novelDirectorHelper
 import {
   parsePersistedDirectorRiskAssessment,
   type DirectorRiskHistoryItem,
-} from "@ai-novel/shared/types/directorRisk";
+} from "@write-now/shared/types/directorRisk";
 
 function parseJsonOrNull<T>(value: string | null | undefined): T | null {
   if (!value?.trim()) {

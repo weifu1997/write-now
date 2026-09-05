@@ -22,8 +22,8 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { AlertTriangle, GitBranch, Network, RadioTower, Sparkles, UsersRound } from "lucide-react";
-import type { Character, CharacterRelation } from "@ai-novel/shared/types/novel";
-import type { CharacterRelationStage } from "@ai-novel/shared/types/characterDynamics";
+import type { Character, CharacterRelation } from "@write-now/shared/types/novel";
+import type { CharacterRelationStage } from "@write-now/shared/types/characterDynamics";
 import FullscreenView from "@/components/common/FullscreenView";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

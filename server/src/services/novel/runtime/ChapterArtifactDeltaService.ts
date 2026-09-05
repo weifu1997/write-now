@@ -1,7 +1,7 @@
 import type {
   ContentProvenance,
   StateChangeProposal,
-} from "@ai-novel/shared/types/canonicalState";
+} from "@write-now/shared/types/canonicalState";
 import { createHash } from "node:crypto";
 import { prisma } from "../../../db/prisma";
 import { runStructuredPrompt } from "../../../prompting/core/promptRunner";

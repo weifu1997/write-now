@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { RotateCcw, Save } from "lucide-react";
-import type { NarrativeForm } from "@ai-novel/shared/types/creationStudio";
-import type { WritingPlatform, WritingPlatformGuidance, WritingPlatformProfileDefinition } from "@ai-novel/shared/types/writingPlatform";
+import type { NarrativeForm } from "@write-now/shared/types/creationStudio";
+import type { WritingPlatform, WritingPlatformGuidance, WritingPlatformProfileDefinition } from "@write-now/shared/types/writingPlatform";
 import {
   activateWritingPlatformProfileVersion,
   getWritingPlatformProfile,

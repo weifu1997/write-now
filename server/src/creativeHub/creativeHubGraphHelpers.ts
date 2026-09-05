@@ -1,4 +1,4 @@
-import type { CreativeHubMessage, CreativeHubThread } from "@ai-novel/shared/types/creativeHub";
+import type { CreativeHubMessage, CreativeHubThread } from "@write-now/shared/types/creativeHub";
 
 export function latestHumanGoal(messages: CreativeHubMessage[]): string {
   const latestHuman = [...messages].reverse().find((item) => item.type === "human");

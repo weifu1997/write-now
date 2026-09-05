@@ -2,9 +2,9 @@ import type {
   BookAnalysisDetail,
   BookAnalysisSectionKey,
   BookAnalysisStatus,
-} from "@ai-novel/shared/types/bookAnalysis";
-import { BOOK_ANALYSIS_SECTIONS } from "@ai-novel/shared/types/bookAnalysis";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+} from "@write-now/shared/types/bookAnalysis";
+import { BOOK_ANALYSIS_SECTIONS } from "@write-now/shared/types/bookAnalysis";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { prisma } from "../../../db/prisma";
 import { AppError } from "../../../middleware/errorHandler";
 import { DocumentChapterService } from "../../knowledge/DocumentChapterService";

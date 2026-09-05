@@ -1,7 +1,7 @@
 import type {
   PayoffLedgerSourceRef,
   PayoffLedgerStatus,
-} from "@ai-novel/shared/types/payoffLedger";
+} from "@write-now/shared/types/payoffLedger";
 
 const BOOK_CONTRACT_REF_PREFIX = "book_contract.";
 

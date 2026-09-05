@@ -1,6 +1,6 @@
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
-import type { DirectorCompletionProfile } from "@ai-novel/shared/types/directorCompletion";
-import type { VolumePlanDocument } from "@ai-novel/shared/types/novel";
+import type { LLMProvider } from "@write-now/shared/types/llm";
+import type { DirectorCompletionProfile } from "@write-now/shared/types/directorCompletion";
+import type { VolumePlanDocument } from "@write-now/shared/types/novel";
 import { prisma } from "../../../db/prisma";
 import { NovelVolumeService } from "../volume/NovelVolumeService";
 import {

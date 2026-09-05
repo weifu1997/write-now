@@ -2,7 +2,7 @@ import {
   DIRECTOR_ISSUE_GOVERNANCE_VERSION,
   directorIssuePolicySchema,
   type DirectorIssuePolicy,
-} from "@ai-novel/shared/types/directorIssue";
+} from "@write-now/shared/types/directorIssue";
 import { prisma } from "../../../../db/prisma";
 import { directorIssuePolicyService } from "./DirectorIssuePolicyService";
 

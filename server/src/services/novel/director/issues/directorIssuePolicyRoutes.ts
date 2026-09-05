@@ -1,6 +1,6 @@
 import type { Router } from "express";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
-import { directorIssuePolicyOverrideSchema } from "@ai-novel/shared/types/directorIssue";
+import type { ApiResponse } from "@write-now/shared/types/api";
+import { directorIssuePolicyOverrideSchema } from "@write-now/shared/types/directorIssue";
 import { z } from "zod";
 import { validate } from "../../../../middleware/validate";
 import { directorIssuePolicyService } from "./DirectorIssuePolicyService";

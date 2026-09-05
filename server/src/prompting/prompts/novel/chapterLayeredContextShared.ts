@@ -3,8 +3,8 @@ import type {
   ChapterWriteContext,
   GenerationContextPackage,
   MacroConstraintContext,
-} from "@ai-novel/shared/types/chapterRuntime";
-import { resolveLengthBudgetContract } from "@ai-novel/shared/types/chapterLengthControl";
+} from "@write-now/shared/types/chapterRuntime";
+import { resolveLengthBudgetContract } from "@write-now/shared/types/chapterLengthControl";
 import { buildPlannerStyleContractSummaryText } from "../../../services/styleEngine/styleContractText";
 
 export function compactText(value: string | null | undefined, fallback = ""): string {

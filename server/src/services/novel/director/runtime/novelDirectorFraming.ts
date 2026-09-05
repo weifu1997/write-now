@@ -1,9 +1,9 @@
-import type { DirectorProjectContextInput } from "@ai-novel/shared/types/novelDirector";
+import type { DirectorProjectContextInput } from "@write-now/shared/types/novelDirector";
 import {
   normalizeCommercialTags,
   type BookFramingSuggestion,
   type BookFramingSuggestionInput,
-} from "@ai-novel/shared/types/novelFraming";
+} from "@write-now/shared/types/novelFraming";
 
 export interface DirectorBookFramingDraft {
   targetAudience?: string;

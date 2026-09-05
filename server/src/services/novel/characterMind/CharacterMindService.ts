@@ -1,4 +1,4 @@
-import type { CharacterMindSnapshot, CharacterMindSnapshotSource } from "@ai-novel/shared/types/characterMind";
+import type { CharacterMindSnapshot, CharacterMindSnapshotSource } from "@write-now/shared/types/characterMind";
 import { prisma } from "../../../db/prisma";
 import { runStructuredPrompt } from "../../../prompting/core/promptRunner";
 import {

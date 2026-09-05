@@ -1,4 +1,4 @@
-import type { TitleFactorySuggestion } from "@ai-novel/shared/types/title";
+import type { TitleFactorySuggestion } from "@write-now/shared/types/title";
 import type { GenerateTitleIdeasInput } from "./TitleGenerationService";
 import { titleGenerationService } from "./TitleGenerationService";
 

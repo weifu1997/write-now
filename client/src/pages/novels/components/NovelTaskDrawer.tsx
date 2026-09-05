@@ -1,11 +1,11 @@
 ﻿import type {
   NovelWorkflowMilestone,
   NovelWorkflowMilestoneType,
-} from "@ai-novel/shared/types/novelWorkflow";
-import type { DirectorBookAutomationAction } from "@ai-novel/shared/types/directorRuntime";
-import type { TaskStatus } from "@ai-novel/shared/types/task";
-import type { CharacterResourceProposalSummary } from "@ai-novel/shared/types/characterResource";
-import type { AutoDirectorAction } from "@ai-novel/shared/types/autoDirectorFollowUp";
+} from "@write-now/shared/types/novelWorkflow";
+import type { DirectorBookAutomationAction } from "@write-now/shared/types/directorRuntime";
+import type { TaskStatus } from "@write-now/shared/types/task";
+import type { CharacterResourceProposalSummary } from "@write-now/shared/types/characterResource";
+import type { AutoDirectorAction } from "@write-now/shared/types/autoDirectorFollowUp";
 import AICockpit from "@/components/autoDirector/AICockpit";
 import LLMSelector from "@/components/common/LLMSelector";
 import { Badge } from "@/components/ui/badge";

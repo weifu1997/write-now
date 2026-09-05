@@ -4,7 +4,7 @@ import type {
   WorldBindingSupport,
   WorldStructuredData,
   WorldStructureSectionKey,
-} from "@ai-novel/shared/types/world";
+} from "@write-now/shared/types/world";
 import type { WorldStructurePayload } from "@/api/world";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

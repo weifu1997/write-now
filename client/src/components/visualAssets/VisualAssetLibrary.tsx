@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import type { VisualAssetCatalogItem, VisualAssetSelection, VisualAssetSourceDomain } from "@ai-novel/shared/types/visualAsset";
+import type { VisualAssetCatalogItem, VisualAssetSelection, VisualAssetSourceDomain } from "@write-now/shared/types/visualAsset";
 import { Check, LoaderCircle, Search, SlidersHorizontal, X } from "lucide-react";
 import { getVisualAsset, getVisualAssetFacets, listVisualAssets, visualAssetQueryKeys } from "@/api/visualAssets";
 import { Button } from "@/components/ui/button";

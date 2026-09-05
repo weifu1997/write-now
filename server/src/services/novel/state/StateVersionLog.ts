@@ -1,7 +1,7 @@
 import type {
   CanonicalStateSnapshot,
   StateVersionRecord,
-} from "@ai-novel/shared/types/canonicalState";
+} from "@write-now/shared/types/canonicalState";
 import { prisma } from "../../../db/prisma";
 
 function parseStringArray(value: string | null | undefined): string[] {

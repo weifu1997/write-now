@@ -1,4 +1,4 @@
-import type { Chapter } from "@ai-novel/shared/types/novel";
+import type { Chapter } from "@write-now/shared/types/novel";
 import { Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

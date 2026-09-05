@@ -4,7 +4,7 @@
  * 复用 drama 已验证的 rhythmEngine + paywallPlanPolicy，
  * 生成每话大纲（hookType / cliffhanger / 卡点）并落库 ComicEpisode。
  */
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { prisma } from "../../db/prisma";
 import { runStructuredPrompt } from "../../prompting/core/promptRunner";
 import { comicEpisodeOutlinePrompt } from "../../prompting/prompts/comic/comic.prompts";

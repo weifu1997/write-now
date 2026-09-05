@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Castle, MapPinned, ShieldAlert, SlidersHorizontal } from "lucide-react";
-import type { StoryWorldSliceOverrides, StoryWorldSliceView } from "@ai-novel/shared/types/storyWorldSlice";
+import type { StoryWorldSliceOverrides, StoryWorldSliceView } from "@write-now/shared/types/storyWorldSlice";
 import { Button } from "@/components/ui/button";
 import {
   Select,

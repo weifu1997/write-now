@@ -1,8 +1,8 @@
-import type { NovelAutoDirectorTaskSummary } from "@ai-novel/shared/types/novel";
+import type { NovelAutoDirectorTaskSummary } from "@write-now/shared/types/novel";
 import {
   resolveWorkflowDisplayStage,
   type WorkflowStepCatalogDisplayStage,
-} from "@ai-novel/shared/types/directorWorkflowStepCatalog";
+} from "@write-now/shared/types/directorWorkflowStepCatalog";
 
 export interface HomeJourneyStage {
   id: string;

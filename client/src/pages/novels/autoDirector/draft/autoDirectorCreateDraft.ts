@@ -2,7 +2,7 @@ import {
   DIRECTOR_RUN_MODES,
   type DirectorRunMode,
   type DirectorWorldSetupMode,
-} from "@ai-novel/shared/types/novelDirector";
+} from "@write-now/shared/types/novelDirector";
 import type { NovelBasicFormState } from "../../novelBasicInfo.shared";
 import type { AutoDirectorCreateStageKey } from "../directorCreateStages";
 

@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { z } from "zod";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
+import type { ApiResponse } from "@write-now/shared/types/api";
 import type {
   CreationStudioTaskProjection,
-} from "@ai-novel/shared/types/creationStudio";
+} from "@write-now/shared/types/creationStudio";
 import { authMiddleware } from "../../../../middleware/auth";
 import { validate } from "../../../../middleware/validate";
 import {

@@ -7,9 +7,9 @@ import type {
   CreationStudioRegenerateRequest,
   CreationStudioTaskProjection,
   NarrativeForm,
-} from "@ai-novel/shared/types/creationStudio";
-import type { DirectorCandidate } from "@ai-novel/shared/types/novelDirector";
-import type { WritingPlatform, WritingPlatformPreference } from "@ai-novel/shared/types/writingPlatform";
+} from "@write-now/shared/types/creationStudio";
+import type { DirectorCandidate } from "@write-now/shared/types/novelDirector";
+import type { WritingPlatform, WritingPlatformPreference } from "@write-now/shared/types/writingPlatform";
 import { prisma } from "../../../../db/prisma";
 import { AppError } from "../../../../middleware/errorHandler";
 import { runStructuredPrompt } from "../../../../prompting/core/promptRunner";

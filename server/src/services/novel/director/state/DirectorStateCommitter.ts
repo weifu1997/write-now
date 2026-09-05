@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { prisma } from "../../../../db/prisma";
-import type { DirectorArtifactRef } from "@ai-novel/shared/types/directorRuntime";
+import type { DirectorArtifactRef } from "@write-now/shared/types/directorRuntime";
 
 function createEventId(runId?: string | null, type?: string): string {
   return [runId?.trim() || "task", type?.trim() || "event", randomUUID()].join(":");

@@ -1,15 +1,15 @@
-import type { ApiResponse } from "@ai-novel/shared/types/api";
+import type { ApiResponse } from "@write-now/shared/types/api";
 import type {
   DirectorAutoApprovalPreferenceSettings,
-} from "@ai-novel/shared/types/autoDirectorApproval";
-import type { DirectorIssuePolicy } from "@ai-novel/shared/types/directorIssue";
-import type { LLMProvider, ProviderAuthMode, ReasoningEffort } from "@ai-novel/shared/types/llm";
+} from "@write-now/shared/types/autoDirectorApproval";
+import type { DirectorIssuePolicy } from "@write-now/shared/types/directorIssue";
+import type { LLMProvider, ProviderAuthMode, ReasoningEffort } from "@write-now/shared/types/llm";
 import type {
   ModelRouteConfig,
   ModelRouteRequestProtocol,
   ModelRouteStructuredResponseFormat,
   ModelRouteTaskType,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import { apiClient } from "./client";
 
 export type EmbeddingProvider = LLMProvider;

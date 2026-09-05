@@ -1,5 +1,5 @@
-import type { AutoDirectorFollowUpListResponse, AutoDirectorFollowUpOverview } from "@ai-novel/shared/types/autoDirectorFollowUp";
-import type { AutoDirectorFollowUpSection } from "@ai-novel/shared/types/autoDirectorValidation";
+import type { AutoDirectorFollowUpListResponse, AutoDirectorFollowUpOverview } from "@write-now/shared/types/autoDirectorFollowUp";
+import type { AutoDirectorFollowUpSection } from "@write-now/shared/types/autoDirectorValidation";
 import { TaskQueueSection } from "@/components/taskQueue";
 import { workspaceToneSurfaceClass, type WorkspaceTone } from "@/components/workspace";
 import { cn } from "@/lib/utils";

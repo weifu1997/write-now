@@ -7,8 +7,8 @@ import type {
   StartMarketRadarAnalysisRequest,
   SyncMarketProductionFoundationRequest,
   MarketTrendReport,
-} from "@ai-novel/shared/types/marketRadar";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
+} from "@write-now/shared/types/marketRadar";
+import type { ApiResponse } from "@write-now/shared/types/api";
 import { apiClient } from "./client";
 
 export async function getMarketRadarSources() {

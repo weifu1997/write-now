@@ -4,8 +4,8 @@ import type {
   AutoDirectorFollowUpOverview,
   AutoDirectorFollowUpPriority,
   AutoDirectorFollowUpReason,
-} from "@ai-novel/shared/types/autoDirectorFollowUp";
-import type { AutoDirectorFollowUpSection } from "@ai-novel/shared/types/autoDirectorValidation";
+} from "@write-now/shared/types/autoDirectorFollowUp";
+import type { AutoDirectorFollowUpSection } from "@write-now/shared/types/autoDirectorValidation";
 import type { WorkspaceTone } from "@/components/workspace";
 import type { TaskQueueSeverity } from "@/components/taskQueue";
 

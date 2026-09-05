@@ -3,7 +3,7 @@ import type {
   AutoDirectorChannelNotificationPayload,
   AutoDirectorEvent,
   AutoDirectorMutationActionCode,
-} from "@ai-novel/shared/types/autoDirectorFollowUp";
+} from "@write-now/shared/types/autoDirectorFollowUp";
 import {
   resolveAutoDirectorBaseUrl,
   type AutoDirectorChannelConfig,

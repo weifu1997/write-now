@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import type { StoryMacroField } from "@ai-novel/shared/types/storyMacro";
+import type { StoryMacroField } from "@write-now/shared/types/storyMacro";
 import type { StoryMacroTabProps } from "../NovelEditView.types";
 import {
   FieldActions,

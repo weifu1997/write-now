@@ -1,5 +1,5 @@
-import type { DirectorArtifactRef } from "@ai-novel/shared/types/directorRuntime";
-import type { NovelWorkflowStage } from "@ai-novel/shared/types/novelWorkflow";
+import type { DirectorArtifactRef } from "@write-now/shared/types/directorRuntime";
+import type { NovelWorkflowStage } from "@write-now/shared/types/novelWorkflow";
 import type { DirectorPolicyRequest } from "../runtime/DirectorPolicyEngine";
 
 export type DirectorExecutionFlow = "chapter_execution" | "quality_repair";

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
-import type { CreativeHubResourceBinding, CreativeHubThread } from "@ai-novel/shared/types/creativeHub";
+import type { ApiResponse } from "@write-now/shared/types/api";
+import type { CreativeHubResourceBinding, CreativeHubThread } from "@write-now/shared/types/creativeHub";
 import type { LangChainMessage } from "@assistant-ui/react-langgraph";
 import { useSearchParams } from "react-router-dom";
 import { ExternalLink, MessagesSquare, RefreshCw } from "lucide-react";
@@ -575,12 +575,12 @@ export default function CreativeHubPage() {
             <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">
               创作中枢用于查询小说状态、诊断问题和获得下一步建议。完整的 Agent 工作流、工具调用、暂停恢复与本地小说工件，可使用独立项目。
             </p>
-            <p className="mt-2 break-all font-mono text-xs text-foreground">git clone https://github.com/ExplosiveCoderflome/ani-book-agent.git</p>
+            <p className="mt-2 break-all font-mono text-xs text-foreground">git clone https://github.com/weifu1997/ani-book-agent.git</p>
             <p className="mt-1 text-xs text-muted-foreground">进入 ani-book-agent 目录，依次运行 pnpm install 和 pnpm dev；默认工作台地址为 http://127.0.0.1:5175。</p>
             <p className="mt-1 text-xs text-muted-foreground">独立项目使用自己的小说工作区和运行记录，不会直接修改这里的小说。</p>
           </div>
           <Button asChild size="sm" variant="outline" className="shrink-0">
-            <a href="https://github.com/ExplosiveCoderflome/ani-book-agent" target="_blank" rel="noreferrer">
+            <a href="https://github.com/weifu1997/ani-book-agent" target="_blank" rel="noreferrer">
               查看 Agent 仓库
               <ExternalLink className="ml-1.5 h-3.5 w-3.5" aria-hidden="true" />
             </a>

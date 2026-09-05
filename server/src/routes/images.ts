@@ -1,6 +1,6 @@
 import { Router } from "express";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
-import type { ImageAsset, ImageGenerationTask } from "@ai-novel/shared/types/image";
+import type { ApiResponse } from "@write-now/shared/types/api";
+import type { ImageAsset, ImageGenerationTask } from "@write-now/shared/types/image";
 import { z } from "zod";
 import { llmProviderSchema } from "../llm/providerSchema";
 import { authMiddleware } from "../middleware/auth";

@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { BookAnalysisDetail } from "@ai-novel/shared/types/bookAnalysis";
+import type { BookAnalysisDetail } from "@write-now/shared/types/bookAnalysis";
 import {
   resumeBookAnalysisWithBudget,
   updateBookAnalysisBudget,

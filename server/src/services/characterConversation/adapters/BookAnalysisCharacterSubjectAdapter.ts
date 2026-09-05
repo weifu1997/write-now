@@ -5,11 +5,11 @@ import type {
   BookAnalysisCharacterEvidenceItem,
   BookAnalysisCharacterProfileSection,
   BookAnalysisCharacterScene,
-} from "@ai-novel/shared/types/bookAnalysisCharacter";
+} from "@write-now/shared/types/bookAnalysisCharacter";
 import type {
   CharacterConversationEvidence,
   CharacterSubjectProjection,
-} from "@ai-novel/shared/types/characterConversation";
+} from "@write-now/shared/types/characterConversation";
 import type { CharacterSubjectAdapter } from "./types";
 
 export interface BookAnalysisCharacterSubjectAdapterInput {

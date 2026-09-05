@@ -3,7 +3,7 @@ import { z } from "zod";
 import type { PromptAsset } from "../../core/promptTypes";
 import { renderSelectedContextBlocks } from "../../core/renderContextBlocks";
 import { NOVEL_PROMPT_BUDGETS } from "./promptBudgetProfiles";
-import { CHAPTER_PROSE_QUALITY_AUDIT_RULES } from "@ai-novel/shared/types/chapterProseContract";
+import { CHAPTER_PROSE_QUALITY_AUDIT_RULES } from "@write-now/shared/types/chapterProseContract";
 
 export const chapterAcceptanceIssueCategorySchema = z.enum([
   "continuity",

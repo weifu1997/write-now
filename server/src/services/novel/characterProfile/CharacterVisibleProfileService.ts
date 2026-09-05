@@ -5,7 +5,7 @@ import type {
   CharacterVisibleProfileField,
   CharacterVisibleProfileFields,
   CharacterVisibleProfileSuggestion,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import { prisma } from "../../../db/prisma";
 import { runStructuredPrompt } from "../../../prompting/core/promptRunner";
 import { characterVisibleProfileCompletionPrompt } from "../../../prompting/prompts/novel/characterVisibleProfile.prompts";

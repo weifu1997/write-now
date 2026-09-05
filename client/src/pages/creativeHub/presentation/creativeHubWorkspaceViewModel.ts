@@ -1,11 +1,11 @@
-import type { FailureDiagnostic } from "@ai-novel/shared/types/agent";
+import type { FailureDiagnostic } from "@write-now/shared/types/agent";
 import type {
   CreativeHubInterrupt,
   CreativeHubNovelSetupStatus,
   CreativeHubProductionStatus,
   CreativeHubThread,
   CreativeHubTurnSummary,
-} from "@ai-novel/shared/types/creativeHub";
+} from "@write-now/shared/types/creativeHub";
 import type { WorkspaceTone } from "@/components/workspace";
 
 export type CreativeHubWorkspaceAction =

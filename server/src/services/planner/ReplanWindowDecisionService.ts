@@ -1,11 +1,11 @@
-import type { ChapterStateGoal, CanonicalStateSnapshot, GenerationNextAction } from "@ai-novel/shared/types/canonicalState";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
-import type { AuditReport } from "@ai-novel/shared/types/novel";
-import type { PayoffLedgerSummary } from "@ai-novel/shared/types/payoffLedger";
+import type { ChapterStateGoal, CanonicalStateSnapshot, GenerationNextAction } from "@write-now/shared/types/canonicalState";
+import type { LLMProvider } from "@write-now/shared/types/llm";
+import type { AuditReport } from "@write-now/shared/types/novel";
+import type { PayoffLedgerSummary } from "@write-now/shared/types/payoffLedger";
 import {
   sanitizeAiReplanWindowDecision,
   type SanitizedReplanWindowDecision,
-} from "@ai-novel/shared/types/replanWindowDecision";
+} from "@write-now/shared/types/replanWindowDecision";
 import { runStructuredPrompt } from "../../prompting/core/promptRunner";
 import { replanWindowDecisionPrompt } from "../../prompting/prompts/planner/replanWindowDecision.prompts";
 

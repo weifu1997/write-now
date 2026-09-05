@@ -1,5 +1,5 @@
 import { RefreshCw } from "lucide-react";
-import type { CharacterResourceLedgerItem } from "@ai-novel/shared/types/characterResource";
+import type { CharacterResourceLedgerItem } from "@write-now/shared/types/characterResource";
 import type { ChapterExecutionInsightsSidebarProps } from "./chapterInsights.types";
 import { getTimelineCheckLabel } from "./TimelinePanel";
 import { Badge } from "@/components/ui/badge";

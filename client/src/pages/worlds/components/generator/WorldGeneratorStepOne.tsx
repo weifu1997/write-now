@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { WorldOptionRefinementLevel, WorldReferenceAnchor, WorldReferenceMode } from "@ai-novel/shared/types/worldWizard";
+import type { WorldOptionRefinementLevel, WorldReferenceAnchor, WorldReferenceMode } from "@write-now/shared/types/worldWizard";
 import { Button } from "@/components/ui/button";
 import KnowledgeDocumentPicker from "@/components/knowledge/KnowledgeDocumentPicker";
 import type {

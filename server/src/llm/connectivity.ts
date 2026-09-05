@@ -1,11 +1,11 @@
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { z } from "zod";
-import type { LLMProvider, ProviderAuthMode } from "@ai-novel/shared/types/llm";
+import type { LLMProvider, ProviderAuthMode } from "@write-now/shared/types/llm";
 import type {
   ModelRouteRequestProtocol,
   ModelRouteStructuredResponseFormat,
   ModelRouteTaskType,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import { getLLM, resolveLLMClientOptions } from "./factory";
 import {
   MODEL_ROUTE_TASK_TYPES,

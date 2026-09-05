@@ -1,13 +1,13 @@
 import {
   DEFAULT_DIRECTOR_STARTUP_PREPARATION,
   isFullBookAutopilotRunMode,
-} from "@ai-novel/shared/types/novelDirector";
+} from "@write-now/shared/types/novelDirector";
 import type {
   BookSpec,
   DirectorConfirmApiResponse,
   DirectorConfirmRequest,
-} from "@ai-novel/shared/types/novelDirector";
-import { buildDirectorCompletionProfile } from "@ai-novel/shared/types/directorCompletion";
+} from "@write-now/shared/types/novelDirector";
+import { buildDirectorCompletionProfile } from "@write-now/shared/types/directorCompletion";
 import type { NovelContextService } from "../../NovelContextService";
 import type { NovelWorkflowService } from "../../workflow/NovelWorkflowService";
 import {

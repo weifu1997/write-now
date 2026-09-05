@@ -2,7 +2,7 @@ import type {
   BookAnalysisDetail,
   BookAnalysisSection,
   BookAnalysisStatus,
-} from "@ai-novel/shared/types/bookAnalysis";
+} from "@write-now/shared/types/bookAnalysis";
 import { isBookAnalysisBudgetExceeded } from "./bookAnalysis.utils.ts";
 
 export type BookAnalysisWorkspaceTone = "neutral" | "info" | "success" | "warning" | "danger";

@@ -5,8 +5,8 @@ import type {
   NovelWorkflowMilestoneType,
   NovelWorkflowResumeTarget,
   NovelWorkflowStage,
-} from "@ai-novel/shared/types/novelWorkflow";
-import { getNovelWorkflowLaneDescriptor } from "@ai-novel/shared/types/novelWorkflow";
+} from "@write-now/shared/types/novelWorkflow";
+import { getNovelWorkflowLaneDescriptor } from "@write-now/shared/types/novelWorkflow";
 
 export const NOVEL_WORKFLOW_STAGE_LABELS: Record<NovelWorkflowStage, string> = {
   project_setup: "项目设定",

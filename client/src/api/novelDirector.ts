@@ -1,4 +1,4 @@
-import type { ApiResponse } from "@ai-novel/shared/types/api";
+import type { ApiResponse } from "@write-now/shared/types/api";
 import type {
   DirectorBookAutomationProjectionResponse,
   DirectorCommandResultResponse,
@@ -11,7 +11,7 @@ import type {
   DirectorManualEditImpactResponse,
   DirectorTaskSnapshotResponse,
   DirectorWorkspaceAnalysisResponse,
-} from "@ai-novel/shared/types/directorRuntime";
+} from "@write-now/shared/types/directorRuntime";
 import type {
   DirectorContinuationMode,
   DirectorCandidatePatchRequest,
@@ -28,9 +28,9 @@ import type {
   DirectorTakeoverReadinessResponse,
   DirectorTakeoverRequest,
   DirectorStepCalibrationRequest,
-} from "@ai-novel/shared/types/novelDirector";
+} from "@write-now/shared/types/novelDirector";
 import { apiClient } from "./client";
-import type { DirectorIssuePolicy, DirectorIssuePolicyOverride } from "@ai-novel/shared/types/directorIssue";
+import type { DirectorIssuePolicy, DirectorIssuePolicyOverride } from "@write-now/shared/types/directorIssue";
 
 export interface NovelDirectorIssuePolicyResponse {
   effectivePolicy: DirectorIssuePolicy;

@@ -4,7 +4,7 @@
  * 读取策略 + 内容节拍 → LLM 生成区间分集大纲 → 落库 DramaEpisode。
  * 卡点集号由节奏引擎确定性给出（不交给 LLM 自由发挥），保证付费节奏可控。
  */
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { prisma } from "../../db/prisma";
 import { runStructuredPrompt } from "../../prompting/core/promptRunner";
 import { dramaEpisodeOutlinePrompt } from "../../prompting/prompts/drama/drama.prompts";

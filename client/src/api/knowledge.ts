@@ -7,8 +7,8 @@ import type {
   KnowledgeDocumentKind,
   KnowledgeDocumentStatus,
   KnowledgeDocumentSummary,
-} from "@ai-novel/shared/types/knowledge";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
+} from "@write-now/shared/types/knowledge";
+import type { ApiResponse } from "@write-now/shared/types/api";
 import { apiClient } from "./client";
 
 export interface RagJobProgress {

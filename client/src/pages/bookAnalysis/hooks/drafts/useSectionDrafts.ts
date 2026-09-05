@@ -4,7 +4,7 @@ import type {
   BookAnalysisDetail,
   BookAnalysisSection,
   BookAnalysisSectionKey,
-} from "@ai-novel/shared/types/bookAnalysis";
+} from "@write-now/shared/types/bookAnalysis";
 import {
   optimizeBookAnalysisSectionPreview,
   updateBookAnalysisSection,

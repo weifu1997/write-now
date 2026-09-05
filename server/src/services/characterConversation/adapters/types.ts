@@ -1,6 +1,6 @@
 import type {
   CharacterSubjectProjection,
-} from "@ai-novel/shared/types/characterConversation";
+} from "@write-now/shared/types/characterConversation";
 
 /**
  * An adapter is deliberately pure: callers own data access and pass the

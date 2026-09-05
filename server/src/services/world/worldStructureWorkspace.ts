@@ -1,4 +1,4 @@
-import type { WorldVisualizationPayload } from "@ai-novel/shared/types/world";
+import type { WorldVisualizationPayload } from "@write-now/shared/types/world";
 import { prisma } from "../../db/prisma";
 import { runStructuredPrompt } from "../../prompting/core/promptRunner";
 import {

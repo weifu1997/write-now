@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 
-const DEFAULT_TITLE = "AI 小说创作工作台 · 从灵感、趋势或参考作品到整本小说";
+const DEFAULT_TITLE = "Write Now · 从灵感、趋势或参考作品到整本小说";
 const DEFAULT_DESCRIPTION =
   "从灵感、公开榜单或参考作品开书，让自动导演准备世界、角色和卷章任务，再选择简易创作持续推进或进入专业工作台接管；失败可从已保存进度恢复。";
-const CANONICAL_BASE = "https://explosivecoderflome.github.io/AI-Novel-Writing-Assistant/";
+const CANONICAL_BASE = "https://weifu1997.github.io/write-now/";
 
 function ensureMeta(selector: string, attribute: "name" | "property", key: string) {
   let element = document.head.querySelector<HTMLMetaElement>(selector);
@@ -44,7 +44,7 @@ export type ResolvedPageMeta = {
 };
 
 export function resolvePageMeta(meta: PageMeta | null | undefined): ResolvedPageMeta {
-  const title = meta?.title ? `${meta.title} · AI 小说创作工作台` : DEFAULT_TITLE;
+  const title = meta?.title ? `${meta.title} · Write Now` : DEFAULT_TITLE;
   const description = meta?.description ?? DEFAULT_DESCRIPTION;
   const canonical = meta?.canonicalPath
     ? `${CANONICAL_BASE}${meta.canonicalPath.replace(/^\//, "")}`

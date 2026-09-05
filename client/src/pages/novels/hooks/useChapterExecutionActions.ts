@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import type { Chapter, ReviewIssue } from "@ai-novel/shared/types/novel";
+import type { Chapter, ReviewIssue } from "@write-now/shared/types/novel";
 import { updateNovelChapter } from "@/api/novel";
 import { generateChapterExecutionContract } from "@/api/novel/chapters";
 import { generateNovelChapterSummary } from "@/api/novelChapterSummary";

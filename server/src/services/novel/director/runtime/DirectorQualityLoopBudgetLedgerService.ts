@@ -1,4 +1,4 @@
-import type { DirectorQualityLoopBudgetEntry } from "@ai-novel/shared/types/novelDirector";
+import type { DirectorQualityLoopBudgetEntry } from "@write-now/shared/types/novelDirector";
 
 type ResolvedDirectorQualityLoopBudgetAction = "auto_patch_repair" | "defer_and_continue";
 

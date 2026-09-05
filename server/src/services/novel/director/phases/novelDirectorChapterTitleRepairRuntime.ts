@@ -1,4 +1,4 @@
-import type { DirectorConfirmRequest } from "@ai-novel/shared/types/novelDirector";
+import type { DirectorConfirmRequest } from "@write-now/shared/types/novelDirector";
 import { getChapterTitleDiversityIssue, isChapterTitleDiversityIssue } from "../../volume/chapterTitleDiversity";
 import type { NovelVolumeService } from "../../volume/NovelVolumeService";
 import type { NovelWorkflowService } from "../../workflow/NovelWorkflowService";

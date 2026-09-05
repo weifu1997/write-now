@@ -3,7 +3,7 @@ import path from "node:path";
 
 export type AppRuntimeMode = "web" | "desktop";
 
-const APP_NAME = "AI-Novel-Writing-Assistant-v2";
+const APP_NAME = "write-now";
 const SERVER_ROOT = path.resolve(__dirname, "..", "..");
 const WORKSPACE_ROOT = path.resolve(SERVER_ROOT, "..");
 

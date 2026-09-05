@@ -20,7 +20,7 @@ import {
   safeJsonParse,
   type ImageTargetAdapter,
 } from "../image/runtime";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { buildGenderLockPrompt, resolveComicStyleKeywords } from "./comicStylePrompt";
 
 // ─── Types ────────────────────────────────────────────────────────────────────

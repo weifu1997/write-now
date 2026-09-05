@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Bot, ChevronDown, Image, RefreshCw, RotateCcw, Trash2, WalletCards, X } from "lucide-react";
-import type { LLMProvider, ReasoningEffort } from "@ai-novel/shared/types/llm";
+import type { LLMProvider, ReasoningEffort } from "@write-now/shared/types/llm";
 import type { APIKeyStatus, ProviderBalanceStatus } from "@/api/settings";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { RecoverableTaskSummary } from "@ai-novel/shared/types/task";
+import type { RecoverableTaskSummary } from "@write-now/shared/types/task";
 import {
   listRecoveryCandidates,
   resumeAllRecoveryCandidates,

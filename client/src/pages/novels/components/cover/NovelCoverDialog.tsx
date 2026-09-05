@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { DEFAULT_NOVEL_COVER_NEGATIVE_PROMPT, DEFAULT_NOVEL_COVER_STYLE_PRESET, buildNovelCoverImagePrompt } from "@ai-novel/shared/imagePrompt";
+import { DEFAULT_NOVEL_COVER_NEGATIVE_PROMPT, DEFAULT_NOVEL_COVER_STYLE_PRESET, buildNovelCoverImagePrompt } from "@write-now/shared/imagePrompt";
 import {
   DEFAULT_NOVEL_COVER_IMAGE_COUNT,
   DEFAULT_NOVEL_COVER_IMAGE_SIZE,
   type ImageAsset,
-} from "@ai-novel/shared/types/image";
+} from "@write-now/shared/types/image";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import {
   deleteImageAsset,
   generateNovelCover,
@@ -24,7 +24,7 @@ import { queryKeys } from "@/api/queryKeys";
 import { getAPIKeySettings } from "@/api/settings";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import type { StoryWorldSliceView } from "@ai-novel/shared/types/storyWorldSlice";
+import type { StoryWorldSliceView } from "@write-now/shared/types/storyWorldSlice";
 import type { NovelBasicFormState } from "../../novelBasicInfo.shared";
 import {
   buildNovelCoverDraftContext,

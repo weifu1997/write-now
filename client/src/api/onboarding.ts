@@ -1,10 +1,10 @@
-import type { ApiResponse } from "@ai-novel/shared/types/api";
+import type { ApiResponse } from "@write-now/shared/types/api";
 import type {
   CompleteQuickSetupRequest,
   CompleteQuickSetupResult,
   FirstNovelOnboardingProjection,
   QuickSetupStatus,
-} from "@ai-novel/shared/types/onboarding";
+} from "@write-now/shared/types/onboarding";
 import { apiClient } from "./client";
 
 export async function getQuickSetupStatus() {

@@ -2,7 +2,7 @@ import type {
   CreativeHubNovelSetupChecklistItem,
   CreativeHubNovelSetupStage,
   CreativeHubNovelSetupStatus,
-} from "@ai-novel/shared/types/creativeHub";
+} from "@write-now/shared/types/creativeHub";
 import { prisma } from "../../db/prisma";
 import { normalizeWorldStructuredData } from "../world/worldStructure";
 

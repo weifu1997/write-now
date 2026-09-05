@@ -1,4 +1,4 @@
-import type { Character, CharacterCastRole, CharacterGender } from "@ai-novel/shared/types/novel";
+import type { Character, CharacterCastRole, CharacterGender } from "@write-now/shared/types/novel";
 
 const CAST_ROLE_LABELS: Record<CharacterCastRole, string> = {
   protagonist: "主角",

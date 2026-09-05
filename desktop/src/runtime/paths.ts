@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-const APP_NAME = "AI-Novel-Writing-Assistant-v2";
+const APP_NAME = "write-now";
 const PORTABLE_DATA_SUFFIX = "-data";
 
 export interface DesktopRuntimeConfig {
@@ -118,7 +118,7 @@ export function resolvePackagedServerEntry(): string {
     resolveDesktopResourcesDir(),
     "app.asar",
     "node_modules",
-    "@ai-novel",
+    "@write-now",
     "server",
     "dist",
     "app.js",

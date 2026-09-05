@@ -21,7 +21,7 @@
 ### 验收结果
 
 - 已通过 `pnpm typecheck`。
-- 已通过 `pnpm --filter @ai-novel/client build`。
+- 已通过 `pnpm --filter @write-now/client build`。
 - 已通过 `node --test tests/chapterEditorPreview.test.js`。
 - 已通过 `node --test tests/prompting-governance.test.js`。
 - 当前可完成主闭环：`选中正文 -> 发起 AI 改写 -> 查看 2-3 个候选 diff -> 接受或拒绝`，且接受前有快照保护。

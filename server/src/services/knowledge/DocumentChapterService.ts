@@ -1,5 +1,5 @@
-import type { BookAnalysisEvidenceItem } from "@ai-novel/shared/types/bookAnalysis";
-import type { DocumentChapter, DocumentChapterSplitResult } from "@ai-novel/shared/types/knowledge";
+import type { BookAnalysisEvidenceItem } from "@write-now/shared/types/bookAnalysis";
+import type { DocumentChapter, DocumentChapterSplitResult } from "@write-now/shared/types/knowledge";
 import { prisma } from "../../db/prisma";
 import { runStructuredPrompt } from "../../prompting/core/promptRunner";
 import { bookAnalysisChapterSplitPrompt } from "../../prompting/prompts/bookAnalysis/bookAnalysisChapter.prompts";

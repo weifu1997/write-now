@@ -6,7 +6,7 @@ import type {
   DirectorBookAutomationStatus,
   DirectorRuntimeProjection,
   DirectorStepRun,
-} from "@ai-novel/shared/types/directorRuntime";
+} from "@write-now/shared/types/directorRuntime";
 
 export function parseJsonOrNull<T>(value: string | null | undefined): T | null {
   if (!value?.trim()) {

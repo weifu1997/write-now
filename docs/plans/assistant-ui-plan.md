@@ -52,7 +52,7 @@
   - `@assistant-ui/react-langgraph`
   - `@langchain/langgraph-sdk`
   - 开发环境额外接入 `@assistant-ui/react-devtools`
-- 当前超过 500 行的 [ChatPage.tsx](/D:/code/AI-Novel-Writing-Assistant-v2/client/src/pages/chat/ChatPage.tsx) 必须先拆分，再承接新功能。
+- 当前超过 500 行的 [ChatPage.tsx](/D:/code/write-now/client/src/pages/chat/ChatPage.tsx) 必须先拆分，再承接新功能。
 - 新的创作中枢页面改为模块化结构：
   - 线程列表区
   - 主消息流区

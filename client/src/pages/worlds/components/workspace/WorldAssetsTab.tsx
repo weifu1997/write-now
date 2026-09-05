@@ -1,6 +1,6 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
 import { GitCompareArrows, GitFork, Map, Network, Workflow } from "lucide-react";
-import type { World, WorldSnapshot } from "@ai-novel/shared/types/world";
+import type { World, WorldSnapshot } from "@write-now/shared/types/world";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

@@ -2,7 +2,7 @@ import type {
   ChapterRepairContext,
   ChapterReviewContext,
   ChapterWriteContext,
-} from "@ai-novel/shared/types/chapterRuntime";
+} from "@write-now/shared/types/chapterRuntime";
 import { createContextBlock } from "../../../core/contextBudget";
 import type { PromptContextBlock } from "../../../core/promptTypes";
 import { buildWriterStyleContractText } from "../../../../services/styleEngine/styleContractText";

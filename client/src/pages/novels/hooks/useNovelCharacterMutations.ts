@@ -1,5 +1,5 @@
 import { useMutation, useQuery, type QueryClient } from "@tanstack/react-query";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import {
   applyBatchCharacterVisibleProfiles,
   applyCharacterVisibleProfile,
@@ -21,7 +21,7 @@ import { buildCharacterProfileFromWizard, type QuickCharacterCreatePayload } fro
 import type {
   SupplementalCharacterCandidate,
   SupplementalCharacterGenerateInput,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 
 interface LLMState {
   provider?: LLMProvider;

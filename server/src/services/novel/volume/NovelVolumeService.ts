@@ -9,7 +9,7 @@ import type {
   VolumePlanVersion,
   VolumePlanVersionSummary,
   VolumeSyncPreview,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "../../../db/prisma";
 import { novelEventBus } from "../../../events";

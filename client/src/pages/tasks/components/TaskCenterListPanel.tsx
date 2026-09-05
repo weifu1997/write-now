@@ -1,4 +1,4 @@
-import type { UnifiedTaskSummary } from "@ai-novel/shared/types/task";
+import type { UnifiedTaskSummary } from "@write-now/shared/types/task";
 import { Button } from "@/components/ui/button";
 import {
   TaskQueueEmptyState,

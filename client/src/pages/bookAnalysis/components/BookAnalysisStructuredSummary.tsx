@@ -4,11 +4,11 @@ import {
   type BookAnalysisEvidenceItem,
   type BookAnalysisSection,
   type BookAnalysisTimelineNode,
-} from "@ai-novel/shared/types/bookAnalysis";
+} from "@write-now/shared/types/bookAnalysis";
 import {
   groupBookAnalysisTimelineNodesByPhase,
   normalizeBookAnalysisTimelineNodes,
-} from "@ai-novel/shared/utils/bookAnalysisTimeline";
+} from "@write-now/shared/utils/bookAnalysisTimeline";
 import { Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { BookAnalysisMode } from "../hooks/bookAnalysisWorkspace.types";

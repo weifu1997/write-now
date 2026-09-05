@@ -1,6 +1,6 @@
 import type { World as PrismaWorld } from "@prisma/client";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
-import type { WorldLayerKey } from "@ai-novel/shared/types/world";
+import type { LLMProvider } from "@write-now/shared/types/llm";
+import type { WorldLayerKey } from "@write-now/shared/types/world";
 import { runStructuredPrompt } from "../../prompting/core/promptRunner";
 import {
   worldLayerGenerationPrompt,

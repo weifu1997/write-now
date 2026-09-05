@@ -1,9 +1,9 @@
 ﻿import type {
   NovelWorkflowCheckpoint,
   NovelWorkflowStage,
-} from "@ai-novel/shared/types/novelWorkflow";
-import { resolveWorkflowStageFromItemOrCheckpoint } from "@ai-novel/shared/types/directorWorkflowStepCatalog";
-import type { TaskStatus, UnifiedTaskStep } from "@ai-novel/shared/types/task";
+} from "@write-now/shared/types/novelWorkflow";
+import { resolveWorkflowStageFromItemOrCheckpoint } from "@write-now/shared/types/directorWorkflowStepCatalog";
+import type { TaskStatus, UnifiedTaskStep } from "@write-now/shared/types/task";
 import { NOVEL_WORKFLOW_STAGE_STEPS, buildSteps } from "./taskCenter.shared";
 
 const WORKFLOW_ITEM_STAGE_MAP: Partial<Record<string, NovelWorkflowStage>> = {

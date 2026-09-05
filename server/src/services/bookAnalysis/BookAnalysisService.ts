@@ -4,8 +4,8 @@ import type {
   BookAnalysisPublishResult,
   BookAnalysisSectionKey,
   BookAnalysisStatus,
-} from "@ai-novel/shared/types/bookAnalysis";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+} from "@write-now/shared/types/bookAnalysis";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { BookAnalysisCommandService } from "./application/BookAnalysisCommandService";
 import { BookAnalysisQueryService } from "./application/BookAnalysisQueryService";
 

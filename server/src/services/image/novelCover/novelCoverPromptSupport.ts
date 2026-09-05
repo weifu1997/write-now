@@ -2,9 +2,9 @@ import {
   buildDefaultNovelCoverSourceDescription,
   buildNovelCoverImagePrompt,
   type NovelCoverImagePromptNovelContext,
-} from "@ai-novel/shared/imagePrompt";
-import { parseCommercialTagsJson } from "@ai-novel/shared/types/novelFraming";
-import { storyWorldSliceSchema } from "@ai-novel/shared/types/storyWorldSlice";
+} from "@write-now/shared/imagePrompt";
+import { parseCommercialTagsJson } from "@write-now/shared/types/novelFraming";
+import { storyWorldSliceSchema } from "@write-now/shared/types/storyWorldSlice";
 import { prisma } from "../../../db/prisma";
 import { AppError } from "../../../middleware/errorHandler";
 import { runStructuredPrompt, runTextPrompt } from "../../../prompting/core/promptRunner";

@@ -1,4 +1,4 @@
-import type { ApiResponse } from "@ai-novel/shared/types/api";
+import type { ApiResponse } from "@write-now/shared/types/api";
 import type {
   AntiAiEffectiveRulesResult,
   AntiAiRule,
@@ -13,9 +13,9 @@ import type {
   StyleProfile,
   StyleRecommendationResult,
   StyleTemplate,
-} from "@ai-novel/shared/types/styleEngine";
-import type { CompiledStylePromptBlocks } from "@ai-novel/shared/types/styleEngine";
-import type { UnifiedTaskDetail } from "@ai-novel/shared/types/task";
+} from "@write-now/shared/types/styleEngine";
+import type { CompiledStylePromptBlocks } from "@write-now/shared/types/styleEngine";
+import type { UnifiedTaskDetail } from "@write-now/shared/types/task";
 import { apiClient } from "./client";
 
 export async function getStyleProfiles() {

@@ -9,7 +9,7 @@
  * 不替代 ImageGenerationService（小说封面 + 老 character image 走两表模型，范式不同）。
  */
 import type { ImageSize } from "../types";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 
 // ─── 状态 ─────────────────────────────────────────────────────────────────────
 

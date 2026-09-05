@@ -4,7 +4,7 @@ import type {
   CharacterResourceProposalSummary,
   CharacterResourceRiskSignal,
   CharacterResourceUpdatePayload,
-} from "@ai-novel/shared/types/characterResource";
+} from "@write-now/shared/types/characterResource";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "../../../db/prisma";
 import {

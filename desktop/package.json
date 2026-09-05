@@ -1,11 +1,11 @@
 {
-  "name": "@ai-novel/desktop",
+  "name": "@write-now/desktop",
   "version": "0.4.19",
   "private": true,
   "license": "AGPL-3.0-only",
-  "author": "AI Novel Writing Assistant Team",
-  "description": "Windows desktop runtime for AI Novel Writing Assistant v2",
-  "productName": "AI Novel Writing Assistant v2",
+  "author": "Write Now Team",
+  "description": "Windows desktop runtime for Write Now",
+  "productName": "Write Now",
   "main": "dist/main.js",
   "files": [
     "dist"
@@ -19,7 +19,7 @@
     "start": "pnpm run prepare:runtime && electron dist/main.js"
   },
   "dependencies": {
-    "@ai-novel/server": "workspace:*",
+    "@write-now/server": "workspace:*",
     "better-sqlite3": "^12.6.2",
     "electron-updater": "^6.6.2"
   },

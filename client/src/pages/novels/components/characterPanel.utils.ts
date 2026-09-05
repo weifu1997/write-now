@@ -1,4 +1,4 @@
-import type { Character, CharacterTimeline } from "@ai-novel/shared/types/novel";
+import type { Character, CharacterTimeline } from "@write-now/shared/types/novel";
 
 const RELATION_POSITIVE_KEYWORDS = ["伙伴", "盟友", "信任", "守护", "亲密", "喜欢", "合作"];
 const RELATION_NEGATIVE_KEYWORDS = ["敌对", "对立", "怀疑", "背叛", "利用", "冲突", "压制"];

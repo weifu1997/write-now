@@ -5,7 +5,7 @@ import {
   normalizeDirectorContinuationMode,
   type DirectorConfirmRequest,
   type DirectorContinuationMode,
-} from "@ai-novel/shared/types/novelDirector";
+} from "@write-now/shared/types/novelDirector";
 import type { NovelContextService } from "../../NovelContextService";
 import type { StoryMacroPlanService } from "../../storyMacro/StoryMacroPlanService";
 import type { NovelVolumeService } from "../../volume/NovelVolumeService";

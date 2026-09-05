@@ -1,11 +1,11 @@
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
-import type { NovelWorldGenerateInput } from "@ai-novel/shared/types/novelWorld";
+import type { LLMProvider } from "@write-now/shared/types/llm";
+import type { NovelWorldGenerateInput } from "@write-now/shared/types/novelWorld";
 import type {
   StoryWorldSlice,
   StoryWorldSliceBuilderMode,
   StoryWorldSliceForce,
   StoryWorldSliceLocation,
-} from "@ai-novel/shared/types/storyWorldSlice";
+} from "@write-now/shared/types/storyWorldSlice";
 import { NovelWorldSliceService } from "../storyWorldSlice/NovelWorldSliceService";
 import { NovelWorldInstanceService } from "./NovelWorldInstanceService";
 

@@ -8,19 +8,19 @@ import type {
   MacroConstraintContext,
   PromptBudgetProfile,
   VolumeWindowContext,
-} from "@ai-novel/shared/types/chapterRuntime";
+} from "@write-now/shared/types/chapterRuntime";
 import {
   parseChapterScenePlan,
   resolveLengthBudgetContract,
-} from "@ai-novel/shared/types/chapterLengthControl";
-import { sanitizeCreativeMustAdvanceItems } from "@ai-novel/shared/types/chapterCreativeContract";
-import type { ReviewIssue } from "@ai-novel/shared/types/novel";
-import type { StoryMacroPlan } from "@ai-novel/shared/types/storyMacro";
+} from "@write-now/shared/types/chapterLengthControl";
+import { sanitizeCreativeMustAdvanceItems } from "@write-now/shared/types/chapterCreativeContract";
+import type { ReviewIssue } from "@write-now/shared/types/novel";
+import type { StoryMacroPlan } from "@write-now/shared/types/storyMacro";
 import {
   hasReaderExperienceContractValue,
   normalizeReaderExperienceContract,
   type ReaderExperienceContract,
-} from "@ai-novel/shared/types/novel/readerExperience";
+} from "@write-now/shared/types/novel/readerExperience";
 import { createContextBlock } from "../../core/contextBudget";
 import type { PromptContextBlock } from "../../core/promptTypes";
 import { buildDynamicCharacterGuidance, buildParticipants } from "./chapterLayeredContextCharacters";

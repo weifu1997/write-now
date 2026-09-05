@@ -1,5 +1,5 @@
-import type { BaseCharacter } from "@ai-novel/shared/types/novelCharacter";
-import type { CharacterSubjectProjection } from "@ai-novel/shared/types/characterConversation";
+import type { BaseCharacter } from "@write-now/shared/types/novelCharacter";
+import type { CharacterSubjectProjection } from "@write-now/shared/types/characterConversation";
 import type { CharacterSubjectAdapter } from "./types";
 
 export interface BaseCharacterSubjectAdapterInput {

@@ -1,4 +1,4 @@
-import type { StyleIntentSummary } from "@ai-novel/shared/types/styleEngine";
+import type { StyleIntentSummary } from "@write-now/shared/types/styleEngine";
 import { Button } from "@/components/ui/button";
 import { AUTO_DIRECTOR_MOBILE_CLASSES } from "@/mobile/autoDirector";
 import type { NovelBasicFormState } from "../novelBasicInfo.shared";

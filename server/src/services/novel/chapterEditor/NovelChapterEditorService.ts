@@ -9,7 +9,7 @@ import type {
   ChapterEditorRewritePreviewRequest,
   ChapterEditorRewritePreviewResponse,
   ChapterEditorTargetRange,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import { runStructuredPrompt } from "../../../prompting/core/promptRunner";
 import {
   chapterEditorRewriteCandidatesPrompt,

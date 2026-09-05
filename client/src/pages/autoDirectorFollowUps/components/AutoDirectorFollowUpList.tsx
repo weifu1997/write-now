@@ -2,9 +2,9 @@ import type {
   AutoDirectorFollowUpAvailableFilters,
   AutoDirectorFollowUpItem,
   AutoDirectorFollowUpPagination,
-} from "@ai-novel/shared/types/autoDirectorFollowUp";
-import type { AutoDirectorFollowUpSection } from "@ai-novel/shared/types/autoDirectorValidation";
-import type { TaskStatus } from "@ai-novel/shared/types/task";
+} from "@write-now/shared/types/autoDirectorFollowUp";
+import type { AutoDirectorFollowUpSection } from "@write-now/shared/types/autoDirectorValidation";
+import type { TaskStatus } from "@write-now/shared/types/task";
 import { Button } from "@/components/ui/button";
 import {
   TaskQueueEmptyState,

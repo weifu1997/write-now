@@ -4,7 +4,7 @@ import type {
   TimelineHookDraft,
   TimelineCheckResult,
   TimelineContextForChapter,
-} from "@ai-novel/shared/types/timeline";
+} from "@write-now/shared/types/timeline";
 import { timelineRepository, type TimelineRepository } from "./timeline.repository";
 
 function eventKey(title: string): string {

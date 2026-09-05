@@ -4,7 +4,7 @@ import type {
   TimelineContextForChapter,
   TimelineIssue,
   TimelineIssueSeverity,
-} from "@ai-novel/shared/types/timeline";
+} from "@write-now/shared/types/timeline";
 import { defaultTimelinePolicy, type TimelinePolicy } from "./timeline-policy";
 
 function normalize(value: string | null | undefined): string {

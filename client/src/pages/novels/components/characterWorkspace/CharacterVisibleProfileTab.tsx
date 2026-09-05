@@ -3,7 +3,7 @@ import type {
   Character,
   CharacterVisibleProfileBatchResult,
   CharacterVisibleProfileSuggestion,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import AiButton from "@/components/common/AiButton";
 import { Button } from "@/components/ui/button";
 import { VISIBLE_PROFILE_FIELDS } from "./characterWorkspace.helpers";

@@ -1,4 +1,4 @@
-import type { NovelWorldAssetSummary, WorldAssetType } from "@ai-novel/shared/types/novelWorld";
+import type { NovelWorldAssetSummary, WorldAssetType } from "@write-now/shared/types/novelWorld";
 
 export interface WorldAssetRow {
   id: string;

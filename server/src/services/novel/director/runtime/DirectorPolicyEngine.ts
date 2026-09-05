@@ -3,7 +3,7 @@ import type {
   DirectorPolicyDecision,
   DirectorPolicyMode,
   DirectorRuntimePolicySnapshot,
-} from "@ai-novel/shared/types/directorRuntime";
+} from "@write-now/shared/types/directorRuntime";
 import { buildDefaultDirectorPolicy } from "./directorRuntimeDefaults";
 
 type DirectorPolicyRiskTag = DirectorPolicyDecision["riskTags"][number];

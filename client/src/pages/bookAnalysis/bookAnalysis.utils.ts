@@ -1,4 +1,4 @@
-import type { BookAnalysisDetail, BookAnalysisSection, BookAnalysisStatus } from "@ai-novel/shared/types/bookAnalysis";
+import type { BookAnalysisDetail, BookAnalysisSection, BookAnalysisStatus } from "@write-now/shared/types/bookAnalysis";
 import type { SectionDraft } from "./bookAnalysis.types";
 
 export function formatStatus(status: BookAnalysisStatus | BookAnalysisSection["status"]): string {

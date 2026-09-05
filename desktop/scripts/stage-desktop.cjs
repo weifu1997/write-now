@@ -10,7 +10,7 @@ const resourcesDir = path.join(buildDir, "resources");
 const appUpdateConfigPath = path.join(resourcesDir, "app-update.yml");
 const clientSourceDir = path.join(repoRoot, "client", "dist");
 const clientTargetDir = path.join(resourcesDir, "client", "dist");
-const serverEntry = path.join(appDir, "node_modules", "@ai-novel", "server", "dist", "app.js");
+const serverEntry = path.join(appDir, "node_modules", "@write-now", "server", "dist", "app.js");
 const desktopMainEntry = path.join(appDir, "dist", "main.js");
 const stagedNodeModulesDir = path.join(appDir, "node_modules");
 const stagedNativePackagesToDetach = ["better-sqlite3"];
@@ -59,15 +59,15 @@ function replaceFileContents(targetPath, contents) {
 function writeDesktopUpdaterConfig() {
   const releaseChannel = (process.env.AI_NOVEL_RELEASE_CHANNEL || "beta").trim().toLowerCase();
   const releaseType = releaseChannel === "beta" ? "prerelease" : "release";
-  const owner = (process.env.AI_NOVEL_GITHUB_OWNER || "ExplosiveCoderflome").trim();
-  const repo = (process.env.AI_NOVEL_GITHUB_REPO || "AI-Novel-Writing-Assistant").trim();
+  const owner = (process.env.AI_NOVEL_GITHUB_OWNER || "weifu1997").trim();
+  const repo = (process.env.AI_NOVEL_GITHUB_REPO || "write-now").trim();
   const config = [
     "provider: github",
     `owner: ${owner}`,
     `repo: ${repo}`,
     `channel: ${releaseChannel}`,
     `releaseType: ${releaseType}`,
-    "updaterCacheDirName: ai-novel-writing-assistant-v2-updater",
+    "updaterCacheDirName: write-now-updater",
     "",
   ].join("\n");
   fs.writeFileSync(appUpdateConfigPath, config, "utf8");
@@ -201,7 +201,7 @@ function main() {
 
   runPnpm([
     "--filter",
-    "@ai-novel/desktop",
+    "@write-now/desktop",
     "deploy",
     "--prod",
     appDir,

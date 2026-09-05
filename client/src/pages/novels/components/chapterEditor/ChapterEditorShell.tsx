@@ -6,11 +6,11 @@ import type {
   ChapterEditorRecommendedTask,
   ChapterEditorRevisionScope,
   ChapterEditorTargetRange,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import {
   readChapterQualityDebtDetails,
   type ChapterQualityDebtDetails,
-} from "@ai-novel/shared/types/chapterQualityLoop";
+} from "@write-now/shared/types/chapterQualityLoop";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { createNovelSnapshot, previewChapterAiRevision, reviewNovelChapter, updateNovelChapter } from "@/api/novel";
 import { queryKeys } from "@/api/queryKeys";

@@ -5,7 +5,7 @@ import type {
   ShortStoryPlanContract,
   ShortStoryPlanSegment,
   ShortStoryQualityResult,
-} from "@ai-novel/shared/types/creationStudio";
+} from "@write-now/shared/types/creationStudio";
 import type { PromptAsset } from "../../core/promptTypes";
 
 const planSegmentSchema = z.object({

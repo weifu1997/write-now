@@ -1,8 +1,8 @@
 import {
   normalizeChapterScenePlan,
   serializeChapterScenePlan,
-} from "@ai-novel/shared/types/chapterLengthControl";
-import { sanitizeCreativeMustAdvanceItems } from "@ai-novel/shared/types/chapterCreativeContract";
+} from "@write-now/shared/types/chapterLengthControl";
+import { sanitizeCreativeMustAdvanceItems } from "@write-now/shared/types/chapterCreativeContract";
 import { createHash } from "node:crypto";
 import { prisma } from "../../db/prisma";
 import { enrichStoryPlan } from "./plannerPlanMetadata";

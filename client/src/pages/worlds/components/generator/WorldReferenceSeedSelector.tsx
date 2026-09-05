@@ -1,7 +1,7 @@
 import type {
   WorldReferenceSeedBundle,
   WorldReferenceSeedSelection,
-} from "@ai-novel/shared/types/worldWizard";
+} from "@write-now/shared/types/worldWizard";
 import { Button } from "@/components/ui/button";
 
 type GroupKey = keyof WorldReferenceSeedBundle;

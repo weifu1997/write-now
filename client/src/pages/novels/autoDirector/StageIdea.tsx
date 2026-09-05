@@ -3,8 +3,8 @@ import type {
   DirectorIdeaConstellationOption,
   DirectorIdeaConstellationSelection,
   DirectorIdeaInspiration,
-} from "@ai-novel/shared/types/novelDirector";
-import type { NovelResourceRecommendationSource } from "@ai-novel/shared/types/novelResourceRecommendation";
+} from "@write-now/shared/types/novelDirector";
+import type { NovelResourceRecommendationSource } from "@write-now/shared/types/novelResourceRecommendation";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Layers3, Route, Sparkles, X } from "lucide-react";
 import { flattenGenreTreeOptions, type GenreTreeNode } from "@/api/genre";

@@ -10,11 +10,11 @@ import type {
   VolumeStrategyPlan,
   VolumeStrategyVolume,
   VolumeUncertaintyMarker,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import {
   getVolumeBeatRoleLabel,
   resolveVolumeBeatSlotKey,
-} from "@ai-novel/shared/types/volumeBeatSlots";
+} from "@write-now/shared/types/volumeBeatSlots";
 import {
   buildDerivedOutlineFromVolumes,
   buildDerivedStructuredOutlineFromVolumes,

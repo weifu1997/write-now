@@ -1,5 +1,5 @@
-import type { AutoDirectorFollowUpItem } from "@ai-novel/shared/types/autoDirectorFollowUp";
-import type { AutoDirectorFollowUpSection } from "@ai-novel/shared/types/autoDirectorValidation";
+import type { AutoDirectorFollowUpItem } from "@write-now/shared/types/autoDirectorFollowUp";
+import type { AutoDirectorFollowUpSection } from "@write-now/shared/types/autoDirectorValidation";
 
 export const AUTO_DIRECTOR_PAUSE_NOTIFICATION_SETTINGS_EVENT = "ai-novel:auto-director-pause-notifications";
 

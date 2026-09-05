@@ -1,12 +1,12 @@
 ﻿import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BOOK_ANALYSIS_SECTIONS } from "@ai-novel/shared/types/bookAnalysis";
-import type { DirectorContinuationMode, DirectorLockScope, DirectorSessionState, DirectorStepCalibrationAction } from "@ai-novel/shared/types/novelDirector";
-import { extractDirectorTaskSeedPayloadFromMeta } from "@ai-novel/shared/types/novelDirector";
-import type { AutoDirectorAction, AutoDirectorMutationActionCode } from "@ai-novel/shared/types/autoDirectorFollowUp";
-import type { DirectorBookAutomationAction, DirectorDashboardMode, DirectorTaskSnapshot } from "@ai-novel/shared/types/directorRuntime";
-import type { NovelExportDownloadFormat, NovelExportFormat, NovelExportScope } from "@ai-novel/shared/types/novelExport";
+import { BOOK_ANALYSIS_SECTIONS } from "@write-now/shared/types/bookAnalysis";
+import type { DirectorContinuationMode, DirectorLockScope, DirectorSessionState, DirectorStepCalibrationAction } from "@write-now/shared/types/novelDirector";
+import { extractDirectorTaskSeedPayloadFromMeta } from "@write-now/shared/types/novelDirector";
+import type { AutoDirectorAction, AutoDirectorMutationActionCode } from "@write-now/shared/types/autoDirectorFollowUp";
+import type { DirectorBookAutomationAction, DirectorDashboardMode, DirectorTaskSnapshot } from "@write-now/shared/types/directorRuntime";
+import type { NovelExportDownloadFormat, NovelExportFormat, NovelExportScope } from "@write-now/shared/types/novelExport";
 import type {
   Chapter,
   PipelineRepairMode,
@@ -17,7 +17,7 @@ import type {
   VolumePlan,
   VolumeRebalanceDecision,
   VolumeStrategyPlan,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import NovelEditView from "./components/NovelEditView";
 import NovelProductionExperienceHandoff from "./components/NovelProductionExperienceHandoff";
 import type { LLMSelectorValue } from "@/components/common/LLMSelector";

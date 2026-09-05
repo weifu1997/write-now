@@ -1,4 +1,4 @@
-import type { DirectorArtifactRef } from "@ai-novel/shared/types/directorRuntime";
+import type { DirectorArtifactRef } from "@write-now/shared/types/directorRuntime";
 import { DirectorStateReader, type DirectorCanonicalState } from "./DirectorStateReader";
 import { DirectorStateCommitter } from "./DirectorStateCommitter";
 

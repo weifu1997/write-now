@@ -9,7 +9,7 @@ import {
   type SimulationLinkDatum,
   type SimulationNodeDatum,
 } from "d3-force";
-import type { WorldGeographyDirection } from "@ai-novel/shared/types/world";
+import type { WorldGeographyDirection } from "@write-now/shared/types/world";
 
 export type GraphNode = {
   id: string;

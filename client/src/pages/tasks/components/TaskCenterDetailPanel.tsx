@@ -1,6 +1,6 @@
-import type { DirectorDashboardView, DirectorRuntimeProjection } from "@ai-novel/shared/types/directorRuntime";
-import type { NovelWorkflowMilestone } from "@ai-novel/shared/types/novelWorkflow";
-import type { UnifiedTaskDetail, UnifiedTaskStep } from "@ai-novel/shared/types/task";
+import type { DirectorDashboardView, DirectorRuntimeProjection } from "@write-now/shared/types/directorRuntime";
+import type { NovelWorkflowMilestone } from "@write-now/shared/types/novelWorkflow";
+import type { UnifiedTaskDetail, UnifiedTaskStep } from "@write-now/shared/types/task";
 import { Link } from "react-router-dom";
 import DirectorRuntimeProjectionCard from "@/components/autoDirector/DirectorRuntimeProjectionCard";
 import {

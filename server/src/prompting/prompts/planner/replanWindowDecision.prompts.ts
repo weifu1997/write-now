@@ -1,6 +1,6 @@
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
-import type { AiReplanWindowDecision } from "@ai-novel/shared/types/replanWindowDecision";
-import { aiReplanWindowDecisionSchema } from "@ai-novel/shared/types/replanWindowDecision";
+import type { AiReplanWindowDecision } from "@write-now/shared/types/replanWindowDecision";
+import { aiReplanWindowDecisionSchema } from "@write-now/shared/types/replanWindowDecision";
 import type { PromptAsset } from "../../core/promptTypes";
 
 export interface ReplanWindowDecisionPromptInput {

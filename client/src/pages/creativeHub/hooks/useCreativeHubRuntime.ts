@@ -12,14 +12,14 @@ import {
   type LangGraphInterruptState,
   type LangGraphStreamCallback,
 } from "@assistant-ui/react-langgraph";
-import type { FailureDiagnostic } from "@ai-novel/shared/types/agent";
+import type { FailureDiagnostic } from "@write-now/shared/types/agent";
 import type {
   CreativeHubInterrupt,
   CreativeHubMessage,
   CreativeHubResourceBinding,
   CreativeHubTurnSummary,
-} from "@ai-novel/shared/types/creativeHub";
-import type { CreativeHubStreamFrame } from "@ai-novel/shared/types/api";
+} from "@write-now/shared/types/creativeHub";
+import type { CreativeHubStreamFrame } from "@write-now/shared/types/api";
 import { toast } from "@/components/ui/toast";
 import { streamCreativeHubRun } from "@/api/creativeHub";
 import {
@@ -41,7 +41,7 @@ interface LoadThreadResult {
   messages: LangChainMessage[];
   interrupts?: CreativeHubInterrupt[];
   checkpointId?: string | null;
-  latestTurnSummary?: import("@ai-novel/shared/types/creativeHub").CreativeHubTurnSummary | null;
+  latestTurnSummary?: import("@write-now/shared/types/creativeHub").CreativeHubTurnSummary | null;
 }
 
 interface UseCreativeHubRuntimeOptions {

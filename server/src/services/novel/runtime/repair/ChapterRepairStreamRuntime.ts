@@ -1,6 +1,6 @@
 import type { BaseMessageChunk } from "@langchain/core/messages";
-import type { GenerationContextPackage } from "@ai-novel/shared/types/chapterRuntime";
-import type { ReviewIssue } from "@ai-novel/shared/types/novel";
+import type { GenerationContextPackage } from "@write-now/shared/types/chapterRuntime";
+import type { ReviewIssue } from "@write-now/shared/types/novel";
 import type { StreamDoneHelpers } from "../../../../llm/streaming";
 import { prisma } from "../../../../db/prisma";
 import { streamTextPrompt } from "../../../../prompting/core/promptRunner";

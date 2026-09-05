@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const {
   buildDirectorCompletionProfile,
   normalizeDirectorCompletionProfile,
-} = require("@ai-novel/shared/types/directorCompletion");
+} = require("@write-now/shared/types/directorCompletion");
 const { listRegisteredPromptAssets } = require("../dist/prompting/registry.js");
 
 test("compact completion profile uses whole-book promise and five-chapter closing budget", () => {

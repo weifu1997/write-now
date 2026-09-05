@@ -1,4 +1,4 @@
-import type { TimelineIssueSeverity } from "@ai-novel/shared/types/timeline";
+import type { TimelineIssueSeverity } from "@write-now/shared/types/timeline";
 
 export interface TimelinePolicy {
   maxOpenCriticalHooks: number;

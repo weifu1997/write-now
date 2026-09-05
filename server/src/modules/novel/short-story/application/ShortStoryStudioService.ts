@@ -5,7 +5,7 @@ import type {
   ShortStoryProjection,
   ShortStoryRevisionImpact,
   ShortStorySegmentUpdateRequest,
-} from "@ai-novel/shared/types/creationStudio";
+} from "@write-now/shared/types/creationStudio";
 import { prisma } from "../../../../db/prisma";
 import { AppError } from "../../../../middleware/errorHandler";
 import { runStructuredPrompt } from "../../../../prompting/core/promptRunner";

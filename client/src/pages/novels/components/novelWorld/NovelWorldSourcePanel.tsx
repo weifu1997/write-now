@@ -4,7 +4,7 @@ import type {
   NovelWorldGenerateInput,
   NovelWorldImportInput,
   NovelWorldManualInput,
-} from "@ai-novel/shared/types/novelWorld";
+} from "@write-now/shared/types/novelWorld";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import SelectControl from "@/components/common/SelectControl";

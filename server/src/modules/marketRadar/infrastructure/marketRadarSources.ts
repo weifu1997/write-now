@@ -1,4 +1,4 @@
-import type { MarketRadarListSource, MarketRadarPlatform } from "@ai-novel/shared/types/marketRadar";
+import type { MarketRadarListSource, MarketRadarPlatform } from "@write-now/shared/types/marketRadar";
 
 export interface CollectedRankingItem {
   rank: number;

@@ -1,6 +1,6 @@
 import type {
   DirectorTaskSnapshot,
-} from "@ai-novel/shared/types/directorRuntime";
+} from "@write-now/shared/types/directorRuntime";
 import type {
   DirectorAutoExecutionPlan,
   DirectorRunMode,
@@ -9,7 +9,7 @@ import type {
   DirectorTakeoverPreview,
   DirectorTakeoverReadinessResponse,
   DirectorTakeoverStrategy,
-} from "@ai-novel/shared/types/novelDirector";
+} from "@write-now/shared/types/novelDirector";
 
 type TakeoverScopeMode = "book" | "chapter_range" | "volume";
 

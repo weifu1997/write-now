@@ -1,11 +1,11 @@
 import type {
   DirectorAutoExecutionState,
   DirectorConfirmRequest,
-} from "@ai-novel/shared/types/novelDirector";
-import { isDirectorAutoExecutionRunMode } from "@ai-novel/shared/types/novelDirector";
+} from "@write-now/shared/types/novelDirector";
+import { isDirectorAutoExecutionRunMode } from "@write-now/shared/types/novelDirector";
 import {
   getWorkflowStepCatalogEntry,
-} from "@ai-novel/shared/types/directorWorkflowStepCatalog";
+} from "@write-now/shared/types/directorWorkflowStepCatalog";
 import {
   getDirectorExecutionNodeAdapter,
   type DirectorExecutionStage,

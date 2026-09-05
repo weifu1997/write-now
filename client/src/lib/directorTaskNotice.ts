@@ -1,5 +1,5 @@
-import type { DirectorTaskNotice } from "@ai-novel/shared/types/novelDirector";
-import type { UnifiedTaskDetail } from "@ai-novel/shared/types/task";
+import type { DirectorTaskNotice } from "@write-now/shared/types/novelDirector";
+import type { UnifiedTaskDetail } from "@write-now/shared/types/task";
 
 type StructuredOutlineTaskLike = Pick<
   UnifiedTaskDetail,

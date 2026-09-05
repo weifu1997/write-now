@@ -1,5 +1,5 @@
-import type { StoryMacroField, StoryMacroFieldValue, StoryMacroPlan } from "@ai-novel/shared/types/storyMacro";
-import type { NovelStoryMode } from "@ai-novel/shared/types/storyMode";
+import type { StoryMacroField, StoryMacroFieldValue, StoryMacroPlan } from "@write-now/shared/types/storyMacro";
+import type { NovelStoryMode } from "@write-now/shared/types/storyMode";
 import { buildBookFramingSummary } from "../bookFraming";
 import { buildStoryModePromptBlock } from "../../storyMode/storyModeProfile";
 import {

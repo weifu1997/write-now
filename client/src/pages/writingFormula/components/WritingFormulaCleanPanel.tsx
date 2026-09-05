@@ -1,4 +1,4 @@
-import type { StyleDetectionReport, StyleProfile } from "@ai-novel/shared/types/styleEngine";
+import type { StyleDetectionReport, StyleProfile } from "@write-now/shared/types/styleEngine";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 

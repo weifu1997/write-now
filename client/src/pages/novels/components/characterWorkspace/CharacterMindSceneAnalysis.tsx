@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { CharacterMindSnapshot } from "@ai-novel/shared/types/characterMind";
+import type { CharacterMindSnapshot } from "@write-now/shared/types/characterMind";
 import { Brain, ChevronDown, ChevronUp, CircleAlert, Lightbulb, ShieldCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

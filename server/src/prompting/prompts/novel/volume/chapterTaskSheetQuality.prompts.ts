@@ -2,10 +2,10 @@ import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import type {
   AiChapterTaskSheetQualityAssessment,
   ChapterExecutionContractQualityCandidate,
-} from "@ai-novel/shared/types/chapterTaskSheetQuality";
+} from "@write-now/shared/types/chapterTaskSheetQuality";
 import {
   aiChapterTaskSheetQualityAssessmentSchema,
-} from "@ai-novel/shared/types/chapterTaskSheetQuality";
+} from "@write-now/shared/types/chapterTaskSheetQuality";
 import type { PromptAsset } from "../../../core/promptTypes";
 
 export interface ChapterTaskSheetQualityPromptInput {

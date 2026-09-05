@@ -2,7 +2,7 @@ import {
   buildStyleIntentSummary,
   type StyleBinding,
   type StyleProfile,
-} from "@ai-novel/shared/types/styleEngine";
+} from "@write-now/shared/types/styleEngine";
 import {
   buildReadableRuleEntries,
   buildReadableRuleSummary,

@@ -1,7 +1,7 @@
 import type {
   BookAnalysisCharacterDimension,
   BookAnalysisCharacterGenerationDepth,
-} from "@ai-novel/shared/types/bookAnalysisCharacter";
+} from "@write-now/shared/types/bookAnalysisCharacter";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { z } from "zod";
 import type { PromptAsset } from "../../core/promptTypes";

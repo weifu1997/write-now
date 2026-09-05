@@ -1,5 +1,5 @@
-import type { ApiResponse } from "@ai-novel/shared/types/api";
-import type { DirectorCommandAcceptedResponse } from "@ai-novel/shared/types/directorRuntime";
+import type { ApiResponse } from "@write-now/shared/types/api";
+import type { DirectorCommandAcceptedResponse } from "@write-now/shared/types/directorRuntime";
 import type {
   RecoverableTaskListResponse,
   TaskOverviewSummary,
@@ -7,13 +7,13 @@ import type {
   TaskStatus,
   UnifiedTaskDetail,
   UnifiedTaskListResponse,
-} from "@ai-novel/shared/types/task";
+} from "@write-now/shared/types/task";
 import type {
   AutoDirectorActionExecutionResult,
   AutoDirectorFollowUpDetail,
   AutoDirectorMutationActionCode,
-} from "@ai-novel/shared/types/autoDirectorFollowUp";
-import type { DirectorLLMOptions } from "@ai-novel/shared/types/novelDirector";
+} from "@write-now/shared/types/autoDirectorFollowUp";
+import type { DirectorLLMOptions } from "@write-now/shared/types/novelDirector";
 import { apiClient, type ApiHttpError } from "./client";
 
 export async function listTasks(params?: {

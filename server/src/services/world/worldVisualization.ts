@@ -6,7 +6,7 @@ import type {
   WorldGeographyRegionType,
   WorldGeographyRouteType,
   WorldVisualizationPayload,
-} from "@ai-novel/shared/types/world";
+} from "@write-now/shared/types/world";
 import { runStructuredPrompt } from "../../prompting/core/promptRunner";
 import { worldVisualizationPrompt } from "../../prompting/prompts/world/world.prompts";
 import {

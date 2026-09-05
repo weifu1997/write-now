@@ -3,7 +3,7 @@ import type {
   LlmLiveEvent,
   LlmLiveSessionSnapshot,
   LlmLiveStreamFrame,
-} from "@ai-novel/shared/types/llmLive";
+} from "@write-now/shared/types/llmLive";
 import { API_BASE_URL } from "@/lib/constants";
 import {
   clearLlmLiveCache,

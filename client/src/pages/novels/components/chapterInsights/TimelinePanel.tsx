@@ -1,8 +1,8 @@
 import { AlertTriangle, ArrowRight, Clock3, Loader2, ShieldAlert, Sparkles, UsersRound } from "lucide-react";
 import type { ReactNode } from "react";
-import type { ChapterRuntimePackage } from "@ai-novel/shared/types/chapterRuntime";
-import type { Chapter } from "@ai-novel/shared/types/novel";
-import type { TimelineContextForChapter, TimelineIssue } from "@ai-novel/shared/types/timeline";
+import type { ChapterRuntimePackage } from "@write-now/shared/types/chapterRuntime";
+import type { Chapter } from "@write-now/shared/types/novel";
+import type { TimelineContextForChapter, TimelineIssue } from "@write-now/shared/types/timeline";
 import type { ChapterTimelineViewData } from "../NovelEditView.types";
 import type { TimelineCheckSummary } from "./chapterInsights.types";
 import { Badge, type BadgeProps } from "@/components/ui/badge";

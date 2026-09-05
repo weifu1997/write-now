@@ -1,8 +1,8 @@
-import type { BookAnalysisSectionKey } from "@ai-novel/shared/types/bookAnalysis";
-import type { DirectorIssuePolicy } from "@ai-novel/shared/types/directorIssue";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
-import type { QualityScore, ReviewIssue } from "@ai-novel/shared/types/novel";
-import { parseCommercialTagsJson } from "@ai-novel/shared/types/novelFraming";
+import type { BookAnalysisSectionKey } from "@write-now/shared/types/bookAnalysis";
+import type { DirectorIssuePolicy } from "@write-now/shared/types/directorIssue";
+import type { LLMProvider } from "@write-now/shared/types/llm";
+import type { QualityScore, ReviewIssue } from "@write-now/shared/types/novel";
+import { parseCommercialTagsJson } from "@write-now/shared/types/novelFraming";
 import { normalizeStoryModeOutput } from "../storyMode/storyModeProfile";
 
 export interface PaginationInput {
@@ -153,7 +153,7 @@ export interface CharacterInput {
   baseCharacterId?: string;
 }
 
-import type { NovelControlPolicy } from "@ai-novel/shared/types/canonicalState";
+import type { NovelControlPolicy } from "@write-now/shared/types/canonicalState";
 
 export interface LLMGenerateOptions {
   provider?: LLMProvider;

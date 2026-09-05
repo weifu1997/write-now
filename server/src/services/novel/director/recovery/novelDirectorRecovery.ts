@@ -1,7 +1,7 @@
 import {
   isDirectorAutoExecutionRunMode,
   type DirectorRunMode,
-} from "@ai-novel/shared/types/novelDirector";
+} from "@write-now/shared/types/novelDirector";
 import { normalizeDirectorRunMode } from "../runtime/novelDirectorHelpers";
 import type { StructuredOutlineRecoveryStep } from "./novelDirectorStructuredOutlineRecovery";
 

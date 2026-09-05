@@ -2,7 +2,7 @@ import {
   LLM_PROVIDERS,
   isBuiltinLLMProvider,
   type LLMProvider,
-} from "@ai-novel/shared/types/llm";
+} from "@write-now/shared/types/llm";
 
 export type EmbeddingProvider = LLMProvider;
 

@@ -1,6 +1,6 @@
-import type { FailureDiagnostic } from "@ai-novel/shared/types/agent";
-import type { CreativeHubInterrupt, CreativeHubTurnSummary } from "@ai-novel/shared/types/creativeHub";
-import type { CreativeHubStreamFrame } from "@ai-novel/shared/types/api";
+import type { FailureDiagnostic } from "@write-now/shared/types/agent";
+import type { CreativeHubInterrupt, CreativeHubTurnSummary } from "@write-now/shared/types/creativeHub";
+import type { CreativeHubStreamFrame } from "@write-now/shared/types/api";
 import type { LangChainMessage } from "@assistant-ui/react-langgraph";
 import type { CreativeHubDebugTraceEntry } from "../components/CreativeHubDebugTraceCard";
 import { getIntentDisplayLabel, getPlannerSourceDisplayLabel } from "./plannerLabels";

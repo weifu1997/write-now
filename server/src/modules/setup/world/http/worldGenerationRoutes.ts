@@ -1,5 +1,5 @@
 import type { Router } from "express";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
+import type { ApiResponse } from "@write-now/shared/types/api";
 import { z } from "zod";
 import { initSSE, streamToSSE, writeSSEFrame } from "../../../../llm/streaming";
 import { validate } from "../../../../middleware/validate";

@@ -1,4 +1,4 @@
-import type { CreativeHubResourceBinding } from "@ai-novel/shared/types/creativeHub";
+import type { CreativeHubResourceBinding } from "@write-now/shared/types/creativeHub";
 
 export function hasCreativeHubBindings(bindings: CreativeHubResourceBinding): boolean {
   return Boolean(

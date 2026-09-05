@@ -3,11 +3,11 @@ import type {
   ChapterReviewContext,
   ChapterWriteContext,
   MacroConstraintContext,
-} from "@ai-novel/shared/types/chapterRuntime";
+} from "@write-now/shared/types/chapterRuntime";
 import type {
   DirectorManualEditInventory,
   DirectorWorkspaceInventory,
-} from "@ai-novel/shared/types/directorRuntime";
+} from "@write-now/shared/types/directorRuntime";
 import { createContextBlock } from "../core/contextBudget";
 import type { PromptContextBlock } from "../core/promptTypes";
 import {

@@ -1,7 +1,7 @@
 import type {
   NovelAutoDirectorTaskSummary,
   ProjectProgressStatus,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import type { NovelListResponse } from "@/api/novel/shared";
 import {
   canContinueChapterBatchAutoExecution,

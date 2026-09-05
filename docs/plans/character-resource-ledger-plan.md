@@ -931,8 +931,8 @@ payoff ledger 管“叙事承诺”，资源账本管“角色资源和行动边
 
 已完成本轮 targeted 验证：
 
-- `pnpm --filter @ai-novel/server build`
-- `pnpm --filter @ai-novel/client build`
+- `pnpm --filter @write-now/server build`
+- `pnpm --filter @write-now/client build`
 - `node --test tests/stateCommitService.test.js tests/novelDirectorAutoExecutionStatus.test.js tests/chapterLayeredContext.test.js`
 
 ### 17.6 剩余事项
@@ -947,7 +947,7 @@ payoff ledger 管“叙事承诺”，资源账本管“角色资源和行动边
 - 手动写作模式新增“复查本章资源”入口：用户改完正文后可以主动触发本章资源提取，低风险直接用于后续写作，中等风险和不确定变更进入待确认。
 - 本章关键资源面板只展示当前章节相关的待确认资源变更，避免其他章节的历史 proposal 干扰当前执行。
 - proposal 摘要已带来源信息，前端可区分“自动同步发现”和“手动复查发现”，方便用户判断这些变更来自后台导演还是主动复查。
-- 本轮验证通过 `pnpm --filter @ai-novel/shared build`、`pnpm --filter @ai-novel/server build`、`pnpm --filter @ai-novel/client build` 和资源提交 / 章节上下文 targeted tests。
+- 本轮验证通过 `pnpm --filter @write-now/shared build`、`pnpm --filter @write-now/server build`、`pnpm --filter @write-now/client build` 和资源提交 / 章节上下文 targeted tests。
 
 ### 17.8 收尾闭环补充（2026-04-25）
 

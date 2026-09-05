@@ -1,6 +1,6 @@
 import type { PromptContextBlock } from "../../../../prompting/core/promptTypes";
-import type { WritingPlatformSnapshot } from "@ai-novel/shared/types/writingPlatform";
-import type { CreationDirection, ShortStoryPlanContract, ShortStoryPlanSegment } from "@ai-novel/shared/types/creationStudio";
+import type { WritingPlatformSnapshot } from "@write-now/shared/types/writingPlatform";
+import type { CreationDirection, ShortStoryPlanContract, ShortStoryPlanSegment } from "@write-now/shared/types/creationStudio";
 import { buildStoryModePromptBlock, parseStoryModeProfileJson } from "../../../../services/storyMode/storyModeProfile";
 
 interface ShortStoryFoundationNovel {

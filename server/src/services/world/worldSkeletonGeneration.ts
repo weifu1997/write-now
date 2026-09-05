@@ -1,11 +1,11 @@
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import type {
   WorldGenerationBlueprint,
   WorldReferenceContext,
   WorldSkeletonGenerationPayload,
   WorldSkeletonGenerationOptions,
-} from "@ai-novel/shared/types/worldWizard";
-import { normalizeWorldSkeletonGenerationOptions } from "@ai-novel/shared/types/worldWizard";
+} from "@write-now/shared/types/worldWizard";
+import { normalizeWorldSkeletonGenerationOptions } from "@write-now/shared/types/worldWizard";
 import { runStructuredPrompt } from "../../prompting/core/promptRunner";
 import { worldSkeletonGenerationPrompt } from "../../prompting/prompts/world/worldDraft.prompts";
 import {

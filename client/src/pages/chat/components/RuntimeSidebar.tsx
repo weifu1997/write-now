@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { AgentStep } from "@ai-novel/shared/types/agent";
+import type { AgentStep } from "@write-now/shared/types/agent";
 import KnowledgeDocumentPicker from "@/components/knowledge/KnowledgeDocumentPicker";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

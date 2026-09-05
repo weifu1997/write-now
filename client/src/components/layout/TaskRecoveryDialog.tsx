@@ -1,4 +1,4 @@
-import type { RecoverableTaskSummary } from "@ai-novel/shared/types/task";
+import type { RecoverableTaskSummary } from "@write-now/shared/types/task";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

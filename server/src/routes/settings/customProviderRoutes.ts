@@ -1,11 +1,11 @@
 import type { Router } from "express";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
+import type { ApiResponse } from "@write-now/shared/types/api";
 import {
   PROVIDER_AUTH_MODES,
   REASONING_EFFORTS,
   type ProviderAuthMode,
   type ReasoningEffort,
-} from "@ai-novel/shared/types/llm";
+} from "@write-now/shared/types/llm";
 import { z } from "zod";
 import { prisma } from "../../db/prisma";
 import { setProviderSecretCache } from "../../llm/factory";

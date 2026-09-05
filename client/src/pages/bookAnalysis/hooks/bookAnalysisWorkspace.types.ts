@@ -6,14 +6,14 @@ import type {
   BookAnalysisSection,
   BookAnalysisSectionKey,
   BookAnalysisStatus,
-} from "@ai-novel/shared/types/bookAnalysis";
+} from "@write-now/shared/types/bookAnalysis";
 import type {
   BookAnalysisCharacter,
   BookAnalysisCharacterDimension,
   BookAnalysisCharacterGenerationDepth,
-} from "@ai-novel/shared/types/bookAnalysisCharacter";
-import type { CharacterProfile } from "@ai-novel/shared/types/characterProfile";
-import type { DocumentChapter, KnowledgeDocumentDetail, KnowledgeDocumentSummary } from "@ai-novel/shared/types/knowledge";
+} from "@write-now/shared/types/bookAnalysisCharacter";
+import type { CharacterProfile } from "@write-now/shared/types/characterProfile";
+import type { DocumentChapter, KnowledgeDocumentDetail, KnowledgeDocumentSummary } from "@write-now/shared/types/knowledge";
 import type { AggregatedEvidenceItem, LLMConfigState, SectionDraft } from "../bookAnalysis.types";
 
 export type ExportFormat = "markdown" | "json";

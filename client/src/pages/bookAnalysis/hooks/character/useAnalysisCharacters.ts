@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { BookAnalysisDetail } from "@ai-novel/shared/types/bookAnalysis";
+import type { BookAnalysisDetail } from "@write-now/shared/types/bookAnalysis";
 import type {
   BookAnalysisCharacter,
   BookAnalysisCharacterDimension,
   BookAnalysisCharacterGenerationDepth,
-} from "@ai-novel/shared/types/bookAnalysisCharacter";
-import type { CharacterProfile } from "@ai-novel/shared/types/characterProfile";
+} from "@write-now/shared/types/bookAnalysisCharacter";
+import type { CharacterProfile } from "@write-now/shared/types/characterProfile";
 import {
   createBookAnalysisCharacter,
   deleteBookAnalysisCharacter,

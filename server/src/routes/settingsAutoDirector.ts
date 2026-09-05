@@ -1,5 +1,5 @@
 import { Router } from "express";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
+import type { ApiResponse } from "@write-now/shared/types/api";
 import { z } from "zod";
 import { authMiddleware } from "../middleware/auth";
 import { validate } from "../middleware/validate";
@@ -9,13 +9,13 @@ import {
 } from "../services/settings/AutoDirectorChannelSettingsService";
 import {
   DIRECTOR_AUTO_APPROVAL_POINTS,
-} from "@ai-novel/shared/types/autoDirectorApproval";
+} from "@write-now/shared/types/autoDirectorApproval";
 import {
   getAutoDirectorApprovalPreferenceSettings,
   saveAutoDirectorApprovalPreferenceSettings,
 } from "../services/settings/AutoDirectorApprovalPreferenceService";
 import { qualityDebtSettingsService } from "../services/settings/QualityDebtSettingsService";
-import { directorIssuePolicySchema } from "@ai-novel/shared/types/directorIssue";
+import { directorIssuePolicySchema } from "@write-now/shared/types/directorIssue";
 import { directorIssuePolicyService } from "../services/novel/director/issues";
 
 const router = Router();

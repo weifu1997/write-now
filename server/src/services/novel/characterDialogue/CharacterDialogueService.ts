@@ -3,7 +3,7 @@ import type {
   CharacterDialogueSession,
   CharacterDialogueTurn,
   CharacterDialogueTurnResult,
-} from "@ai-novel/shared/types/characterDialogue";
+} from "@write-now/shared/types/characterDialogue";
 import { prisma } from "../../../db/prisma";
 import { runStructuredPrompt } from "../../../prompting/core/promptRunner";
 import {

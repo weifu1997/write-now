@@ -1,4 +1,4 @@
-import { buildStyleIntentSummary } from "@ai-novel/shared/types/styleEngine";
+import { buildStyleIntentSummary } from "@write-now/shared/types/styleEngine";
 import { AppError } from "../../../middleware/errorHandler";
 import {
   runWithLlmUsageTracking,
@@ -11,7 +11,7 @@ import type {
   DirectorRuntimeSnapshot,
   DirectorManualEditImpact,
   DirectorWorkspaceAnalysis,
-} from "@ai-novel/shared/types/directorRuntime";
+} from "@write-now/shared/types/directorRuntime";
 import type {
   DirectorContinuationMode,
   DirectorCandidatePatchRequest,
@@ -29,8 +29,8 @@ import type {
   DirectorTakeoverRequest,
   DirectorTakeoverResponse,
   DirectorStepCalibrationRequest,
-} from "@ai-novel/shared/types/novelDirector";
-import { isFullBookAutopilotRunMode } from "@ai-novel/shared/types/novelDirector";
+} from "@write-now/shared/types/novelDirector";
+import { isFullBookAutopilotRunMode } from "@write-now/shared/types/novelDirector";
 import { BookContractService } from "../BookContractService";
 import { CharacterPreparationService } from "../characterPrep/CharacterPreparationService";
 import { CharacterDynamicsService } from "../dynamics/CharacterDynamicsService";
@@ -73,7 +73,7 @@ import {
 import {
   normalizeDirectorAutoApprovalConfig,
   shouldAutoApproveDirectorApprovalPoint,
-} from "@ai-novel/shared/types/autoDirectorApproval";
+} from "@write-now/shared/types/autoDirectorApproval";
 import { recordAutoDirectorAutoApprovalFromTask } from "../../task/autoDirectorFollowUps/autoDirectorAutoApprovalAudit";
 import { flattenPreparedOutlineChapters } from "./recovery/novelDirectorStructuredOutlineRecovery";
 import { DirectorRuntimeService } from "./runtime/DirectorRuntimeService";
@@ -102,7 +102,7 @@ import {
   isExecutableWorkflowStepModule,
 } from "./workflowStepRuntime/WorkflowStepModule";
 import type { DirectorWorkflowSeedPayload } from "./runtime/novelDirectorHelpers";
-import { DIRECTOR_ISSUE_GOVERNANCE_VERSION } from "@ai-novel/shared/types/directorIssue";
+import { DIRECTOR_ISSUE_GOVERNANCE_VERSION } from "@write-now/shared/types/directorIssue";
 import { directorIssuePolicyService } from "./issues";
 
 function isWorkflowTaskCancelledError(error: unknown): boolean {

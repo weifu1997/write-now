@@ -49,7 +49,7 @@ jobs:
         run: pnpm check:docs-manifest
 
       - name: Build project site
-        run: pnpm --filter @ai-novel/site build
+        run: pnpm --filter @write-now/site build
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v6

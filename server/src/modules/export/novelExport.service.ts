@@ -1,4 +1,4 @@
-import type { NovelExportFormat, NovelExportScope } from "@ai-novel/shared/types/novelExport";
+import type { NovelExportFormat, NovelExportScope } from "@write-now/shared/types/novelExport";
 import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/errorHandler";
 import { KnowledgeService } from "../../services/knowledge/KnowledgeService";

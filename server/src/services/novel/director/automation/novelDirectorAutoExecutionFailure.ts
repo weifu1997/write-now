@@ -1,4 +1,4 @@
-import type { DirectorAutoExecutionState } from "@ai-novel/shared/types/novelDirector";
+import type { DirectorAutoExecutionState } from "@write-now/shared/types/novelDirector";
 
 export function isSkippableAutoExecutionReviewFailure(message: string | null | undefined): boolean {
   const normalized = message?.trim() ?? "";

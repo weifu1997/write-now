@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { AUTO_DIRECTOR_MOBILE_CLASSES } from "@/mobile/autoDirector";
 import type { NovelBasicFormState } from "../novelBasicInfo.shared";
-import { findDirectorIssuePolicyPreset, type DirectorIssuePolicy } from "@ai-novel/shared/types/directorIssue";
+import { findDirectorIssuePolicyPreset, type DirectorIssuePolicy } from "@write-now/shared/types/directorIssue";
 import { AutoDirectorIssuePolicyCard } from "@/pages/settings/AutoDirectorIssuePolicyCard";
 
 interface StageModelRunProps {

@@ -5,7 +5,7 @@ function loadDistModule(modulePath) {
     return require(modulePath);
   } catch (error) {
     if (error && error.code === "MODULE_NOT_FOUND") {
-      throw new Error("Build the server first: pnpm --filter @ai-novel/server build");
+      throw new Error("Build the server first: pnpm --filter @write-now/server build");
     }
     throw error;
   }

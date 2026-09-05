@@ -122,7 +122,7 @@ function printHelp() {
     "Options: --retention-days 30 --llm-retention-days 14 --max-file-mb 50 --no-cleanup",
   );
   console.log(
-    "Example: node scripts/run-with-log.cjs --name server -- pnpm --filter @ai-novel/server dev",
+    "Example: node scripts/run-with-log.cjs --name server -- pnpm --filter @write-now/server dev",
   );
 }
 

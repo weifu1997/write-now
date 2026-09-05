@@ -1,4 +1,4 @@
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { briefSummary, extractFacts } from "../novel/novelP0Utils";
 import { runStructuredPrompt } from "../../prompting/core/promptRunner";
 import { stateSnapshotPrompt } from "../../prompting/prompts/state/state.prompts";

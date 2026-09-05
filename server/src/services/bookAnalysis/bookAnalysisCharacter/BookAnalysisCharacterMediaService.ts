@@ -1,8 +1,8 @@
 import { Readable } from "node:stream";
-import { buildDefaultCharacterImageSourceDescription } from "@ai-novel/shared/imagePrompt";
-import type { ImageAsset, ImageGenerationTask } from "@ai-novel/shared/types/image";
-import type { CharacterProfile } from "@ai-novel/shared/types/characterProfile";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import { buildDefaultCharacterImageSourceDescription } from "@write-now/shared/imagePrompt";
+import type { ImageAsset, ImageGenerationTask } from "@write-now/shared/types/image";
+import type { CharacterProfile } from "@write-now/shared/types/characterProfile";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { prisma } from "../../../db/prisma";
 import { AppError } from "../../../middleware/errorHandler";
 import { characterLibrarySyncService } from "../../character/CharacterLibrarySyncService";

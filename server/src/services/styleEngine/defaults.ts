@@ -5,7 +5,7 @@ import type {
   LanguageRules,
   NarrativeRules,
   RhythmRules,
-} from "@ai-novel/shared/types/styleEngine";
+} from "@write-now/shared/types/styleEngine";
 
 export interface DefaultTemplateDefinition {
   key: string;

@@ -1,4 +1,4 @@
-import type { StateChangeProposal } from "@ai-novel/shared/types/canonicalState";
+import type { StateChangeProposal } from "@write-now/shared/types/canonicalState";
 import { createHash } from "crypto";
 import { prisma } from "../../../db/prisma";
 import { runStructuredPrompt } from "../../../prompting/core/promptRunner";

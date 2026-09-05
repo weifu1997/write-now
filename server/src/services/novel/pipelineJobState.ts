@@ -1,12 +1,12 @@
-import type { PipelineJobStatus } from "@ai-novel/shared/types/novel";
+import type { PipelineJobStatus } from "@write-now/shared/types/novel";
 import type {
   PipelineBackgroundSyncActivity,
   PipelineBackgroundSyncKind,
   PipelineBackgroundSyncState,
   PipelinePayload,
 } from "./novelCoreShared";
-import type { NovelControlPolicy } from "@ai-novel/shared/types/canonicalState";
-import { directorIssuePolicySchema } from "@ai-novel/shared/types/directorIssue";
+import type { NovelControlPolicy } from "@write-now/shared/types/canonicalState";
+import { directorIssuePolicySchema } from "@write-now/shared/types/directorIssue";
 
 const PIPELINE_ACTIVE_STAGES = ["queued", "generating_chapters", "reviewing", "repairing", "finalizing"] as const;
 const PIPELINE_STAGE_PROGRESS = {

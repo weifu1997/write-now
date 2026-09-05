@@ -12,7 +12,7 @@ import DirectorTakeoverEntryPanel from "./DirectorTakeoverEntryPanel";
 import SelectControl from "@/components/common/SelectControl";
 import OutlineCurrentVolumeWorkspace from "./outline/OutlineCurrentVolumeWorkspace";
 import OutlineResourceCommitments from "./outline/OutlineResourceCommitments";
-import type { VolumeBeatImpactItem } from "@ai-novel/shared/types/novel";
+import type { VolumeBeatImpactItem } from "@write-now/shared/types/novel";
 
 type OutlineWorkspaceTab = "current" | "strategy" | "assets";
 

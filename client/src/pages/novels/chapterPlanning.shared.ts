@@ -3,7 +3,7 @@ import type {
   QualityScore,
   ReplanRecommendation,
   ReviewIssue,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 
 export interface ChapterReviewResult {
   score: QualityScore;

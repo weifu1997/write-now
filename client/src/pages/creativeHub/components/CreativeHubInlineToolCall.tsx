@@ -4,7 +4,7 @@ import CreativeHubToolResultCard from "./CreativeHubToolResultCard";
 import CreativeHubDebugTraceCard, { type CreativeHubDebugTraceEntry } from "./CreativeHubDebugTraceCard";
 import CreativeHubTurnSummaryCard from "./CreativeHubTurnSummaryCard";
 import { useCreativeHubInlineControls } from "./CreativeHubInlineControlsContext";
-import type { CreativeHubTurnSummary } from "@ai-novel/shared/types/creativeHub";
+import type { CreativeHubTurnSummary } from "@write-now/shared/types/creativeHub";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 

@@ -4,7 +4,7 @@
 
 Creative Hub 是围绕小说状态进行查询、诊断和下一步引导的工作台。它负责展示当前小说、创作线程、AI 执行记录、待确认操作和推荐下一步，并把查询动作交给既有 Creative Hub Runtime 与受控工具。
 
-本模块不是小说生产事实源，也不是第二套小说生产器。自动导演、章节生产、任务投影和资源服务继续维护各自事实；Creative Hub 只读取这些结构化状态、解释影响并导航到正式工作流。完整 Agent 驱动创作使用独立项目：`https://github.com/ExplosiveCoderflome/ani-book-agent`，使用者从 GitHub 克隆后独立安装和运行。
+本模块不是小说生产事实源，也不是第二套小说生产器。自动导演、章节生产、任务投影和资源服务继续维护各自事实；Creative Hub 只读取这些结构化状态、解释影响并导航到正式工作流。完整 Agent 驱动创作使用独立项目：`https://github.com/weifu1997/ani-book-agent`，使用者从 GitHub 克隆后独立安装和运行。
 
 ## 目录所有权
 

@@ -13,7 +13,7 @@ import {
   WandSparkles,
 } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import type { ShortStoryRevisionImpact } from "@ai-novel/shared/types/creationStudio";
+import type { ShortStoryRevisionImpact } from "@write-now/shared/types/creationStudio";
 import {
   applyShortStoryRevision,
   deriveShortStoryLongForm,

@@ -3,7 +3,7 @@ import type {
   CharacterGender,
   SupplementalCharacterCandidate,
   SupplementalCharacterGenerationMode,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 
 export const CAST_ROLE_LABELS: Record<CharacterCastRole, string> = {
   protagonist: "主角",

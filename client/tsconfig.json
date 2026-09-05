@@ -9,8 +9,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@ai-novel/shared": ["../shared/index.ts"],
-      "@ai-novel/shared/*": ["../shared/*"]
+      "@write-now/shared": ["../shared/index.ts"],
+      "@write-now/shared/*": ["../shared/*"]
     },
     "types": ["vite/client"],
     "noEmit": true

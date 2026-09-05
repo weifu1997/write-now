@@ -1,7 +1,7 @@
 import type {
   CharacterCandidate,
   DynamicCharacterOverview,
-} from "@ai-novel/shared/types/characterDynamics";
+} from "@write-now/shared/types/characterDynamics";
 import { prisma } from "../../../db/prisma";
 import { compareDynamicRows, PROJECTION_SOURCE_TYPES } from "./characterDynamicsShared";
 import {

@@ -6,8 +6,8 @@ import {
   buildFullDirectorAutoApprovalConfig,
   normalizeDirectorAutoApprovalConfig,
   type DirectorAutoApprovalConfig,
-} from "@ai-novel/shared/types/autoDirectorApproval";
-import type { DirectorRunMode } from "@ai-novel/shared/types/novelDirector";
+} from "@write-now/shared/types/autoDirectorApproval";
+import type { DirectorRunMode } from "@write-now/shared/types/novelDirector";
 import { getAutoDirectorApprovalPreferenceSettings } from "@/api/settings";
 import { queryKeys } from "@/api/queryKeys";
 

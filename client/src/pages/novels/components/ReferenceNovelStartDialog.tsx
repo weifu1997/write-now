@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import type { BookAnalysis } from "@ai-novel/shared/types/bookAnalysis";
+import type { BookAnalysis } from "@write-now/shared/types/bookAnalysis";
 import { BookOpen, Check, GitBranch, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { listBookAnalyses } from "@/api/bookAnalysis";

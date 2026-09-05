@@ -26,7 +26,7 @@
 ### 本轮验证
 
 - `pnpm typecheck`
-- `pnpm --filter @ai-novel/client build`
+- `pnpm --filter @write-now/client build`
 - `node --test tests/chapterEditorPreview.test.js`
 - `node --test tests/prompting-governance.test.js`
 

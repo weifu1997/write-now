@@ -1,7 +1,7 @@
 import type {
   StyleExtractionSourceProcessingMode,
   StyleSourceType,
-} from "@ai-novel/shared/types/styleEngine";
+} from "@write-now/shared/types/styleEngine";
 
 export type StyleExtractionTaskSourceType = Extract<StyleSourceType, "from_text" | "from_knowledge_document">;
 

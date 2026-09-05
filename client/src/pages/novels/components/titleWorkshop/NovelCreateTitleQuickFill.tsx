@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { TitleFactorySuggestion, TitleLibraryEntry } from "@ai-novel/shared/types/title";
+import type { TitleFactorySuggestion, TitleLibraryEntry } from "@write-now/shared/types/title";
 import {
   AI_FREEDOM_OPTIONS,
   EMOTION_OPTIONS,

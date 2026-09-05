@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { DomainAgentName, ResourceScope, ToolCategory } from "@ai-novel/shared/types/agent";
+import type { DomainAgentName, ResourceScope, ToolCategory } from "@write-now/shared/types/agent";
 import type { AgentIntentName, AgentToolName, ToolExecutionContext } from "../types";
 
 export type ToolRiskLevel = "low" | "medium" | "high";

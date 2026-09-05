@@ -1,6 +1,6 @@
-import type { ApiResponse } from "@ai-novel/shared/types/api";
-import type { ChapterQualityLoopAssessment } from "@ai-novel/shared/types/chapterQualityLoop";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { ApiResponse } from "@write-now/shared/types/api";
+import type { ChapterQualityLoopAssessment } from "@write-now/shared/types/chapterQualityLoop";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import type {
   AuditIssue,
   AuditReport,
@@ -11,7 +11,7 @@ import type {
   ReviewIssue,
   StoryPlan,
   StoryStateSnapshot,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import { apiClient } from "../client";
 import type { DraftOptimizePreview } from "./shared";
 

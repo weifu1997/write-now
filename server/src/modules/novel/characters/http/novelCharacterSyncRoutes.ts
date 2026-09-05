@@ -1,9 +1,9 @@
 import type { Router } from "express";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
+import type { ApiResponse } from "@write-now/shared/types/api";
 import {
   importBaseCharacterToNovelInputSchema,
   novelCharacterSaveToLibraryInputSchema,
-} from "@ai-novel/shared/types/characterSync";
+} from "@write-now/shared/types/characterSync";
 import { z } from "zod";
 import { llmProviderSchema } from "../../../../llm/providerSchema";
 import { validate } from "../../../../middleware/validate";

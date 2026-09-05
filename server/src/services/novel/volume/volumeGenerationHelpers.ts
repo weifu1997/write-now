@@ -9,7 +9,7 @@ import type {
   VolumePlanDocument,
   VolumeRebalanceDecision,
   VolumeStrategyPlan,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import { buildVolumeWorkspaceDocument } from "./volumeWorkspaceDocument";
 import type {
   ChapterDetailMode,

@@ -78,4 +78,4 @@ export function resolveMarketOpeningIdea(
 ): string {
   return currentIdea.trim() || seed?.openingIdea.trim() || "";
 }
-import type { MarketCreativeSeed } from "@ai-novel/shared/types/marketRadar";
+import type { MarketCreativeSeed } from "@write-now/shared/types/marketRadar";

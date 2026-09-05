@@ -1,6 +1,6 @@
 import type { FormEvent } from "react";
-import type { CharacterDialogueInfluence, CharacterDialogueInfluenceStatus } from "@ai-novel/shared/types/characterDialogue";
-import type { CharacterConversationPolicy } from "@ai-novel/shared/types/characterConversation";
+import type { CharacterDialogueInfluence, CharacterDialogueInfluenceStatus } from "@write-now/shared/types/characterDialogue";
+import type { CharacterConversationPolicy } from "@write-now/shared/types/characterConversation";
 import type { CharacterConversationSessionView } from "@/api/characterConversation";
 import { MessageCircle, Send, Sparkles } from "lucide-react";
 import AiButton from "@/components/common/AiButton";

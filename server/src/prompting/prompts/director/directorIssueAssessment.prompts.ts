@@ -3,7 +3,7 @@ import {
   DIRECTOR_ISSUE_CODES,
   directorIssueAssessmentSchema,
   type DirectorIssueAssessment,
-} from "@ai-novel/shared/types/directorIssue";
+} from "@write-now/shared/types/directorIssue";
 import type { PromptAsset } from "../../core/promptTypes";
 
 export interface DirectorIssueAssessmentPromptInput {

@@ -2,13 +2,13 @@ import type {
   VolumeBeatSheet,
   VolumePlan,
   VolumePlanDocument,
-} from "@ai-novel/shared/types/novel";
-import { assessChapterExecutionContractShape } from "@ai-novel/shared/types/chapterTaskSheetQuality";
+} from "@write-now/shared/types/novel";
+import { assessChapterExecutionContractShape } from "@write-now/shared/types/chapterTaskSheetQuality";
 import {
   ChapterScenePlanNormalizationError,
   normalizeChapterScenePlan,
   serializeChapterScenePlan,
-} from "@ai-novel/shared/types/chapterLengthControl";
+} from "@write-now/shared/types/chapterLengthControl";
 import { runStructuredPrompt } from "../../../../prompting/core/promptRunner";
 import { volumeChapterExecutionContractPrompt } from "../../../../prompting/prompts/novel/volume/chapterDetail.prompts";
 import { buildVolumeChapterDetailContextBlocks } from "../../../../prompting/prompts/novel/volume/contextBlocks";

@@ -3,9 +3,9 @@ import { z } from "zod";
 import type {
   CreationIntentInterpretation,
   NarrativeForm,
-} from "@ai-novel/shared/types/creationStudio";
+} from "@write-now/shared/types/creationStudio";
 import type { PromptAsset } from "../../core/promptTypes";
-import type { WritingPlatformPreference } from "@ai-novel/shared/types/writingPlatform";
+import type { WritingPlatformPreference } from "@write-now/shared/types/writingPlatform";
 import { supportsWritingPlatformForm } from "../../../modules/novel/writing-platform";
 
 export interface CreationIntentPromptInput {

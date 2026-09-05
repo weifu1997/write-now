@@ -3,9 +3,9 @@ import type {
   CompleteQuickSetupResult,
   QuickSetupProviderOption,
   QuickSetupStatus,
-} from "@ai-novel/shared/types/onboarding";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
-import type { ModelRouteTaskType } from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/onboarding";
+import type { LLMProvider } from "@write-now/shared/types/llm";
+import type { ModelRouteTaskType } from "@write-now/shared/types/novel";
 import { setProviderSecretCache } from "../../../../llm/factory";
 import { llmConnectivityService } from "../../../../llm/connectivity";
 import {

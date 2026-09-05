@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import type { KnowledgeDocumentStatus } from "@ai-novel/shared/types/knowledge";
+import type { KnowledgeDocumentStatus } from "@write-now/shared/types/knowledge";
 import { Link } from "react-router-dom";
 import { listKnowledgeDocuments } from "@/api/knowledge";
 import { queryKeys } from "@/api/queryKeys";

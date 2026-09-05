@@ -5,8 +5,8 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import type {
   CreationDirection,
   NarrativeForm,
-} from "@ai-novel/shared/types/creationStudio";
-import type { WritingPlatform, WritingPlatformPreference } from "@ai-novel/shared/types/writingPlatform";
+} from "@write-now/shared/types/creationStudio";
+import type { WritingPlatform, WritingPlatformPreference } from "@write-now/shared/types/writingPlatform";
 import {
   confirmCreationDirection,
   getCreationStudioTask,

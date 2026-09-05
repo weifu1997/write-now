@@ -5,7 +5,7 @@ import type {
   LlmLivePhase,
   LlmLiveSessionSnapshot,
   LlmLiveTokenUsage,
-} from "@ai-novel/shared/types/llmLive";
+} from "@write-now/shared/types/llmLive";
 
 const COMPLETED_SESSION_RETENTION_MS = 10 * 60 * 1000;
 const MAX_PREVIEW_CHARS = 16_000;

@@ -13,8 +13,8 @@ import type {
   WorldRules,
   WorldStructuredData,
   WorldStructureSectionKey,
-} from "@ai-novel/shared/types/world";
-import { parseWorldGenerationBlueprint } from "@ai-novel/shared/types/worldWizard";
+} from "@write-now/shared/types/world";
+import { parseWorldGenerationBlueprint } from "@write-now/shared/types/worldWizard";
 
 export const WORLD_STRUCTURE_SCHEMA_VERSION = 1;
 

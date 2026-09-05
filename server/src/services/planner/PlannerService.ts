@@ -1,7 +1,7 @@
-import type { GenerationContextPackage } from "@ai-novel/shared/types/chapterRuntime";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
-import type { AuditReport, ReplanResult } from "@ai-novel/shared/types/novel";
-import type { PayoffLedgerSummary } from "@ai-novel/shared/types/payoffLedger";
+import type { GenerationContextPackage } from "@write-now/shared/types/chapterRuntime";
+import type { LLMProvider } from "@write-now/shared/types/llm";
+import type { AuditReport, ReplanResult } from "@write-now/shared/types/novel";
+import type { PayoffLedgerSummary } from "@write-now/shared/types/payoffLedger";
 import { prisma } from "../../db/prisma";
 import { characterDynamicsQueryService } from "../novel/dynamics/CharacterDynamicsQueryService";
 import { contextAssemblyService } from "../novel/production/ContextAssemblyService";

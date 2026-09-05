@@ -1,4 +1,4 @@
-import type { ModelRouteTaskType } from "@ai-novel/shared/types/novel";
+import type { ModelRouteTaskType } from "@write-now/shared/types/novel";
 
 export const MODEL_ROUTE_LABELS: Record<ModelRouteTaskType, { title: string; description: string }> = {
   planner: {

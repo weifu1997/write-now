@@ -1,5 +1,5 @@
-import type { BookAnalysisSectionKey } from "@ai-novel/shared/types/bookAnalysis";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { BookAnalysisSectionKey } from "@write-now/shared/types/bookAnalysis";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { prisma } from "../../db/prisma";
 import { BookAnalysisBudgetExceededError, BookAnalysisBudgetGuard } from "./caching/bookAnalysis.budget";
 import { BookAnalysisSourceCacheService } from "./caching/bookAnalysis.cache";

@@ -1,4 +1,4 @@
-import type { StyleExtractionDraft } from "@ai-novel/shared/types/styleEngine";
+import type { StyleExtractionDraft } from "@write-now/shared/types/styleEngine";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

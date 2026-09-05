@@ -1,7 +1,7 @@
 import type {
   RuntimeAuditIssue,
   RuntimeAuditReport,
-} from "@ai-novel/shared/types/chapterRuntime";
+} from "@write-now/shared/types/chapterRuntime";
 
 export type ProseQualityIssueCode =
   | "prose_negative_flip"

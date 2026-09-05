@@ -2,10 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import {
   buildCharacterImagePrompt,
   buildDefaultCharacterImageSourceDescription,
-} from "@ai-novel/shared/imagePrompt";
+} from "@write-now/shared/imagePrompt";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
-import type { BaseCharacter } from "@ai-novel/shared/types/novel";
+import type { LLMProvider } from "@write-now/shared/types/llm";
+import type { BaseCharacter } from "@write-now/shared/types/novel";
 import {
   generateCharacterImages,
   getImageTask,

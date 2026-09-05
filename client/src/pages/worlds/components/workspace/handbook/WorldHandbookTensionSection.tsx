@@ -1,6 +1,6 @@
 import { GitBranch } from "lucide-react";
 import type { Dispatch, SetStateAction } from "react";
-import type { WorldStructuredData } from "@ai-novel/shared/types/world";
+import type { WorldStructuredData } from "@write-now/shared/types/world";
 import { Button } from "@/components/ui/button";
 import { HandbookField, HandbookTextarea, SectionHeader } from "./HandbookPrimitives";
 import { listToText, textToList } from "./handbookEditorUtils";

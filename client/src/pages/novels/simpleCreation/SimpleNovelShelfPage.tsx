@@ -16,8 +16,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import type { ChapterQualityDebtDetails, ChapterQualityDebtSource } from "@ai-novel/shared/types/chapterQualityLoop";
-import type { SimpleCreationShelfChapterStatus } from "@ai-novel/shared/types/novel";
+import type { ChapterQualityDebtDetails, ChapterQualityDebtSource } from "@write-now/shared/types/chapterQualityLoop";
+import type { SimpleCreationShelfChapterStatus } from "@write-now/shared/types/novel";
 import {
   downloadNovelExport,
   getSimpleCreationShelf,

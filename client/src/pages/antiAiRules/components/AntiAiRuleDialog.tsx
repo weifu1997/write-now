@@ -1,5 +1,5 @@
 import { FormEvent } from "react";
-import type { AntiAiRule } from "@ai-novel/shared/types/styleEngine";
+import type { AntiAiRule } from "@write-now/shared/types/styleEngine";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AppDialogContent, Dialog } from "@/components/ui/dialog";

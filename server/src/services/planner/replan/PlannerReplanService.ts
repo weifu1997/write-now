@@ -1,4 +1,4 @@
-import type { AuditReport, ReplanResult } from "@ai-novel/shared/types/novel";
+import type { AuditReport, ReplanResult } from "@write-now/shared/types/novel";
 import { prisma } from "../../../db/prisma";
 import { contextAssemblyService } from "../../novel/production/ContextAssemblyService";
 import { payoffLedgerSyncService } from "../../payoff/PayoffLedgerSyncService";

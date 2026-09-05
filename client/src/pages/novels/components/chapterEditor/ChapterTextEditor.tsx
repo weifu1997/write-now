@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { Value } from "platejs";
 import { ParagraphPlugin, Plate, PlateContent, usePlateEditor } from "platejs/react";
-import type { ChapterEditorDiffChunk } from "@ai-novel/shared/types/novel";
+import type { ChapterEditorDiffChunk } from "@write-now/shared/types/novel";
 import type { ChapterEditorSelectionRange, SelectionToolbarPosition } from "./chapterEditorTypes";
 import {
   buildSelectionRangeFromValue,

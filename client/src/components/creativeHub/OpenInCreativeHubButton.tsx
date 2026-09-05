@@ -1,5 +1,5 @@
 import type { ComponentProps } from "react";
-import type { CreativeHubResourceBinding } from "@ai-novel/shared/types/creativeHub";
+import type { CreativeHubResourceBinding } from "@write-now/shared/types/creativeHub";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { buildCreativeHubPath } from "@/lib/creativeHubLinks";

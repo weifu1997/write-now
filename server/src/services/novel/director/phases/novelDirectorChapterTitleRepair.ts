@@ -1,4 +1,4 @@
-import type { DirectorConfirmRequest } from "@ai-novel/shared/types/novelDirector";
+import type { DirectorConfirmRequest } from "@write-now/shared/types/novelDirector";
 import { buildNovelEditResumeTarget } from "../../workflow/novelWorkflow.shared";
 import { getChapterTitleDiversityIssue } from "../../volume/chapterTitleDiversity";
 import { resolveVolumeChapterBeatKey } from "../../volume/volumeGenerationHelpers";

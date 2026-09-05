@@ -1,9 +1,9 @@
 import type {
   NovelProductionExperience,
   NovelProductionExperienceSelectionResponse,
-} from "@ai-novel/shared/types/novelWorkflow";
-import { buildFullBookAutopilotExecutionPlan } from "@ai-novel/shared/types/novelDirector";
-import { buildFullDirectorAutoApprovalConfig } from "@ai-novel/shared/types/autoDirectorApproval";
+} from "@write-now/shared/types/novelWorkflow";
+import { buildFullBookAutopilotExecutionPlan } from "@write-now/shared/types/novelDirector";
+import { buildFullDirectorAutoApprovalConfig } from "@write-now/shared/types/autoDirectorApproval";
 import { prisma } from "../../../../db/prisma";
 import { AppError } from "../../../../middleware/errorHandler";
 import { parseSeedPayload } from "../../workflow/novelWorkflow.shared";

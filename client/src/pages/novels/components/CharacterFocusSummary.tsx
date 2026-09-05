@@ -1,4 +1,4 @@
-import type { Character } from "@ai-novel/shared/types/novel";
+import type { Character } from "@write-now/shared/types/novel";
 import type { ReactNode } from "react";
 import { Activity, BookOpen, Crown, Target } from "lucide-react";
 import { Badge } from "@/components/ui/badge";

@@ -3,7 +3,7 @@ import type {
   KnowledgeDocumentKind,
   KnowledgeDocumentStatus,
   KnowledgeIndexStatus,
-} from "@ai-novel/shared/types/knowledge";
+} from "@write-now/shared/types/knowledge";
 import {
   toolCountSchema,
   toolListLimitSchema,

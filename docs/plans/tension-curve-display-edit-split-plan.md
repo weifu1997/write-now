@@ -89,4 +89,4 @@
 - Part 1 已完成：`TensionCurvePanel` 只保留只读展示、视口切换、参考线、图例和形状提示，不再接收 `onPointChange` / `onPointRelease` / `onPointReleaseMany`。
 - Part 2 已完成：可编辑 React Flow 画布拆入 `TensionCurveFlowCanvas`，编辑装配进入 `TensionCurveEditDialog`；弹窗补齐卷级定位条、节奏段交付条、章节详情侧栏和整卷/当前段交还 AI。
 - Part 3 已完成：节奏 / 拆章工作台通过“编辑紧张度曲线”打开弹窗；卷战略 / 卷骨架页保持只读缩略图，只提供“去节奏 / 拆章编辑曲线”的跳转入口。
-- 已通过代码级验证：`pnpm --filter @ai-novel/client typecheck`。按项目验证规则，浏览器截图与拖拽手感验收留给用户在实际 UI 中确认。
+- 已通过代码级验证：`pnpm --filter @write-now/client typecheck`。按项目验证规则，浏览器截图与拖拽手感验收留给用户在实际 UI 中确认。

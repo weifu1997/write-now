@@ -5,7 +5,7 @@ import type {
   PayoffLedgerSourceRef,
   PayoffLedgerStatus,
   PayoffLedgerSummary,
-} from "@ai-novel/shared/types/payoffLedger";
+} from "@write-now/shared/types/payoffLedger";
 
 type PayoffLedgerRowLike = {
   id: string;

@@ -3,7 +3,7 @@ import type {
   ChapterEditorDiagnosticCard,
   ChapterEditorRevisionScope,
   ChapterEditorWorkspaceResponse,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import { Button } from "@/components/ui/button";
 import type { ChapterEditorSessionState } from "./chapterEditorTypes";
 

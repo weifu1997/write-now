@@ -1,11 +1,11 @@
-import type { ApiResponse } from "@ai-novel/shared/types/api";
-import type { BookAnalysisSectionKey } from "@ai-novel/shared/types/bookAnalysis";
-import type { KnowledgeDocumentDetail } from "@ai-novel/shared/types/knowledge";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
-import type { NovelExportFormat, NovelExportScope } from "@ai-novel/shared/types/novelExport";
-import type { TitleFactorySuggestion } from "@ai-novel/shared/types/title";
-import type { NovelCreateResourceRecommendation } from "@ai-novel/shared/types/novelResourceRecommendation";
-import type { WritingPlatform, WritingPlatformRecommendation } from "@ai-novel/shared/types/writingPlatform";
+import type { ApiResponse } from "@write-now/shared/types/api";
+import type { BookAnalysisSectionKey } from "@write-now/shared/types/bookAnalysis";
+import type { KnowledgeDocumentDetail } from "@write-now/shared/types/knowledge";
+import type { LLMProvider } from "@write-now/shared/types/llm";
+import type { NovelExportFormat, NovelExportScope } from "@write-now/shared/types/novelExport";
+import type { TitleFactorySuggestion } from "@write-now/shared/types/title";
+import type { NovelCreateResourceRecommendation } from "@write-now/shared/types/novelResourceRecommendation";
+import type { WritingPlatform, WritingPlatformRecommendation } from "@write-now/shared/types/writingPlatform";
 import type {
   AIFreedom,
   Chapter,
@@ -18,7 +18,7 @@ import type {
   ProjectMode,
   ProjectProgressStatus,
   SimpleCreationShelfProjection,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import { apiClient } from "../client";
 import {
   buildNovelExportFallbackFileName,

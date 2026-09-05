@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { Castle, Plus } from "lucide-react";
-import type { WorldForce, WorldStructuredData } from "@ai-novel/shared/types/world";
+import type { WorldForce, WorldStructuredData } from "@write-now/shared/types/world";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { HandbookField, HandbookTextarea, SectionHeader } from "./HandbookPrimitives";

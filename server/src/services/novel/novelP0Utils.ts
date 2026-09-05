@@ -1,4 +1,4 @@
-import type { QualityScore, ReviewIssue } from "@ai-novel/shared/types/novel";
+import type { QualityScore, ReviewIssue } from "@write-now/shared/types/novel";
 
 export interface ExtractedFact {
   category: "plot" | "character" | "world";

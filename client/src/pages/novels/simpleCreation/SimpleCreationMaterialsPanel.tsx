@@ -1,4 +1,4 @@
-import type { SimpleCreationShelfProjection } from "@ai-novel/shared/types/novel";
+import type { SimpleCreationShelfProjection } from "@write-now/shared/types/novel";
 import type { ReactNode } from "react";
 import { BookMarked, Boxes, ChevronDown, Globe2, Sparkles, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";

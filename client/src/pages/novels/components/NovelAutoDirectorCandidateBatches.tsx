@@ -1,4 +1,4 @@
-import type { TitleFactorySuggestion } from "@ai-novel/shared/types/title";
+import type { TitleFactorySuggestion } from "@write-now/shared/types/title";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Check, ChevronDown, RefreshCw, Wand2 } from "lucide-react";
 import {
@@ -6,7 +6,7 @@ import {
   type DirectorCandidate,
   type DirectorCandidateBatch,
   type DirectorCorrectionPreset,
-} from "@ai-novel/shared/types/novelDirector";
+} from "@write-now/shared/types/novelDirector";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";

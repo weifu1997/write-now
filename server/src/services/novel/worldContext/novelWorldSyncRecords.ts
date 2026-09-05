@@ -1,4 +1,4 @@
-import type { NovelWorldSyncRecordSummary, NovelWorldSyncSection } from "@ai-novel/shared/types/novelWorld";
+import type { NovelWorldSyncRecordSummary, NovelWorldSyncSection } from "@write-now/shared/types/novelWorld";
 import { prisma } from "../../../db/prisma";
 
 interface WorldSyncRecordRow {

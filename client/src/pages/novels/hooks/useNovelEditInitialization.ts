@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import type { BaseCharacter, Character, VolumePlan } from "@ai-novel/shared/types/novel";
+import type { BaseCharacter, Character, VolumePlan } from "@write-now/shared/types/novel";
 import type { NovelDetailResponse } from "@/api/novel";
 import {
   DEFAULT_ESTIMATED_CHAPTER_COUNT,

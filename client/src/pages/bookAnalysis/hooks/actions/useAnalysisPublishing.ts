@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type {
   BookAnalysisDetail,
   BookAnalysisPublishResult,
-} from "@ai-novel/shared/types/bookAnalysis";
+} from "@write-now/shared/types/bookAnalysis";
 import { useNavigate } from "react-router-dom";
 import { publishBookAnalysis } from "@/api/bookAnalysis";
 import { queryKeys } from "@/api/queryKeys";

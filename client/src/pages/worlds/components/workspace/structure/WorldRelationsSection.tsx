@@ -4,7 +4,7 @@ import type {
   WorldForceRelation,
   WorldLocationControlRelation,
   WorldStructuredData,
-} from "@ai-novel/shared/types/world";
+} from "@write-now/shared/types/world";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 

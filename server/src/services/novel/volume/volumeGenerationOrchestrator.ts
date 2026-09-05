@@ -2,7 +2,7 @@ import type {
   VolumeCountGuidance,
   VolumeGenerationScope,
   VolumePlanDocument,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import { prisma } from "../../../db/prisma";
 import { runStructuredPrompt } from "../../../prompting/core/promptRunner";
 import {
@@ -60,8 +60,8 @@ import {
 import {
   MAX_VOLUME_COUNT,
   buildVolumeCountGuidance,
-} from "@ai-novel/shared/types/volumePlanning";
-import { buildDirectorCompletionProfile } from "@ai-novel/shared/types/directorCompletion";
+} from "@write-now/shared/types/volumePlanning";
+import { buildDirectorCompletionProfile } from "@write-now/shared/types/directorCompletion";
 
 type StoryMacroPlanResult = Awaited<ReturnType<StoryMacroPlanService["getPlan"]>> | null;
 

@@ -3,10 +3,10 @@ import { z } from "zod";
 import type {
   DirectorWorkspaceInventory,
   AiWorkspaceInterpretation,
-} from "@ai-novel/shared/types/directorRuntime";
+} from "@write-now/shared/types/directorRuntime";
 import {
   DIRECTOR_ARTIFACT_TYPES,
-} from "@ai-novel/shared/types/directorRuntime";
+} from "@write-now/shared/types/directorRuntime";
 import type { PromptAsset } from "../../core/promptTypes";
 import { renderSelectedContextBlocks } from "../../core/renderContextBlocks";
 

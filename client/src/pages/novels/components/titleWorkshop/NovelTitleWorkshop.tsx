@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { TitleFactorySuggestion } from "@ai-novel/shared/types/title";
+import type { TitleFactorySuggestion } from "@write-now/shared/types/title";
 import { generateNovelTitles } from "@/api/novel";
 import { createTitleLibraryEntry } from "@/api/title";
 import { queryKeys } from "@/api/queryKeys";

@@ -6,7 +6,7 @@ import type {
   DynamicCharacterCurrentVolume,
   DynamicCharacterOverviewItem,
   DynamicCharacterRiskLevel,
-} from "@ai-novel/shared/types/characterDynamics";
+} from "@write-now/shared/types/characterDynamics";
 import { normalizeName } from "./characterDynamicsShared";
 
 export interface VolumeWindow {

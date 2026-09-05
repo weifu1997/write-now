@@ -8,7 +8,7 @@ import {
   type StyleProfileFeature,
   type StyleTemplate,
   type StyleRuleSet,
-} from "@ai-novel/shared/types/styleEngine";
+} from "@write-now/shared/types/styleEngine";
 
 export function parseJsonObject<T extends Record<string, unknown>>(value?: string | null, fallback?: T): T {
   if (!value) {

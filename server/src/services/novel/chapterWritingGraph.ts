@@ -2,8 +2,8 @@ import type { BaseMessageChunk } from "@langchain/core/messages";
 import type {
   ChapterRuntimePackage,
   GenerationContextPackage,
-} from "@ai-novel/shared/types/chapterRuntime";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+} from "@write-now/shared/types/chapterRuntime";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import type { TaskType } from "../../llm/modelRouter";
 import { createContextBlock } from "../../prompting/core/contextBudget";
 import { runTextPrompt, streamTextPrompt } from "../../prompting/core/promptRunner";
@@ -17,7 +17,7 @@ import { chapterWriterPrompt } from "../../prompting/prompts/novel/chapterWriter
 import { NovelContinuationService } from "./NovelContinuationService";
 import { assertChapterContentNotEmpty } from "./runtime/chapterEmptyContentError";
 import { prisma } from "../../db/prisma";
-import type { WritingPlatformSnapshot } from "@ai-novel/shared/types/writingPlatform";
+import type { WritingPlatformSnapshot } from "@write-now/shared/types/writingPlatform";
 
 async function loadWritingPlatformBlock(novelId: string) {
   const novel = await prisma.novel.findUnique({

@@ -1,8 +1,8 @@
-import type { CharacterHardFacts } from "@ai-novel/shared/types/novel";
+import type { CharacterHardFacts } from "@write-now/shared/types/novel";
 import type {
   ChapterCharacterPendingReviewField,
   GenerationContextPackage,
-} from "@ai-novel/shared/types/chapterRuntime";
+} from "@write-now/shared/types/chapterRuntime";
 
 export interface PendingCharacterHardFactReview {
   currentState?: string | null;

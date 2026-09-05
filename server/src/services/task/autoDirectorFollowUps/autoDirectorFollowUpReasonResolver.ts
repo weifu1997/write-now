@@ -5,7 +5,7 @@ import type {
   AutoDirectorFollowUpResolverInput,
   AutoDirectorMutationActionCode,
   AutoDirectorResolvedFollowUpReason,
-} from "@ai-novel/shared/types/autoDirectorFollowUp";
+} from "@write-now/shared/types/autoDirectorFollowUp";
 import { buildWorkflowResumeAction } from "../novelWorkflowExplainability";
 
 const CHANNEL_ACTION_CODES = new Set<AutoDirectorActionCode>([

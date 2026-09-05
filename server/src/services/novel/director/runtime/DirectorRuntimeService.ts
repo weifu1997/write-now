@@ -6,8 +6,8 @@ import type {
   DirectorStepRun,
   DirectorManualEditImpact,
   DirectorWorkspaceAnalysis,
-} from "@ai-novel/shared/types/directorRuntime";
-import type { DirectorLLMOptions } from "@ai-novel/shared/types/novelDirector";
+} from "@write-now/shared/types/directorRuntime";
+import type { DirectorLLMOptions } from "@write-now/shared/types/novelDirector";
 import { DirectorNodeRunner, type DirectorNodeContract, type DirectorNodeRunResult } from "./DirectorNodeRunner";
 import { DirectorPolicyEngine, type DirectorPolicyRequest } from "./DirectorPolicyEngine";
 import { DirectorRuntimeStore } from "./DirectorRuntimeStore";

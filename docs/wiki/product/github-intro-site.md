@@ -10,7 +10,7 @@
 
 - 公开介绍站放在 `site/` workspace，使用 React + Vite 构建为纯静态产物。
 - 站点只依赖已有产品截图和公开下载 / 仓库链接，不连接后端，不读取本地用户数据。
-- GitHub Pages 部署由 `.github/workflows/site-pages.yml` 负责，推送到 `main` 或手动触发时构建 `@ai-novel/site` 并发布 `site/dist`。
+- GitHub Pages 部署由 `.github/workflows/site-pages.yml` 负责，推送到 `main` 或手动触发时构建 `@write-now/site` 并发布 `site/dist`。
 - 站点视觉内容优先使用真实产品截图和项目社交预览图，避免用抽象插画替代产品界面。
 - 站点设计方向定义在 `site/DESIGN.md`，采用“文学编辑部 + AI 控制台”的表达：暖纸面承载创作叙事，暗色控制台承载产品可信度。
 - 文档展示采用白名单 manifest，公开入口只展示面向使用者和潜在用户的文档，不自动暴露整个 `docs/` 目录。
@@ -20,7 +20,7 @@
 
 介绍站的主要读者是第一次看到项目的人，文案应从用户视角解释：
 
-- AI 小说创作工作台如何帮助新手从一句灵感推进到整本小说。
+- Write Now如何帮助新手从一句灵感推进到整本小说。
 - 自动导演、世界 / 角色准备、卷级拆章、章节执行和质量修复之间的关系。
 - 开发者为什么可以从这个项目研究 AI Native Product、Agent Workflow 和长篇生产链。
 - 下载桌面版与查看源码的入口。
@@ -81,7 +81,7 @@
 
 ## Routing And Prerender Rule
 
-公开文档站使用 History 路由，不再把文档路径放在 hash 里。面向用户和搜索引擎的标准路径是 `/AI-Novel-Writing-Assistant/docs/<docId>`，文档首页是 `/AI-Novel-Writing-Assistant/docs`。组件、搜索结果、面包屑、分页和 Markdown 内部文档链接都应输出真实路径；`#/docs/<docId>` 只作为旧链接兼容入口，由首页脚本替换为新路径。
+公开文档站使用 History 路由，不再把文档路径放在 hash 里。面向用户和搜索引擎的标准路径是 `/write-now/docs/<docId>`，文档首页是 `/write-now/docs`。组件、搜索结果、面包屑、分页和 Markdown 内部文档链接都应输出真实路径；`#/docs/<docId>` 只作为旧链接兼容入口，由首页脚本替换为新路径。
 
 GitHub Pages 仍是静态托管，因此必须同时保留两层能力：
 

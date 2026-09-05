@@ -1,13 +1,13 @@
 import { Router } from "express";
 import { z } from "zod";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
+import type { ApiResponse } from "@write-now/shared/types/api";
 import {
   MARKET_INFLUENCE_MODES,
   MARKET_FOUNDATION_SYNC_TARGETS,
   MARKET_RADAR_PLATFORMS,
   type CreateMarketCreativeBriefRequest,
   type StartMarketRadarAnalysisRequest,
-} from "@ai-novel/shared/types/marketRadar";
+} from "@write-now/shared/types/marketRadar";
 import { validate } from "../../../middleware/validate";
 import { marketRadarService } from "../application/MarketRadarService";
 

@@ -1,5 +1,5 @@
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
-import type { StoryPlanLevel } from "@ai-novel/shared/types/novel";
+import type { LLMProvider } from "@write-now/shared/types/llm";
+import type { StoryPlanLevel } from "@write-now/shared/types/novel";
 import { runStructuredPrompt } from "../../prompting/core/promptRunner";
 import type { PromptContextBlock } from "../../prompting/core/promptTypes";
 import { normalizePlannerOutput, type PlannerOutput } from "./plannerOutputNormalization";

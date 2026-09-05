@@ -1,8 +1,8 @@
 import type {
   DirectorBookAutomationAction,
   DirectorBookAutomationProjection,
-} from "@ai-novel/shared/types/directorRuntime";
-import type { DirectorContinuationMode } from "@ai-novel/shared/types/novelDirector";
+} from "@write-now/shared/types/directorRuntime";
+import type { DirectorContinuationMode } from "@write-now/shared/types/novelDirector";
 
 export function isDirectorCockpitContinuationAction(action: DirectorBookAutomationAction): boolean {
   return action.type === "continue" || action.type === "auto_execute_range";

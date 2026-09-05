@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://explosivecoderflome.github.io/AI-Novel-Writing-Assistant/sitemap.xml
+Sitemap: https://weifu1997.github.io/write-now/sitemap.xml

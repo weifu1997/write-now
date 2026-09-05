@@ -5,7 +5,7 @@ import { ragServices } from "../../rag";
 import { briefSummary, extractFacts } from "../novelP0Utils";
 import { chapterArtifactBackgroundSyncService } from "./ChapterArtifactBackgroundSyncService";
 import type { ArtifactSyncMode } from "../novelCoreShared";
-import type { ContentProvenance } from "@ai-novel/shared/types/canonicalState";
+import type { ContentProvenance } from "@write-now/shared/types/canonicalState";
 import {
   chapterLifecycleService,
   type ChapterLifecycleService,

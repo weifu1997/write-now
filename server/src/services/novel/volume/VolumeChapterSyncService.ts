@@ -3,11 +3,11 @@ import type {
   VolumePlanDocument,
   VolumePlan,
   VolumeSyncPreview,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import {
   assessChapterExecutionContractShape,
   formatChapterTaskSheetQualityFailure,
-} from "@ai-novel/shared/types/chapterTaskSheetQuality";
+} from "@write-now/shared/types/chapterTaskSheetQuality";
 import { prisma } from "../../../db/prisma";
 import type { VolumeUpdateReason } from "../../../events";
 import {

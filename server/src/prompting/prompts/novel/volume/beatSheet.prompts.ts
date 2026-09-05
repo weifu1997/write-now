@@ -8,7 +8,7 @@ import {
   VOLUME_BEAT_REQUIRED_SLOT_KEYS,
   VOLUME_BEAT_SLOT_DEFINITIONS,
   getVolumeBeatRoleLabel,
-} from "@ai-novel/shared/types/volumeBeatSlots";
+} from "@write-now/shared/types/volumeBeatSlots";
 import { type VolumeBeatSheetPromptInput } from "./shared";
 import { buildVolumeBeatSheetContextBlocks } from "./contextBlocks";
 import { NOVEL_PROMPT_BUDGETS } from "../promptBudgetProfiles";

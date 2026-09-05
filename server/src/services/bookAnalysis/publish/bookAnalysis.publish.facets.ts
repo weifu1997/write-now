@@ -4,7 +4,7 @@ import {
   type BookAnalysisEvidenceItem,
   type BookAnalysisSection,
   type BookAnalysisTimelineNode,
-} from "@ai-novel/shared/types/bookAnalysis";
+} from "@write-now/shared/types/bookAnalysis";
 import type { RagChunkFacets, RagChunkFacetKey, RagPreChunk } from "../../rag/chunkFacets";
 
 const FIELD_FACET_MAP: Record<string, RagChunkFacetKey[]> = {

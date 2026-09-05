@@ -17,7 +17,7 @@
 
 - [x] **Step 1: Create `lucky-beta` from `beta` in an isolated worktree**
 
-Run: `git worktree add ~/.config/superpowers/worktrees/AI-Novel-Writing-Assistant/lucky-beta -b lucky-beta beta`
+Run: `git worktree add ~/.config/superpowers/worktrees/write-now/lucky-beta -b lucky-beta beta`
 Expected: worktree starts at `beta` commit `3fbdc3a`.
 
 - [x] **Step 2: List `lucky` commits not in `beta`**
@@ -49,7 +49,7 @@ Compare `server/src/prisma/schema.prisma` and `server/src/prisma/schema.sqlite.p
 
 - [ ] **Step 3: Run focused config/type verification**
 
-Run: `pnpm --filter @ai-novel/server typecheck`
+Run: `pnpm --filter @write-now/server typecheck`
 Expected: TypeScript compiles and Prisma client generation uses selected schema.
 
 ### Task 3: Port WeCom / DingTalk Follow-Up Channels

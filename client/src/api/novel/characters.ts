@@ -1,11 +1,11 @@
-import type { ApiResponse } from "@ai-novel/shared/types/api";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { ApiResponse } from "@write-now/shared/types/api";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import type {
   CharacterResourceContext,
   CharacterResourceLedgerItem,
   CharacterResourceLedgerResponse,
-} from "@ai-novel/shared/types/characterResource";
-import type { StateCommitResult } from "@ai-novel/shared/types/canonicalState";
+} from "@write-now/shared/types/characterResource";
+import type { StateCommitResult } from "@write-now/shared/types/canonicalState";
 import type {
   Character,
   CharacterCastApplyResult,
@@ -22,7 +22,7 @@ import type {
   SupplementalCharacterCandidate,
   SupplementalCharacterGenerateInput,
   SupplementalCharacterGenerationResult,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import { apiClient } from "../client";
 
 export async function getNovelCharacters(id: string) {

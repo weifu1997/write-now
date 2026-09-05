@@ -1,4 +1,4 @@
-import type { World } from "@ai-novel/shared/types/world";
+import type { World } from "@write-now/shared/types/world";
 
 export const LAYERS = [
   { key: "foundation", label: "L1 基础层", primaryField: "background" },

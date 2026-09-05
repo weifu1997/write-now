@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { BookAnalysisDetail } from "@ai-novel/shared/types/bookAnalysis";
+import type { BookAnalysisDetail } from "@write-now/shared/types/bookAnalysis";
 import { Button } from "@/components/ui/button";
 import { AppDialogContent, Dialog } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";

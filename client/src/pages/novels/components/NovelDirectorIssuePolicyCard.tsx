@@ -7,7 +7,7 @@ import {
   type DirectorIssueAction,
   type DirectorIssueCode,
   type DirectorIssuePolicyOverride,
-} from "@ai-novel/shared/types/directorIssue";
+} from "@write-now/shared/types/directorIssue";
 import { getNovelDirectorIssuePolicy, saveNovelDirectorIssuePolicy } from "@/api/novelDirector";
 import { queryKeys } from "@/api/queryKeys";
 import { Button } from "@/components/ui/button";

@@ -3,7 +3,7 @@ import type {
   VisualAssetOrigin,
   VisualAssetScopeKind,
   VisualAssetSourceDomain,
-} from "@ai-novel/shared/types/visualAsset";
+} from "@write-now/shared/types/visualAsset";
 import { prisma } from "../../../db/prisma";
 import { buildImageAssetPublicUrl } from "../../../services/image/imageAssetStorage";
 

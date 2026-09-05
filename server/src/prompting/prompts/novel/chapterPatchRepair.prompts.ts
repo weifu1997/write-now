@@ -1,6 +1,6 @@
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
-import type { ChapterPatchRepairPlan } from "@ai-novel/shared/types/chapterPatchRepair";
-import { chapterPatchRepairPlanSchema } from "@ai-novel/shared/types/chapterPatchRepair";
+import type { ChapterPatchRepairPlan } from "@write-now/shared/types/chapterPatchRepair";
+import { chapterPatchRepairPlanSchema } from "@write-now/shared/types/chapterPatchRepair";
 import type { PromptAsset } from "../../core/promptTypes";
 import { renderSelectedContextBlocks } from "../../core/renderContextBlocks";
 import { NOVEL_PROMPT_BUDGETS } from "./promptBudgetProfiles";

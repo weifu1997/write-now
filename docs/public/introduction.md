@@ -1,6 +1,6 @@
 # 项目介绍
 
-AI 小说创作工作台是一套帮助你把灵感推进成长篇小说的创作工具。它不要求你一开始就会写大纲、设计人物关系、拆卷或控制节奏，而是把这些步骤拆成可执行的链路，让 AI 在每一步给出可选择、可保存、可继续的结果。
+Write Now是一套帮助你把灵感推进成长篇小说的创作工具。它不要求你一开始就会写大纲、设计人物关系、拆卷或控制节奏，而是把这些步骤拆成可执行的链路，让 AI 在每一步给出可选择、可保存、可继续的结果。
 
 ## 它解决什么问题
 
@@ -88,13 +88,13 @@ AI 小说创作工作台是一套帮助你把灵感推进成长篇小说的创�
 
 普通用户优先使用 Windows 桌面版：
 
-- 最新版本页：[GitHub Releases](https://github.com/ExplosiveCoderflome/AI-Novel-Writing-Assistant/releases/latest)
+- 最新版本页：[GitHub Releases](https://github.com/weifu1997/write-now/releases/latest)
 - 建议优先下载安装版。
 - 不想安装时，可以选择 portable 版本直接运行。
 
 源码和项目仓库：
 
-[AI-Novel-Writing-Assistant](https://github.com/ExplosiveCoderflome/AI-Novel-Writing-Assistant)
+[write-now](https://github.com/weifu1997/write-now)
 
 ## 下一步阅读
 

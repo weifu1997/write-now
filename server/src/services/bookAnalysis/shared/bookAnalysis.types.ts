@@ -1,4 +1,4 @@
-import type { BookAnalysisEvidenceItem, BookAnalysisSectionKey } from "@ai-novel/shared/types/bookAnalysis";
+import type { BookAnalysisEvidenceItem, BookAnalysisSectionKey } from "@write-now/shared/types/bookAnalysis";
 import type { LlmTokenUsageSnapshot } from "../../../llm/usageTracking";
 
 export type AnalysisTask =

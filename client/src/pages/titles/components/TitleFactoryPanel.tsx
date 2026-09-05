@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { TitleFactorySuggestion } from "@ai-novel/shared/types/title";
+import type { TitleFactorySuggestion } from "@write-now/shared/types/title";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Settings2, Sparkles } from "lucide-react";
 import { flattenGenreTreeOptions, type GenreTreeNode } from "@/api/genre";

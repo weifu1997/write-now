@@ -6,7 +6,7 @@ import type {
   MarketRadarPlatform,
   MarketRadarSignal,
   MarketTrendReport,
-} from "@ai-novel/shared/types/marketRadar";
+} from "@write-now/shared/types/marketRadar";
 import { ArrowRight, Check, ExternalLink, Loader2, Radar, RefreshCw, Sparkles } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import {

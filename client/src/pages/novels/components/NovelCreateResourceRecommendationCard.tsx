@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import type { NovelCreateResourceRecommendation } from "@ai-novel/shared/types/novelResourceRecommendation";
+import type { NovelCreateResourceRecommendation } from "@write-now/shared/types/novelResourceRecommendation";
 import { recommendNovelCreateResources } from "@/api/novel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

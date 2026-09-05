@@ -4,7 +4,7 @@ import type {
   CharacterConversationPolicy,
   CharacterSubjectProjection,
   CharacterSubjectRef,
-} from "@ai-novel/shared/types/characterConversation";
+} from "@write-now/shared/types/characterConversation";
 import {
   activateCharacterConversationInfluence,
   createCharacterConversationSession,

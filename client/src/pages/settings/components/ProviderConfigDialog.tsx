@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import { Bot, Image, KeyRound, Link2, SlidersHorizontal } from "lucide-react";
 import type { APIKeyStatus } from "@/api/settings";
-import type { ProviderAuthMode } from "@ai-novel/shared/types/llm";
+import type { ProviderAuthMode } from "@write-now/shared/types/llm";
 import SearchableSelect from "@/components/common/SearchableSelect";
 import { Button } from "@/components/ui/button";
 import { AppDialogContent, Dialog } from "@/components/ui/dialog";

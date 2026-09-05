@@ -2,11 +2,11 @@ import type {
   DirectorCandidate,
   DirectorCandidateBatch,
   DirectorProjectContextInput,
-} from "@ai-novel/shared/types/novelDirector";
-import type { StoryMacroPlan } from "@ai-novel/shared/types/storyMacro";
+} from "@write-now/shared/types/novelDirector";
+import type { StoryMacroPlan } from "@write-now/shared/types/storyMacro";
 import { createContextBlock } from "../../core/contextBudget";
 import type { PromptContextBlock } from "../../core/promptTypes";
-import { buildDirectorCompletionProfile } from "@ai-novel/shared/types/directorCompletion";
+import { buildDirectorCompletionProfile } from "@write-now/shared/types/directorCompletion";
 
 function compactText(value: string | null | undefined, fallback = "none"): string {
   return value?.replace(/\s+/g, " ").trim() || fallback;

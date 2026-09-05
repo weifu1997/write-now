@@ -1,4 +1,4 @@
-import type { CharacterTimeline } from "@ai-novel/shared/types/novel";
+import type { CharacterTimeline } from "@write-now/shared/types/novel";
 import AiButton from "@/components/common/AiButton";
 import { Badge } from "@/components/ui/badge";
 

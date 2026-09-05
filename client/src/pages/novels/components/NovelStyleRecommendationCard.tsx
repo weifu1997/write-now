@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { StyleRecommendationResult } from "@ai-novel/shared/types/styleEngine";
+import type { StyleRecommendationResult } from "@write-now/shared/types/styleEngine";
 import { createStyleBinding, getStyleBindings, recommendStyleProfilesForNovel } from "@/api/styleEngine";
 import { queryKeys } from "@/api/queryKeys";
 import AiButton from "@/components/common/AiButton";

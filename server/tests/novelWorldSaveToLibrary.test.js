@@ -8,7 +8,7 @@ test("NovelWorldLibrarySaveService exports save method", async () => {
 });
 
 test("novel world save-to-library input defaults to empty payload", async () => {
-  const { novelWorldSaveToLibraryInputSchema } = await import("@ai-novel/shared/types/novelWorld");
+  const { novelWorldSaveToLibraryInputSchema } = await import("@write-now/shared/types/novelWorld");
   assert.deepEqual(novelWorldSaveToLibraryInputSchema.parse({}), {});
   assert.deepEqual(novelWorldSaveToLibraryInputSchema.parse({ syncEnabled: false }), {
     syncEnabled: false,

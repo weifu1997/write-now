@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
-import type { StoryWorldSlice } from "@ai-novel/shared/types/storyWorldSlice";
-import type { WorldBindingSupport, WorldStructuredData } from "@ai-novel/shared/types/world";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { StoryWorldSlice } from "@write-now/shared/types/storyWorldSlice";
+import type { WorldBindingSupport, WorldStructuredData } from "@write-now/shared/types/world";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import type {
   NovelWorldAssetSummary,
   NovelWorldHandbook,
@@ -9,7 +9,7 @@ import type {
   NovelWorldSyncDiff,
   NovelWorldSyncInput,
   NovelWorldSyncSection,
-} from "@ai-novel/shared/types/novelWorld";
+} from "@write-now/shared/types/novelWorld";
 import { prisma } from "../../../db/prisma";
 import { runStructuredPrompt } from "../../../prompting/core/promptRunner";
 import { novelThemeWorldGenerationPrompt } from "../../../prompting/prompts/world/world.prompts";

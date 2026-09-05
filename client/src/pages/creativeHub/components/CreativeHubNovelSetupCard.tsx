@@ -1,4 +1,4 @@
-import type { CreativeHubNovelSetupStatus } from "@ai-novel/shared/types/creativeHub";
+import type { CreativeHubNovelSetupStatus } from "@write-now/shared/types/creativeHub";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";

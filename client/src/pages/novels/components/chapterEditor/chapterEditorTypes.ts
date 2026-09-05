@@ -6,7 +6,7 @@ import type {
   ChapterEditorOperation,
   ChapterEditorRevisionScope,
   ChapterEditorWorkspaceResponse,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 
 export interface ChapterEditorSelectionRange {
   from: number;
@@ -50,7 +50,7 @@ export interface ChapterEditorRequestBuilderInput {
   selection?: ChapterEditorSelectionRange | null;
   content: string;
   contextRange?: ChapterEditorSelectionRange | null;
-  provider?: import("@ai-novel/shared/types/llm").LLMProvider;
+  provider?: import("@write-now/shared/types/llm").LLMProvider;
   model?: string;
   temperature?: number;
 }

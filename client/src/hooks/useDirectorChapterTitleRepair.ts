@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { UnifiedTaskDetail } from "@ai-novel/shared/types/task";
+import type { UnifiedTaskDetail } from "@write-now/shared/types/task";
 import { useNavigate } from "react-router-dom";
 import { repairNovelWorkflowChapterTitles } from "@/api/novelWorkflow";
 import { queryKeys } from "@/api/queryKeys";

@@ -5,7 +5,7 @@ import {
   type WorkflowStepModule,
   type WorkflowStepReadiness,
 } from "./WorkflowStepModule";
-import type { DirectorStepFactInspection } from "@ai-novel/shared/types/directorRuntime";
+import type { DirectorStepFactInspection } from "@write-now/shared/types/directorRuntime";
 import { directorWorkflowStepModuleRegistry } from "./directorWorkflowStepRegistry";
 
 export class StepNotReadyError extends Error {

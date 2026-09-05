@@ -5,8 +5,8 @@ import {
   forceManyBody,
   forceSimulation,
 } from "d3-force";
-import type { Character, CharacterRelation } from "@ai-novel/shared/types/novel";
-import type { CharacterRelationStage } from "@ai-novel/shared/types/characterDynamics";
+import type { Character, CharacterRelation } from "@write-now/shared/types/novel";
+import type { CharacterRelationStage } from "@write-now/shared/types/characterDynamics";
 import { isProtagonistCharacter } from "../characterAssetWorkspace.helpers";
 
 export type RelationshipGraphMode = "all" | "current" | "tension" | "dynamic";

@@ -1,6 +1,6 @@
 import { Router } from "express";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
-import type { CompleteQuickSetupRequest } from "@ai-novel/shared/types/onboarding";
+import type { ApiResponse } from "@write-now/shared/types/api";
+import type { CompleteQuickSetupRequest } from "@write-now/shared/types/onboarding";
 import { z } from "zod";
 import { authMiddleware } from "../../../../middleware/auth";
 import { validate } from "../../../../middleware/validate";

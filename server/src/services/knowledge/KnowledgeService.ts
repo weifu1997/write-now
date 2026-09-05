@@ -3,7 +3,7 @@ import type {
   KnowledgeDocumentKind,
   KnowledgeDocumentStatus,
   KnowledgeRecallTestResult,
-} from "@ai-novel/shared/types/knowledge";
+} from "@write-now/shared/types/knowledge";
 import { prisma } from "../../db/prisma";
 import { ragConfig } from "../../config/rag";
 import { ragServices } from "../rag";

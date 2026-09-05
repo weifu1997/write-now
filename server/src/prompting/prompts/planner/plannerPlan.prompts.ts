@@ -1,5 +1,5 @@
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
-import type { StoryPlanLevel } from "@ai-novel/shared/types/novel";
+import type { StoryPlanLevel } from "@write-now/shared/types/novel";
 import type { PromptAsset } from "../../core/promptTypes";
 import { normalizePlannerOutput, type PlannerOutput } from "../../../services/planner/plannerOutputNormalization";
 import { plannerOutputSchema } from "../../../services/planner/plannerSchemas";

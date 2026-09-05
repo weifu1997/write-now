@@ -5,14 +5,14 @@ import type {
   NovelWorkflowMilestoneType,
   NovelWorkflowResumeTarget,
   NovelWorkflowStage,
-} from "@ai-novel/shared/types/novelWorkflow";
+} from "@write-now/shared/types/novelWorkflow";
 import {
   getWorkflowCheckpointLabel,
   resolveWorkflowStageFromCheckpoint,
-} from "@ai-novel/shared/types/directorWorkflowStepCatalog";
+} from "@write-now/shared/types/directorWorkflowStepCatalog";
 import { NOVEL_WORKFLOW_STAGE_LABELS, NOVEL_WORKFLOW_STAGE_PROGRESS, parseResumeTarget, parseSeedPayload } from "./novelWorkflow.shared";
 import type { DirectorWorkflowSeedPayload } from "../director/runtime/novelDirectorHelpers";
-import type { TaskStatus } from "@ai-novel/shared/types/task";
+import type { TaskStatus } from "@write-now/shared/types/task";
 
 export interface BootstrapWorkflowInput {
   workflowTaskId?: string | null;

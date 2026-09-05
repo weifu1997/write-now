@@ -1,7 +1,7 @@
 import type {
   ChapterWriteContext,
   GenerationContextPackage,
-} from "@ai-novel/shared/types/chapterRuntime";
+} from "@write-now/shared/types/chapterRuntime";
 import {
   buildBookContractContext,
   buildChapterWriteContext,

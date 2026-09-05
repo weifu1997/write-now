@@ -7,8 +7,8 @@ import type {
   CreativeHubThreadMetadata,
   CreativeHubThreadHistoryItem,
   CreativeHubThreadState,
-} from "@ai-novel/shared/types/creativeHub";
-import type { FailureDiagnostic } from "@ai-novel/shared/types/agent";
+} from "@write-now/shared/types/creativeHub";
+import type { FailureDiagnostic } from "@write-now/shared/types/agent";
 import { prisma } from "../db/prisma";
 import { novelSetupStatusService } from "../services/novel/NovelSetupStatusService";
 

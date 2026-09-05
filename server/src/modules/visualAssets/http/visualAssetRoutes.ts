@@ -1,6 +1,6 @@
 import { Router } from "express";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
-import { VISUAL_ASSET_KINDS, VISUAL_ASSET_SOURCES, type VisualAssetScopeKind } from "@ai-novel/shared/types/visualAsset";
+import type { ApiResponse } from "@write-now/shared/types/api";
+import { VISUAL_ASSET_KINDS, VISUAL_ASSET_SOURCES, type VisualAssetScopeKind } from "@write-now/shared/types/visualAsset";
 import { z } from "zod";
 import { authMiddleware } from "../../../middleware/auth";
 import { validate } from "../../../middleware/validate";

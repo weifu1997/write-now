@@ -30,7 +30,7 @@ import {
   type RouteSavePayload,
   type StructuredFallbackDraft,
 } from "./modelRoutes.utils";
-import type { ModelRouteTaskType } from "@ai-novel/shared/types/novel";
+import type { ModelRouteTaskType } from "@write-now/shared/types/novel";
 
 function RouteStatusDot({ state }: { state: ConnectivityState }) {
   const colorClass = state === "healthy"

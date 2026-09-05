@@ -3,7 +3,7 @@ import {
   type DirectorIdeaConstellationCategory,
   type DirectorIdeaConstellationOption,
   type DirectorIdeaConstellationSelection,
-} from "@ai-novel/shared/types/novelDirector";
+} from "@write-now/shared/types/novelDirector";
 
 export const IDEA_CONSTELLATION_CATEGORY_LABELS: Record<DirectorIdeaConstellationCategory, string> = {
   protagonist: "主角开局",

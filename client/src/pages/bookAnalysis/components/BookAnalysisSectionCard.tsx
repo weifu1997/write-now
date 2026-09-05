@@ -1,8 +1,8 @@
 import {
   BOOK_ANALYSIS_STRUCTURED_FIELD_LABELS,
   type BookAnalysisSection,
-} from "@ai-novel/shared/types/bookAnalysis";
-import type { DocumentChapter } from "@ai-novel/shared/types/knowledge";
+} from "@write-now/shared/types/bookAnalysis";
+import type { DocumentChapter } from "@write-now/shared/types/knowledge";
 import { LocateFixed } from "lucide-react";
 import MarkdownViewer from "@/components/common/MarkdownViewer";
 import { Badge } from "@/components/ui/badge";

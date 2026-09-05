@@ -1,13 +1,13 @@
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import type {
   WorldLayerKey,
   WorldStructuredData,
   WorldStructureSectionKey,
-} from "@ai-novel/shared/types/world";
+} from "@write-now/shared/types/world";
 import type {
   WorldOptionRefinementLevel,
   WorldReferenceMode,
-} from "@ai-novel/shared/types/worldWizard";
+} from "@write-now/shared/types/worldWizard";
 import { WORLD_LAYER_ORDER } from "./worldTemplates";
 import { normalizeWorldStructuredData } from "./worldStructure";
 

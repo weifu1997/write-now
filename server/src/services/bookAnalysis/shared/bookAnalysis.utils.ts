@@ -2,9 +2,9 @@ import type {
   BookAnalysisEvidenceItem,
   BookAnalysisSection,
   BookAnalysisSectionKey,
-} from "@ai-novel/shared/types/bookAnalysis";
-import { BOOK_ANALYSIS_SECTIONS, BOOK_ANALYSIS_STRUCTURED_FIELD_SPECS } from "@ai-novel/shared/types/bookAnalysis";
-import { normalizeBookAnalysisTimelineNodes } from "@ai-novel/shared/utils/bookAnalysisTimeline";
+} from "@write-now/shared/types/bookAnalysis";
+import { BOOK_ANALYSIS_SECTIONS, BOOK_ANALYSIS_STRUCTURED_FIELD_SPECS } from "@write-now/shared/types/bookAnalysis";
+import { normalizeBookAnalysisTimelineNodes } from "@write-now/shared/utils/bookAnalysisTimeline";
 import {
   CHAPTER_HEADING_REGEX,
   CHUNK_OVERLAP_CHARS,

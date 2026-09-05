@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DIRECTOR_IDEA_CONSTELLATION_CATEGORIES } from "@ai-novel/shared/types/novelDirector";
+import { DIRECTOR_IDEA_CONSTELLATION_CATEGORIES } from "@write-now/shared/types/novelDirector";
 
 export const directorIdeaConstellationOptionSchema = z.object({
   id: z.string().trim().min(1).max(48),

@@ -4,7 +4,7 @@ import { Check, ScanLine } from "lucide-react";
 import type {
   BookAnalysisCharacter,
   BookAnalysisCharacterAppearanceScanJob,
-} from "@ai-novel/shared/types/bookAnalysisCharacter";
+} from "@write-now/shared/types/bookAnalysisCharacter";
 import {
   generateBookAnalysisCharacterAppearanceImage,
   getBookAnalysisCharacterAppearance,

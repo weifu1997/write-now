@@ -14,9 +14,9 @@ import type {
   DirectorRunMode,
   DirectorSessionState,
   DirectorTaskNotice,
-} from "@ai-novel/shared/types/novelDirector";
-import type { DirectorRuntimeSnapshot } from "@ai-novel/shared/types/directorRuntime";
-import type { DirectorIssuePolicy } from "@ai-novel/shared/types/directorIssue";
+} from "@write-now/shared/types/novelDirector";
+import type { DirectorRuntimeSnapshot } from "@write-now/shared/types/directorRuntime";
+import type { DirectorIssuePolicy } from "@write-now/shared/types/directorIssue";
 import {
   DIRECTOR_CORRECTION_PRESETS,
   DIRECTOR_MAX_TARGET_CHAPTER_COUNT,
@@ -24,20 +24,20 @@ import {
   buildFullBookAutopilotExecutionPlan,
   isDirectorAutoExecutionRunMode,
   isFullBookAutopilotRunMode,
-} from "@ai-novel/shared/types/novelDirector";
+} from "@write-now/shared/types/novelDirector";
 import {
   buildFullDirectorAutoApprovalConfig,
   normalizeDirectorAutoApprovalConfig,
   type DirectorAutoApprovalConfig,
-} from "@ai-novel/shared/types/autoDirectorApproval";
-import type { BookContractDraft } from "@ai-novel/shared/types/novelWorkflow";
-import type { TitleFactorySuggestion } from "@ai-novel/shared/types/title";
+} from "@write-now/shared/types/autoDirectorApproval";
+import type { BookContractDraft } from "@write-now/shared/types/novelWorkflow";
+import type { TitleFactorySuggestion } from "@write-now/shared/types/title";
 import { titleGenerationService } from "../../../title/TitleGenerationService";
 import { isNearDuplicateTitle } from "../../../title/titleGeneration.shared";
-import type { NovelWorkflowResumeTarget } from "@ai-novel/shared/types/novelWorkflow";
+import type { NovelWorkflowResumeTarget } from "@write-now/shared/types/novelWorkflow";
 import type { DirectorBookContractParsed } from "./novelDirectorSchemas";
-import type { DirectorCompletionProfile } from "@ai-novel/shared/types/directorCompletion";
-import { buildDirectorCompletionProfile } from "@ai-novel/shared/types/directorCompletion";
+import type { DirectorCompletionProfile } from "@write-now/shared/types/directorCompletion";
+import { buildDirectorCompletionProfile } from "@write-now/shared/types/directorCompletion";
 
 export type LLMOptions = Pick<DirectorCandidatesRequest, "provider" | "model" | "temperature">;
 

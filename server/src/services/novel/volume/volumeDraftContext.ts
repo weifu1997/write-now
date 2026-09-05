@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import type {
   VolumeChapterPlan,
   VolumePlan,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 
 type LooseRecord = Record<string, unknown>;
 

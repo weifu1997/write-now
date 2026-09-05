@@ -1,7 +1,7 @@
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import type { PromptAsset } from "../../../core/promptTypes";
-import type { VolumeCountRange } from "@ai-novel/shared/types/novel";
-import { MAX_VOLUME_COUNT } from "@ai-novel/shared/types/volumePlanning";
+import type { VolumeCountRange } from "@write-now/shared/types/novel";
+import { MAX_VOLUME_COUNT } from "@write-now/shared/types/volumePlanning";
 import { renderSelectedContextBlocks } from "../../../core/renderContextBlocks";
 import {
   createVolumeStrategyCritiqueSchema,

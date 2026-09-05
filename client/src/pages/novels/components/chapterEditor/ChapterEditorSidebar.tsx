@@ -1,4 +1,4 @@
-import type { Chapter, ChapterEditorDiagnosticCard, ChapterEditorWorkspaceResponse } from "@ai-novel/shared/types/novel";
+import type { Chapter, ChapterEditorDiagnosticCard, ChapterEditorWorkspaceResponse } from "@write-now/shared/types/novel";
 import { Button } from "@/components/ui/button";
 
 interface ChapterEditorSidebarProps {

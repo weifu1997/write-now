@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import type { TaskKind, TaskStatus, UnifiedTaskStep } from "@ai-novel/shared/types/task";
+import type { TaskKind, TaskStatus, UnifiedTaskStep } from "@write-now/shared/types/task";
 import { useSearchParams } from "react-router-dom";
-import type { NovelWorkflowMilestone } from "@ai-novel/shared/types/novelWorkflow";
+import type { NovelWorkflowMilestone } from "@write-now/shared/types/novelWorkflow";
 import { getDirectorTaskSnapshot } from "@/api/novelDirector";
 import {
   getTaskDetail,

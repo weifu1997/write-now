@@ -5,8 +5,8 @@ import type {
   GenerationContextPackage,
   RuntimeAuditIssue,
   RuntimeAuditReport,
-} from "@ai-novel/shared/types/chapterRuntime";
-import type { TimelineCheckResult, TimelineContextForChapter, TimelineIssue } from "@ai-novel/shared/types/timeline";
+} from "@write-now/shared/types/chapterRuntime";
+import type { TimelineCheckResult, TimelineContextForChapter, TimelineIssue } from "@write-now/shared/types/timeline";
 import type { ChapterAcceptanceAssessmentOutput } from "../../../prompting/prompts/novel/chapterAcceptance.prompts";
 import { withChapterRepairContext } from "../../../prompting/prompts/novel/chapterLayeredContext";
 import { buildSyntheticPayoffIssues } from "../../payoff/payoffLedgerShared";

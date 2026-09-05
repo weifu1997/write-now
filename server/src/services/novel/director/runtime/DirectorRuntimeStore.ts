@@ -9,7 +9,7 @@ import type {
   DirectorRuntimeSnapshot,
   DirectorStepRun,
   DirectorWorkspaceAnalysis,
-} from "@ai-novel/shared/types/directorRuntime";
+} from "@write-now/shared/types/directorRuntime";
 import { prisma } from "../../../../db/prisma";
 import { parseSeedPayload } from "../../workflow/novelWorkflow.shared";
 import type { DirectorWorkflowSeedPayload } from "./novelDirectorHelpers";

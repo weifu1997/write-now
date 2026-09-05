@@ -30,7 +30,7 @@ import {
 import { initializeDesktopUpdater, type DesktopUpdaterController } from "./runtime/updater";
 import { createDesktopLogBundle } from "./runtime/logBundle";
 
-const APP_USER_MODEL_ID = "com.ai-novel.desktop";
+const APP_USER_MODEL_ID = "com.write-now.desktop";
 const MAIN_WINDOW_BACKGROUND = "#08101f";
 const BOOTSTRAP_CHANNEL = "desktop:bootstrap-state-changed";
 const UPDATER_CHANNEL = "desktop:updater-state-changed";
@@ -231,7 +231,7 @@ function createSplashHtml(): string {
         http-equiv="Content-Security-Policy"
         content="default-src 'none'; style-src 'unsafe-inline'; img-src data:"
       />
-      <title>AI 小说创作工作台</title>
+      <title>Write Now</title>
       <style>
         :root {
           color-scheme: dark;
@@ -304,7 +304,7 @@ function createSplashHtml(): string {
     <body>
       <main class="panel">
         ${brandMark}
-        <div class="title">AI 小说创作工作台</div>
+        <div class="title">Write Now</div>
         <p class="subtitle">正在准备桌面启动壳和打包后的本地写作引擎。</p>
         <div class="meter"><span></span></div>
       </main>
@@ -324,7 +324,7 @@ function createSplashWindow(): BrowserWindow {
     fullscreenable: false,
     frame: false,
     alwaysOnTop: true,
-    title: "AI Novel Writing Assistant v2",
+    title: "Write Now",
     backgroundColor: MAIN_WINDOW_BACKGROUND,
     icon: windowIcon,
   });
@@ -406,7 +406,7 @@ async function showBootstrapFailureDialog(error: unknown): Promise<void> {
   const errorMessage = error instanceof Error ? error.message : String(error);
   const result = await dialog.showMessageBox({
     type: "error",
-    title: "AI 小说创作工作台启动失败",
+    title: "Write Now启动失败",
     message: "桌面应用未能完成初始化。",
     detail: `${errorMessage}\n\n日志目录:\n${logDir}\n\n日志文件:\n${logFilePath}`,
     buttons: ["打开日志目录", "复制日志路径", "退出"],
@@ -444,7 +444,7 @@ function registerDesktopIpcHandlers(): void {
     return logPath;
   });
   ipcMain.handle("desktop:bundle-logs", async () => {
-    const suggestedName = `AI-Novel-logs-${new Date().toISOString().replace(/[:.]/g, "-")}.zip`;
+    const suggestedName = `Write-Now-logs-${new Date().toISOString().replace(/[:.]/g, "-")}.zip`;
     const result = await dialog.showSaveDialog({
       title: "保存桌面日志包",
       defaultPath: path.join(app.getPath("downloads"), suggestedName),
@@ -454,7 +454,7 @@ function registerDesktopIpcHandlers(): void {
     const bootstrap = desktopBootstrapStore.getSnapshot();
     const updater = desktopUpdaterStore.getSnapshot();
     const summary = [
-      "AI 小说创作工作台近期日志包摘要",
+      "Write Now近期日志包摘要",
       `生成时间: ${new Date().toISOString()}`,
       `应用版本: ${app.getVersion()}`,
       `平台: ${process.platform} ${process.arch}`,

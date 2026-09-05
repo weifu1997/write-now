@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, type QueryClient } from "@tanstack/react-query";
-import type { ReviewIssue, Chapter, StoryStateSnapshot, StoryPlan } from "@ai-novel/shared/types/novel";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { ReviewIssue, Chapter, StoryStateSnapshot, StoryPlan } from "@write-now/shared/types/novel";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { generateChapterPlan, replanNovel, reviewNovelChapter } from "@/api/novel";
 import { queryKeys } from "@/api/queryKeys";
 import type { ChapterExecutionStrategy } from "../chapterExecution.utils";

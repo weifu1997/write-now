@@ -4,9 +4,9 @@ import type {
   CharacterTimeline,
   CharacterVisibleProfileBatchResult,
   CharacterVisibleProfileSuggestion,
-} from "@ai-novel/shared/types/novel";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
-import type { CharacterResourceLedgerItem } from "@ai-novel/shared/types/characterResource";
+} from "@write-now/shared/types/novel";
+import type { LLMProvider } from "@write-now/shared/types/llm";
+import type { CharacterResourceLedgerItem } from "@write-now/shared/types/characterResource";
 import type { CharacterFormState } from "../characterPanel/characterPanel.types";
 
 export interface CharacterAssetWorkspaceProps {

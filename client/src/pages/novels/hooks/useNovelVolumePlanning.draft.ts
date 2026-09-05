@@ -1,4 +1,4 @@
-import type { VolumePlan } from "@ai-novel/shared/types/novel";
+import type { VolumePlan } from "@write-now/shared/types/novel";
 import {
   createEmptyChapter,
   createEmptyVolume,

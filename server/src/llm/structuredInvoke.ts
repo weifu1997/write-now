@@ -1,9 +1,9 @@
 import type { ZodType } from "zod";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import type { BaseMessage } from "@langchain/core/messages";
-import type { LLMProvider, ProviderAuthMode } from "@ai-novel/shared/types/llm";
+import type { LLMProvider, ProviderAuthMode } from "@write-now/shared/types/llm";
 import type { TaskType } from "./modelRouter";
-import type { ModelRouteRequestProtocol } from "@ai-novel/shared/types/novel";
+import type { ModelRouteRequestProtocol } from "@write-now/shared/types/novel";
 import {
   createLLMFromResolvedOptions,
   resolveLLMClientOptions,

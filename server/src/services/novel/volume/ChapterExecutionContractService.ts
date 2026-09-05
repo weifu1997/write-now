@@ -1,10 +1,10 @@
 import type { Prisma } from "@prisma/client";
-import { parseChapterScenePlan, serializeChapterScenePlan } from "@ai-novel/shared/types/chapterLengthControl";
+import { parseChapterScenePlan, serializeChapterScenePlan } from "@write-now/shared/types/chapterLengthControl";
 import {
   assessChapterExecutionContractShape,
   formatChapterTaskSheetQualityFailure,
-} from "@ai-novel/shared/types/chapterTaskSheetQuality";
-import type { VolumePlanDocument } from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/chapterTaskSheetQuality";
+import type { VolumePlanDocument } from "@write-now/shared/types/novel";
 import { prisma } from "../../../db/prisma";
 import type { StyleBindingService } from "../../styleEngine/StyleBindingService";
 import { buildWriterStyleContractText } from "../../styleEngine/styleContractText";

@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import type { WorldPropertyOption } from "@ai-novel/shared/types/worldWizard";
+import type { WorldPropertyOption } from "@write-now/shared/types/worldWizard";
 import { flattenGenreTreeOptions, getGenreTree } from "@/api/genre";
 import { getWorldTemplates } from "@/api/world";
 import { queryKeys } from "@/api/queryKeys";

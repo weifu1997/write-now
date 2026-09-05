@@ -1,7 +1,7 @@
 import type {
   GenerationContextPackage,
   RuntimeStyleDetectionReport,
-} from "@ai-novel/shared/types/chapterRuntime";
+} from "@write-now/shared/types/chapterRuntime";
 import { StyleDetectionService } from "../../styleEngine/StyleDetectionService";
 import { StyleRewriteService } from "../../styleEngine/StyleRewriteService";
 import type { ChapterRuntimeRequestInput } from "./chapterRuntimeSchema";

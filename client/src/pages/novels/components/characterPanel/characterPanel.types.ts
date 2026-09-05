@@ -4,7 +4,7 @@ import type {
   SupplementalCharacterGenerateInput,
   SupplementalCharacterGenerationResult,
   SupplementalCharacterCandidate,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import type { QuickCharacterCreatePayload } from "../characterPanel.utils";
 
 export interface QuickCharacterFormState {

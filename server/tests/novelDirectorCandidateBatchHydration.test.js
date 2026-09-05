@@ -4,7 +4,7 @@ const assert = require("node:assert/strict");
 const {
   extractDirectorTaskSeedPayloadFromMeta,
   mergeDirectorCandidateBatches,
-} = require("@ai-novel/shared/types/novelDirector");
+} = require("@write-now/shared/types/novelDirector");
 
 function buildCandidate(id, workingTitle) {
   return {

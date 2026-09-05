@@ -1,7 +1,7 @@
 import type {
   ContentProvenance,
   StateChangeProposal,
-} from "@ai-novel/shared/types/canonicalState";
+} from "@write-now/shared/types/canonicalState";
 
 export const DEBT_SOURCE_QUALITY_NOTE = "source_quality:debt";
 export const DEBT_PENDING_REVIEW_NOTE = "quality debt source requires manual review";

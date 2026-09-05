@@ -1,4 +1,4 @@
-import type { StoryModeProfile } from "@ai-novel/shared/types/storyMode";
+import type { StoryModeProfile } from "@write-now/shared/types/storyMode";
 import SelectControl from "@/components/common/SelectControl";
 
 function linesToList(value: string): string[] {

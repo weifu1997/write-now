@@ -1,6 +1,6 @@
 import type { Router } from "express";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
-import type { WorldLayerKey, WorldStructureSectionKey } from "@ai-novel/shared/types/world";
+import type { ApiResponse } from "@write-now/shared/types/api";
+import type { WorldLayerKey, WorldStructureSectionKey } from "@write-now/shared/types/world";
 import { z } from "zod";
 import { validate } from "../../../../middleware/validate";
 import {

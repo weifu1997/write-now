@@ -1,4 +1,4 @@
-import type { StoryMacroField } from "@ai-novel/shared/types/storyMacro";
+import type { StoryMacroField } from "@write-now/shared/types/storyMacro";
 import AiButton from "@/components/common/AiButton";
 import { Button } from "@/components/ui/button";
 

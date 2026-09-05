@@ -3,7 +3,7 @@ import type {
   CharacterCastRole,
   CharacterGender,
   SupplementalCharacterGenerationMode,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import { llmProviderSchema } from "../../../llm/providerSchema";
 
 const nonEmptyString = z.string().trim().min(1);

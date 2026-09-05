@@ -6,7 +6,7 @@ import type {
   VolumePlanDocument,
   VolumeRebalanceDecision,
   VolumeStrategyPlan,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import { normalizeVolumeDraft } from "../volumePlan.utils";
 
 export function serializeVolumeDraftSnapshot(volumes: VolumePlan[]): string {

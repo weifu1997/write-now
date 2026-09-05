@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 
 function normalizeProvider(rawProvider: unknown): LLMProvider {
   return typeof rawProvider === "string" && rawProvider.trim()

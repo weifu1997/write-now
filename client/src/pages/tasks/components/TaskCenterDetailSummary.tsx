@@ -1,5 +1,5 @@
-import type { DirectorDashboardView } from "@ai-novel/shared/types/directorRuntime";
-import type { UnifiedTaskDetail } from "@ai-novel/shared/types/task";
+import type { DirectorDashboardView } from "@write-now/shared/types/directorRuntime";
+import type { UnifiedTaskDetail } from "@write-now/shared/types/task";
 import { TaskQueueStatusBadge } from "@/components/taskQueue";
 import {
   formatCheckpoint,

@@ -2,7 +2,7 @@ import type {
   DirectorAutoExecutionState,
   DirectorCircuitBreakerReason,
   DirectorCircuitBreakerState,
-} from "@ai-novel/shared/types/novelDirector";
+} from "@write-now/shared/types/novelDirector";
 
 export const DIRECTOR_CIRCUIT_BREAKER_THRESHOLDS = {
   modelFailureOpenAt: 3,

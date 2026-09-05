@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import type { DirectorAutoApprovalPreferenceSettings } from "@ai-novel/shared/types/autoDirectorApproval";
+import type { DirectorAutoApprovalPreferenceSettings } from "@write-now/shared/types/autoDirectorApproval";
 import AutoDirectorApprovalPointMultiSelect, {
   summarizeDirectorAutoApprovalPoints,
 } from "@/components/autoDirector/AutoDirectorApprovalPointMultiSelect";
