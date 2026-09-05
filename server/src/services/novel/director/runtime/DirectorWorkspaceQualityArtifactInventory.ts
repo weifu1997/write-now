@@ -118,7 +118,9 @@ export function pushQualityFoundationArtifacts(
       targetId: target.targetId,
       contentRef: { table: "PayoffLedgerItem", id: item.id },
       updatedAt: item.updatedAt,
-      status: item.currentStatus === "failed" ? "stale" : "active",
+      // failed 表示承诺义务已闭合(payoffLedgerShared 的 open 判定同样排除 failed),
+      // 资产应视为已终结而非待复核,否则会以「需复核」警告长期滞留在导演进度里。
+      status: item.currentStatus === "failed" ? "superseded" : "active",
       contentHash: stableDirectorContentHash(compactHashParts([
         item.currentStatus,
         item.lastTouchedChapterId,

@@ -96,6 +96,8 @@ Web API 只接收命令和返回轻量投影；Worker 负责执行重型生产�
 
 人工保存的规划资产必须登记为 `user_edited`、`protectedUserContent=true`，更新内容 hash 和版本。上游规划变化只让依赖它的下游规划 artifact 变为 `stale`；`chapter_draft` 不因规划重算被清空或标记为可覆盖。`volume_beat_sheet` 和 `volume_chapter_list` 是独立 artifact 类型，用于区分节奏板、拆章列表和章节正文。
 
+资产台账中的 `stale` 只表示"上游变化后可刷新重建"；生命周期已闭合的承诺不得借用该状态。伏笔台账 `PayoffLedgerItem.currentStatus=failed`（无论来自书级来源替换的 `source_superseded` 路径，还是阶段回报 / 章节差异 AI 的结论）意味着承诺义务已终止，与 `payoffLedgerShared` 的 open 判定一致，其派生 `reader_promise` 资产必须登记为 `superseded` 而非 `stale`，否则"N 项需复核"会以警告形式长期滞留在导演进度里。同理，导演进度徽标「缺少规划资源」只对规划类产物类型（`PLANNING_ARTIFACT_TYPES`）生效；`chapter_draft`、`audit_report` 等正文/执行类产物在规划刚完成、正文尚未开始时缺失属于正常过渡态，不得挂该警告。注意 UI 投影读取的是 `DirectorRun.lastWorkspaceAnalysisJson` 保存的最近一次工作区分析，章节执行期间不重算，因此已落库的历史 `stale` 行会在下一次工作区分析对账时自然收敛为 `superseded`。
+
 新书确认方向后采用 `auto_to_ready + fast_start` 进入开篇准备。小说项目一旦建立，用户即可提前选择简易创作并进入只读书架；该选择写入任务 `productionExperience` 和小说 `creationExperience`，但不得跳过角色、卷章和执行合同准备。开篇路线可用后，已选择简易创作的任务自动转为 `full_book_autopilot` 并开始正文；尚未选择的任务停在 `production_experience_required`。任务 Seed 必须持久化 `startupPreparation`，使服务重启后仍能恢复路线窗口、下一章细化游标与延迟增强策略。后续因重规划再次进入结构化大纲时，应沿用已确认的简易生产方式，不重复要求选择。
 
 快速启动的目标是连续抵达首章正文。关键路径只允许等待精简故事基础、开篇世界切片、核心角色、3～5 章路线和下一章执行合同；普通系统规划重算应以安全范围策略自动通过。完整世界手册、非开篇角色增强、远期卷骨架和后续完整章节合同不得占用正文关键路径。若步骤会覆盖 `protectedUserContent`，或命中数据完整性、正文保护、模型服务和运行时安全风险，仍必须暂停。
