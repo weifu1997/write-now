@@ -487,7 +487,7 @@ function buildVisibleRiskBadges(input: {
     if (inventory.staleArtifacts.length > 0) {
       push({ label: `${inventory.staleArtifacts.length} 项需复核`, level: "warning", source: "artifact" });
     }
-    if (inventory.missingArtifactTypes.length > 0) {
+    if (inventory.missingArtifactTypes.some((type) => PLANNING_ARTIFACT_TYPES.includes(type))) {
       push({ label: "缺少规划资源", level: "warning", source: "artifact" });
     }
   }
