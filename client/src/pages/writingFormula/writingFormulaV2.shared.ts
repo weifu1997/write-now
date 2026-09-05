@@ -3,7 +3,7 @@ import type {
   StyleExtractionDraft,
   StyleFeatureDecision,
   StyleProfile,
-} from "@ai-novel/shared/types/styleEngine";
+} from "@write-now/shared/types/styleEngine";
 
 export const WRITING_FORMULA_V2_MODES = ["imitate", "clean", "book-style"] as const;
 export const STARTER_STYLE_PROFILE_SOURCE_PREFIX = "starter-style-profile:";

@@ -1,4 +1,4 @@
-import type { TitleFactorySuggestion } from "@ai-novel/shared/types/title";
+import type { TitleFactorySuggestion } from "@write-now/shared/types/title";
 import { BookmarkPlus, Check, Copy, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getTitleStyleLabel } from "../titleStudio.shared";

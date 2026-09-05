@@ -1,4 +1,4 @@
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { prisma } from "../db/prisma";
 
 const STRUCTURED_FALLBACK_ENABLED_KEY = "structuredFallback.enabled";

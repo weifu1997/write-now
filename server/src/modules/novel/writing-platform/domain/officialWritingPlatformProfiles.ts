@@ -1,7 +1,7 @@
 import type {
   WritingPlatform,
   WritingPlatformProfileDefinition,
-} from "@ai-novel/shared/types/writingPlatform";
+} from "@write-now/shared/types/writingPlatform";
 
 export const OFFICIAL_WRITING_PLATFORM_PROFILES: Record<WritingPlatform, WritingPlatformProfileDefinition> = {
   fanqie_free: {

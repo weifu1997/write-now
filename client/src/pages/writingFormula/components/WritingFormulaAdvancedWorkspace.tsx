@@ -1,4 +1,4 @@
-import type { AntiAiRule, StyleProfile, StyleProfileFeature } from "@ai-novel/shared/types/styleEngine";
+import type { AntiAiRule, StyleProfile, StyleProfileFeature } from "@write-now/shared/types/styleEngine";
 import WritingFormulaEditorPanel from "./WritingFormulaEditorPanel";
 
 interface WritingFormulaEditorState {

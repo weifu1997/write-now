@@ -17,8 +17,8 @@ import {
 } from "./creativeHubRuntimeHelpers";
 import { type CreativeHubGraphResult } from "./langgraphState";
 import { CreativeHubInterruptGraphState, type CreativeHubInterruptGraphStateValue } from "./creativeHubInterruptState";
-import type { CreativeHubInterrupt, CreativeHubThread } from "@ai-novel/shared/types/creativeHub";
-import type { CreativeHubStreamFrame } from "@ai-novel/shared/types/api";
+import type { CreativeHubInterrupt, CreativeHubThread } from "@write-now/shared/types/creativeHub";
+import type { CreativeHubStreamFrame } from "@write-now/shared/types/api";
 
 interface CreativeHubInterruptInvocation {
   emitFrame: (frame: CreativeHubStreamFrame) => void;

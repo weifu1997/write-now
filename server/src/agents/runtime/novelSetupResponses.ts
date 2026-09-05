@@ -1,4 +1,4 @@
-import type { CreativeHubNovelSetupStatus } from "@ai-novel/shared/types/creativeHub";
+import type { CreativeHubNovelSetupStatus } from "@write-now/shared/types/creativeHub";
 
 function stageLabel(stage: CreativeHubNovelSetupStatus["stage"]): string {
   switch (stage) {

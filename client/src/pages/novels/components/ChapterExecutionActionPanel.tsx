@@ -1,6 +1,6 @@
-import type { SSEFrame } from "@ai-novel/shared/types/api";
-import type { ChapterRuntimePackage } from "@ai-novel/shared/types/chapterRuntime";
-import type { AuditReport, Chapter, StoryStateSnapshot } from "@ai-novel/shared/types/novel";
+import type { SSEFrame } from "@write-now/shared/types/api";
+import type { ChapterRuntimePackage } from "@write-now/shared/types/chapterRuntime";
+import type { AuditReport, Chapter, StoryStateSnapshot } from "@write-now/shared/types/novel";
 import { Link } from "react-router-dom";
 import AiButton from "@/components/common/AiButton";
 import { Badge } from "@/components/ui/badge";

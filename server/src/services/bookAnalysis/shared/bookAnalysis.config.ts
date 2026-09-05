@@ -1,4 +1,4 @@
-import { DEFAULT_BOOK_ANALYSIS_BUDGET_TOKENS } from "@ai-novel/shared/types/bookAnalysis";
+import { DEFAULT_BOOK_ANALYSIS_BUDGET_TOKENS } from "@write-now/shared/types/bookAnalysis";
 
 function readInt(rawValue: string | undefined, fallback: number, min: number, max: number): number {
   const parsed = Number(rawValue ?? "");

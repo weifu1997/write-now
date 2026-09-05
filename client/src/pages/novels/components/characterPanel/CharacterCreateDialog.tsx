@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import type { BaseCharacter } from "@ai-novel/shared/types/novel";
+import type { BaseCharacter } from "@write-now/shared/types/novel";
 import AiButton from "@/components/common/AiButton";
 import SelectControl from "@/components/common/SelectControl";
 import { Badge } from "@/components/ui/badge";

@@ -3,7 +3,7 @@ import type {
   WritingPlatformProfileDefinition,
   WritingPlatformProfileVersionView,
   WritingPlatformSnapshot,
-} from "@ai-novel/shared/types/writingPlatform";
+} from "@write-now/shared/types/writingPlatform";
 import { prisma } from "../../../../db/prisma";
 import {
   OFFICIAL_WRITING_PLATFORM_PROFILES,

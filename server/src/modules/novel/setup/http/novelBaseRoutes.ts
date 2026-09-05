@@ -1,13 +1,13 @@
 import type { Router } from "express";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
+import type { ApiResponse } from "@write-now/shared/types/api";
 import {
   hasChapterQualityLoopReplanRequiredRiskFlags,
   readChapterQualityDebtDetails,
-} from "@ai-novel/shared/types/chapterQualityLoop";
-import { NOVEL_LIST_PAGE_LIMIT_DEFAULT, NOVEL_LIST_PAGE_LIMIT_MAX } from "@ai-novel/shared/types/pagination";
+} from "@write-now/shared/types/chapterQualityLoop";
+import { NOVEL_LIST_PAGE_LIMIT_DEFAULT, NOVEL_LIST_PAGE_LIMIT_MAX } from "@write-now/shared/types/pagination";
 import { z } from "zod";
-import type { SimpleCreationShelfProjection } from "@ai-novel/shared/types/novel";
-import { parsePersistedDirectorRiskAssessment } from "@ai-novel/shared/types/directorRisk";
+import type { SimpleCreationShelfProjection } from "@write-now/shared/types/novel";
+import { parsePersistedDirectorRiskAssessment } from "@write-now/shared/types/directorRisk";
 import { prisma } from "../../../../db/prisma";
 import { llmProviderSchema } from "../../../../llm/providerSchema";
 import { validate } from "../../../../middleware/validate";

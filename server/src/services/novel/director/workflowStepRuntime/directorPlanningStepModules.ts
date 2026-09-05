@@ -1,6 +1,6 @@
-import type { DirectorConfirmRequest } from "@ai-novel/shared/types/novelDirector";
-import type { VolumePlanDocument } from "@ai-novel/shared/types/novel";
-import type { StoryMacroPlan } from "@ai-novel/shared/types/storyMacro";
+import type { DirectorConfirmRequest } from "@write-now/shared/types/novelDirector";
+import type { VolumePlanDocument } from "@write-now/shared/types/novel";
+import type { StoryMacroPlan } from "@write-now/shared/types/storyMacro";
 import type { DirectorCharacterSetupPhaseResult } from "../phases/novelDirectorPipelinePhases";
 import {
   getDirectorStageNodeAdapter,

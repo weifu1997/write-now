@@ -1,6 +1,6 @@
 import { BookOpen, Clock3, Download, ImagePlus, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import type { ImageTaskStatus } from "@ai-novel/shared/types/image";
+import type { ImageTaskStatus } from "@write-now/shared/types/image";
 import defaultNovelCoverUrl from "@/assets/default-novel-cover.webp";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";

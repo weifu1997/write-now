@@ -4,8 +4,8 @@ import {
   ThreadPrimitive,
   type AssistantRuntime,
 } from "@assistant-ui/react";
-import type { FailureDiagnostic } from "@ai-novel/shared/types/agent";
-import type { CreativeHubInterrupt } from "@ai-novel/shared/types/creativeHub";
+import type { FailureDiagnostic } from "@write-now/shared/types/agent";
+import type { CreativeHubInterrupt } from "@write-now/shared/types/creativeHub";
 import { RefreshCw } from "lucide-react";
 import { WorkspaceStateNotice } from "@/components/workspace";
 import { Button } from "@/components/ui/button";

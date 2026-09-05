@@ -1,5 +1,5 @@
-import type { DirectorRunMode, DirectorWorldSetupMode } from "@ai-novel/shared/types/novelDirector";
-import type { StyleIntentSummary } from "@ai-novel/shared/types/styleEngine";
+import type { DirectorRunMode, DirectorWorldSetupMode } from "@write-now/shared/types/novelDirector";
+import type { StyleIntentSummary } from "@write-now/shared/types/styleEngine";
 import type { NovelBasicFormState } from "../novelBasicInfo.shared";
 import {
   EMOTION_OPTIONS,

@@ -1,6 +1,6 @@
-import { parseChapterScenePlan } from "@ai-novel/shared/types/chapterLengthControl";
-import type { ChapterTaskSheetQualityMode } from "@ai-novel/shared/types/chapterTaskSheetQuality";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import { parseChapterScenePlan } from "@write-now/shared/types/chapterLengthControl";
+import type { ChapterTaskSheetQualityMode } from "@write-now/shared/types/chapterTaskSheetQuality";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { prisma } from "../../../db/prisma";
 import { novelFactService } from "../fact/NovelFactService";
 import type { ChapterRouteWindowOptions, ChapterRouteWindowResult } from "./ChapterRouteWindowService";

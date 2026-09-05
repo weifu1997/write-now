@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { WorldConsistencyIssue, WorldConsistencyReport } from "@ai-novel/shared/types/world";
+import type { WorldConsistencyIssue, WorldConsistencyReport } from "@write-now/shared/types/world";
 import { Button } from "@/components/ui/button";
 import {
   localizeConsistencyField,

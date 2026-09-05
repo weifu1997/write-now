@@ -1,4 +1,4 @@
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { resolveLLMClientOptions } from "../../llm/factory";
 import { selectStructuredOutputStrategy } from "../../llm/structuredOutput";
 import { runStructuredPrompt } from "../../prompting/core/promptRunner";

@@ -1,5 +1,5 @@
-import { serializeCommercialTagsJson } from "@ai-novel/shared/types/novelFraming";
-import type { NovelAutoDirectorTaskSummary } from "@ai-novel/shared/types/novel";
+import { serializeCommercialTagsJson } from "@write-now/shared/types/novelFraming";
+import type { NovelAutoDirectorTaskSummary } from "@write-now/shared/types/novel";
 import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/errorHandler";
 import { mapNovelAutoDirectorTaskSummary } from "../task/novelWorkflowTaskSummary";

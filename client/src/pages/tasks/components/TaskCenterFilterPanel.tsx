@@ -1,4 +1,4 @@
-import type { TaskKind, TaskStatus } from "@ai-novel/shared/types/task";
+import type { TaskKind, TaskStatus } from "@write-now/shared/types/task";
 import { Input } from "@/components/ui/input";
 import type { TaskSortMode } from "../taskCenterUtils";
 import SelectControl from "@/components/common/SelectControl";

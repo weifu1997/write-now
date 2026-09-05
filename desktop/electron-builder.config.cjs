@@ -11,8 +11,8 @@ function firstNonEmpty(...values) {
 
 const releaseChannel = firstNonEmpty(process.env.AI_NOVEL_RELEASE_CHANNEL, "beta").toLowerCase();
 const isBetaRelease = releaseChannel === "beta";
-const githubOwner = firstNonEmpty(process.env.AI_NOVEL_GITHUB_OWNER, "ExplosiveCoderflome");
-const githubRepo = firstNonEmpty(process.env.AI_NOVEL_GITHUB_REPO, "AI-Novel-Writing-Assistant");
+const githubOwner = firstNonEmpty(process.env.AI_NOVEL_GITHUB_OWNER, "weifu1997");
+const githubRepo = firstNonEmpty(process.env.AI_NOVEL_GITHUB_REPO, "write-now");
 const windowsSigningLink = firstNonEmpty(
   process.env.CSC_LINK,
   process.env.WIN_CSC_LINK,
@@ -34,8 +34,8 @@ if (!isBetaRelease && !hasWindowsSigningMaterial && !allowUnsignedRelease) {
 }
 
 module.exports = {
-  appId: "com.ai-novel.desktop",
-  productName: "AI Novel Writing Assistant v2",
+  appId: "com.write-now.desktop",
+  productName: "Write Now",
   directories: {
     app: "build/app",
     output: "build/dist",

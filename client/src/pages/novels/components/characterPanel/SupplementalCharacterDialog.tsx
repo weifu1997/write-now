@@ -5,7 +5,7 @@ import type {
   SupplementalCharacterCandidate,
   SupplementalCharacterGenerationMode,
   SupplementalCharacterGenerationResult,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import AiButton from "@/components/common/AiButton";
 import SelectControl from "@/components/common/SelectControl";
 import { Badge } from "@/components/ui/badge";

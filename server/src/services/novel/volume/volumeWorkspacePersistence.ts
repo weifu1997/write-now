@@ -1,4 +1,4 @@
-import type { VolumeChapterPlan, VolumePlan, VolumePlanDocument } from "@ai-novel/shared/types/novel";
+import type { VolumeChapterPlan, VolumePlan, VolumePlanDocument } from "@write-now/shared/types/novel";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "../../../db/prisma";
 import { withSqliteRetry } from "../../../db/sqliteRetry";

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BookOpen, Castle, ChevronDown, Compass, GitBranch, LibraryBig, MapPin, Pencil, Sparkles, Trash2 } from "lucide-react";
-import type { WorldStructuredData } from "@ai-novel/shared";
+import type { WorldStructuredData } from "@write-now/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { deleteWorld, getWorldList } from "@/api/world";

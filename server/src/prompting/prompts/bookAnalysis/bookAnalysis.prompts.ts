@@ -1,8 +1,8 @@
-import type { BookAnalysisSectionKey } from "@ai-novel/shared/types/bookAnalysis";
+import type { BookAnalysisSectionKey } from "@write-now/shared/types/bookAnalysis";
 import {
   BOOK_ANALYSIS_STRUCTURED_FIELD_LABELS,
   BOOK_ANALYSIS_STRUCTURED_FIELD_SPECS,
-} from "@ai-novel/shared/types/bookAnalysis";
+} from "@write-now/shared/types/bookAnalysis";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { z } from "zod";
 import type { PromptAsset } from "../../core/promptTypes";

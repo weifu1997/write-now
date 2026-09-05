@@ -6,8 +6,8 @@ import type {
   DirectorPolicyMode,
   DirectorRuntimeProjection,
   DirectorWorkerHealthSummary,
-} from "@ai-novel/shared/types/directorRuntime";
-import { getDirectorNodeDisplayLabel } from "@ai-novel/shared/types/directorRuntime";
+} from "@write-now/shared/types/directorRuntime";
+import { getDirectorNodeDisplayLabel } from "@write-now/shared/types/directorRuntime";
 import { prisma } from "../../../../db/prisma";
 import { loadPersistentDirectorRuntimeProjection } from "./novelDirectorRuntimeProjection";
 import { directorArtifactLedgerQueryService } from "../runtime/DirectorArtifactLedgerQueryService";

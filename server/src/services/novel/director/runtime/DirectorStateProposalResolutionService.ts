@@ -1,9 +1,9 @@
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
-import type { StateChangeProposal } from "@ai-novel/shared/types/canonicalState";
+import type { LLMProvider } from "@write-now/shared/types/llm";
+import type { StateChangeProposal } from "@write-now/shared/types/canonicalState";
 import type {
   DirectorStateProposalResolution,
   DirectorStateProposalResolutionDecision,
-} from "@ai-novel/shared/types/stateProposalResolution";
+} from "@write-now/shared/types/stateProposalResolution";
 import { prisma } from "../../../../db/prisma";
 import { withSqliteRetry } from "../../../../db/sqliteRetry";
 import { runStructuredPrompt } from "../../../../prompting/core/promptRunner";

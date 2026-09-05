@@ -21,7 +21,7 @@ import bookshelfImage from "../../images/v2/微信截图_20260813220328.png";
 import chapterExecutionImage from "../../images/write/章节执行.png";
 import projectSettingsImage from "../../images/write/项目设定.png";
 
-const repoUrl = "https://github.com/ExplosiveCoderflome/AI-Novel-Writing-Assistant";
+const repoUrl = "https://github.com/weifu1997/write-now";
 const releaseUrl = `${repoUrl}/releases/latest`;
 const docsIntroBannerImage = `${import.meta.env.BASE_URL}assets/docs-intro-banner.png`;
 
@@ -158,14 +158,14 @@ function App({ initialPath }: AppProps) {
 }
 
 function SiteNav({ page }: { page: "home" | "docs" }) {
-  const stars = useGithubStars("ExplosiveCoderflome", "AI-Novel-Writing-Assistant");
+  const stars = useGithubStars("weifu1997", "write-now");
   return (
     <nav className="site-nav" aria-label="主导航">
-      <a className="brand" href={sitePath("/")} aria-label="AI 小说创作工作台首页">
+      <a className="brand" href={sitePath("/")} aria-label="Write Now首页">
         <span className="brand-mark">
           <img src={appIcon} alt="" aria-hidden="true" />
         </span>
-        <span>AI 小说创作工作台</span>
+        <span>Write Now</span>
       </a>
       <div className="nav-links">
         <a href={docsPath()}>文档</a>
@@ -194,7 +194,7 @@ function SiteNav({ page }: { page: "home" | "docs" }) {
 }
 
 function HomePage() {
-  const stars = useGithubStars("ExplosiveCoderflome", "AI-Novel-Writing-Assistant");
+  const stars = useGithubStars("weifu1997", "write-now");
   usePageMeta(null);
   return (
     <>

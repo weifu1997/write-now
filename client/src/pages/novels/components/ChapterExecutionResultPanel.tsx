@@ -1,8 +1,8 @@
 import type {
   Chapter,
   StoryPlan,
-} from "@ai-novel/shared/types/novel";
-import type { SSEFrame } from "@ai-novel/shared/types/api";
+} from "@write-now/shared/types/novel";
+import type { SSEFrame } from "@write-now/shared/types/api";
 import { useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

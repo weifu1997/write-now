@@ -1,5 +1,5 @@
-import type { VolumePlan } from "@ai-novel/shared/types/novel";
-import { assessChapterExecutionContractShape } from "@ai-novel/shared/types/chapterTaskSheetQuality";
+import type { VolumePlan } from "@write-now/shared/types/novel";
+import { assessChapterExecutionContractShape } from "@write-now/shared/types/chapterTaskSheetQuality";
 
 export type StructuredVolumeChapter = VolumePlan["chapters"][number];
 export type ChapterDetailMode = "purpose" | "boundary" | "task_sheet";

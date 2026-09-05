@@ -1,7 +1,7 @@
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { z } from "zod";
-import type { NarrativeForm } from "@ai-novel/shared/types/creationStudio";
-import type { WritingPlatformRecommendation } from "@ai-novel/shared/types/writingPlatform";
+import type { NarrativeForm } from "@write-now/shared/types/creationStudio";
+import type { WritingPlatformRecommendation } from "@write-now/shared/types/writingPlatform";
 import type { PromptAsset } from "../../core/promptTypes";
 import { supportsWritingPlatformForm } from "../../../modules/novel/writing-platform";
 

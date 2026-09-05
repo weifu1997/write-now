@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { useMutation, useQuery, type QueryClient } from "@tanstack/react-query";
-import type { StoryWorldSliceOverrides } from "@ai-novel/shared/types/storyWorldSlice";
+import type { StoryWorldSliceOverrides } from "@write-now/shared/types/storyWorldSlice";
 import type {
   NovelWorldGenerateInput,
   NovelWorldImportInput,
   NovelWorldManualInput,
   NovelWorldSaveToLibraryInput,
   NovelWorldSyncInput,
-} from "@ai-novel/shared/types/novelWorld";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+} from "@write-now/shared/types/novelWorld";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { queryKeys } from "@/api/queryKeys";
 import {
   getNovelWorld,

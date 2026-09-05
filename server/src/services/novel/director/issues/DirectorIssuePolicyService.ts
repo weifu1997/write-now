@@ -7,7 +7,7 @@ import {
   type DirectorIssueCode,
   type DirectorIssuePolicy,
   type DirectorIssuePolicyOverride,
-} from "@ai-novel/shared/types/directorIssue";
+} from "@write-now/shared/types/directorIssue";
 import { prisma } from "../../../../db/prisma";
 import { AppError } from "../../../../middleware/errorHandler";
 

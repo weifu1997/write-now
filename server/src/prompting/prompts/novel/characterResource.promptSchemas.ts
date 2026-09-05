@@ -6,7 +6,7 @@ import {
   characterResourceRiskSeveritySchema,
   characterResourceStatusSchema,
   characterResourceTypeSchema,
-} from "@ai-novel/shared/types/characterResource";
+} from "@write-now/shared/types/characterResource";
 
 function normalizeOptionalConfidence(value: unknown): unknown {
   if (value == null || typeof value === "number") {

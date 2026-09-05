@@ -1,7 +1,7 @@
 import type {
   ContentProvenance,
   StateChangeProposal,
-} from "@ai-novel/shared/types/canonicalState";
+} from "@write-now/shared/types/canonicalState";
 import { prisma } from "../../../db/prisma";
 
 function compactText(value: string | null | undefined): string {

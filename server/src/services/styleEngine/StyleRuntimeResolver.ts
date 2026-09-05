@@ -1,4 +1,4 @@
-import type { AntiAiRule, ResolvedStyleContext, StyleBinding, StyleProfile } from "@ai-novel/shared/types/styleEngine";
+import type { AntiAiRule, ResolvedStyleContext, StyleBinding, StyleProfile } from "@write-now/shared/types/styleEngine";
 import { AntiAiPolicyResolver } from "./AntiAiPolicyResolver";
 import { StyleBindingService } from "./StyleBindingService";
 import { StyleCompiler } from "./StyleCompiler";

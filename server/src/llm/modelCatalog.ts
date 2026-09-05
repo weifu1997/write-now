@@ -1,4 +1,4 @@
-import type { LLMProvider, ProviderAuthMode } from "@ai-novel/shared/types/llm";
+import type { LLMProvider, ProviderAuthMode } from "@write-now/shared/types/llm";
 import {
   isBuiltInProvider,
   providerRequiresApiKey,

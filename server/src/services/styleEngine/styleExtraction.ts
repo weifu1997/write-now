@@ -7,12 +7,12 @@ import type {
   StyleFeatureDecision,
   StyleRulePatch,
   StyleRuleSet,
-} from "@ai-novel/shared/types/styleEngine";
+} from "@write-now/shared/types/styleEngine";
 import {
   buildStyleRuleSetFromFeatures,
   hasStyleRulePatchContent,
   resolveStyleFeatureRulePatch,
-} from "@ai-novel/shared/types/styleEngine";
+} from "@write-now/shared/types/styleEngine";
 import { clamp } from "./helpers";
 
 const FEATURE_GROUPS: StyleExtractionFeatureGroup[] = ["narrative", "language", "dialogue", "rhythm", "fingerprint"];

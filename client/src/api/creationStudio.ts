@@ -1,4 +1,4 @@
-import type { ApiResponse } from "@ai-novel/shared/types/api";
+import type { ApiResponse } from "@write-now/shared/types/api";
 import type {
   CreationStudioConfirmRequest,
   CreationStudioInterpretRequest,
@@ -9,7 +9,7 @@ import type {
   ShortStoryRevisionImpact,
   ShortStoryRevisionPreviewRequest,
   ShortStorySegmentUpdateRequest,
-} from "@ai-novel/shared/types/creationStudio";
+} from "@write-now/shared/types/creationStudio";
 import { apiClient } from "./client";
 
 export async function interpretCreationIdea(payload: CreationStudioInterpretRequest) {

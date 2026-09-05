@@ -3,7 +3,7 @@ import type {
   DirectorRuntimePolicyUpdateRequest,
   DirectorRunCommandStatus,
   DirectorRunCommandType,
-} from "@ai-novel/shared/types/directorRuntime";
+} from "@write-now/shared/types/directorRuntime";
 import type {
   DirectorCandidate,
   DirectorCandidateBatch,
@@ -15,8 +15,8 @@ import type {
   DirectorRefinementRequest,
   DirectorTakeoverRequest,
   DirectorStepCalibrationRequest,
-} from "@ai-novel/shared/types/novelDirector";
-import { normalizeCommercialTags } from "@ai-novel/shared/types/novelFraming";
+} from "@write-now/shared/types/novelDirector";
+import { normalizeCommercialTags } from "@write-now/shared/types/novelFraming";
 import { prisma } from "../../../../db/prisma";
 import { withSqliteRetry } from "../../../../db/sqliteRetry";
 import { AppError } from "../../../../middleware/errorHandler";

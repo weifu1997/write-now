@@ -3,7 +3,7 @@ import path from "node:path";
 import { appendDesktopLog, logDesktopError } from "./logging";
 import { resolveDesktopAppDataDir, resolveWorkspaceRoot } from "./paths";
 
-const IMPORT_ARG_PREFIX = "--ai-novel-import-db=";
+const IMPORT_ARG_PREFIX = "--write-now-import-db=";
 const SQLITE_HEADER = Buffer.from("SQLite format 3\u0000", "utf8");
 const DESKTOP_DATABASE_FILE_NAME = "dev.db";
 const DATABASE_SIDE_CAR_SUFFIXES = ["", "-wal", "-shm"] as const;
@@ -332,7 +332,7 @@ function validateImportSource(sourcePath: string, currentDatabasePath: string): 
   }
 
   if (!hasKnownApplicationTables(normalizedSourcePath)) {
-    throw new Error("The selected database does not look like an AI Novel Writing Assistant local database.");
+    throw new Error("The selected database does not look like an Write Now local database.");
   }
 
   return normalizedSourcePath;

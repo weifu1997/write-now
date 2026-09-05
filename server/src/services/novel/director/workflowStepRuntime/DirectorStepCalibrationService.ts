@@ -1,4 +1,4 @@
-import type { DirectorStepCalibrationRequest } from "@ai-novel/shared/types/novelDirector";
+import type { DirectorStepCalibrationRequest } from "@write-now/shared/types/novelDirector";
 import { AppError } from "../../../../middleware/errorHandler";
 import type { getSharedNovelServices } from "../../application/sharedNovelServices";
 import { NovelWorkflowService } from "../../workflow/NovelWorkflowService";

@@ -1,5 +1,5 @@
 import { createHmac } from "node:crypto";
-import type { AutoDirectorMutationActionCode } from "@ai-novel/shared/types/autoDirectorFollowUp";
+import type { AutoDirectorMutationActionCode } from "@write-now/shared/types/autoDirectorFollowUp";
 
 export interface WeComMarkdownCallbackInput {
   callbackId: string;

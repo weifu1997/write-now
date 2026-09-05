@@ -146,8 +146,8 @@ test("Creative Hub stays diagnostic and points full Agent work to the independen
   const page = read("CreativeHubPage.tsx");
   const sidebar = read("components/CreativeHubSidebar.tsx");
 
-  assert.match(page, /https:\/\/github\.com\/ExplosiveCoderflome\/ani-book-agent/);
-  assert.match(page, /git clone https:\/\/github\.com\/ExplosiveCoderflome\/ani-book-agent\.git/);
+  assert.match(page, /https:\/\/github\.com\/weifu1997\/ani-book-agent/);
+  assert.match(page, /git clone https:\/\/github\.com\/weifu1997\/ani-book-agent\.git/);
   assert.doesNotMatch(page, /D:\\code\\ai/);
   assert.match(page, /pnpm install/);
   assert.match(page, /pnpm dev/);

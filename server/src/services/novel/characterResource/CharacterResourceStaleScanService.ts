@@ -1,4 +1,4 @@
-import type { CharacterResourceRiskSignal } from "@ai-novel/shared/types/characterResource";
+import type { CharacterResourceRiskSignal } from "@write-now/shared/types/characterResource";
 import { prisma } from "../../../db/prisma";
 import {
   parseJsonArray,

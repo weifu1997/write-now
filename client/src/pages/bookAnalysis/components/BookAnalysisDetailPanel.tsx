@@ -5,8 +5,8 @@ import type {
   BookAnalysisPublishResult,
   BookAnalysisSection,
   BookAnalysisSectionKey,
-} from "@ai-novel/shared/types/bookAnalysis";
-import type { DocumentChapter } from "@ai-novel/shared/types/knowledge";
+} from "@write-now/shared/types/bookAnalysis";
+import type { DocumentChapter } from "@write-now/shared/types/knowledge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

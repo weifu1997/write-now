@@ -1,6 +1,6 @@
-import type { StoryMacroPlan } from "@ai-novel/shared/types/storyMacro";
-import type { ResolvedStyleContext } from "@ai-novel/shared/types/styleEngine";
-import type { PayoffLedgerResponse } from "@ai-novel/shared/types/payoffLedger";
+import type { StoryMacroPlan } from "@write-now/shared/types/storyMacro";
+import type { ResolvedStyleContext } from "@write-now/shared/types/styleEngine";
+import type { PayoffLedgerResponse } from "@write-now/shared/types/payoffLedger";
 import { isPayoffOverdueAtChapter } from "../payoff/payoffLedgerShared";
 import { buildPlannerStyleContractSummaryText } from "../styleEngine/styleContractText";
 import { buildStoryModePromptBlock, normalizeStoryModeOutput } from "../storyMode/storyModeProfile";

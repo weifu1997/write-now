@@ -7,9 +7,9 @@ import type {
   CreativeHubResourceBinding,
   CreativeHubThread,
   CreativeHubTurnSummary,
-} from "@ai-novel/shared/types/creativeHub";
-import type { FailureDiagnostic } from "@ai-novel/shared/types/agent";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+} from "@write-now/shared/types/creativeHub";
+import type { FailureDiagnostic } from "@write-now/shared/types/agent";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 
 export interface CreativeHubRunSettings {
   provider?: LLMProvider;

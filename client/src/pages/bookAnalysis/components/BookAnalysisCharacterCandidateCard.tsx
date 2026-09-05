@@ -2,7 +2,7 @@ import type {
   BookAnalysisCharacter,
   BookAnalysisCharacterDimension,
   BookAnalysisCharacterGenerationDepth,
-} from "@ai-novel/shared/types/bookAnalysisCharacter";
+} from "@write-now/shared/types/bookAnalysisCharacter";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 

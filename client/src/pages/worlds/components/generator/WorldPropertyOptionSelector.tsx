@@ -1,4 +1,4 @@
-import type { WorldPropertyOption } from "@ai-novel/shared/types/worldWizard";
+import type { WorldPropertyOption } from "@write-now/shared/types/worldWizard";
 
 interface WorldPropertyOptionSelectorProps {
   options: WorldPropertyOption[];

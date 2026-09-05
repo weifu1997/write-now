@@ -10,8 +10,8 @@ import type {
   BookAnalysisCharacterGenerationDepth,
   BookAnalysisCharacterProfileSection,
   BookAnalysisCharacterStatus,
-} from "@ai-novel/shared/types/bookAnalysisCharacter";
-import type { CharacterProfile } from "@ai-novel/shared/types/characterProfile";
+} from "@write-now/shared/types/bookAnalysisCharacter";
+import type { CharacterProfile } from "@write-now/shared/types/characterProfile";
 import {
   decodeEvidence,
   safeParseJSON,

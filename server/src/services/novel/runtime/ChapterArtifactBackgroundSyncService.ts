@@ -10,7 +10,7 @@ import type {
   PipelineBackgroundSyncKind,
   PipelinePayload,
 } from "../novelCoreShared";
-import type { ContentProvenance } from "@ai-novel/shared/types/canonicalState";
+import type { ContentProvenance } from "@write-now/shared/types/canonicalState";
 import { buildContentHash, ChapterArtifactDeltaService } from "./ChapterArtifactDeltaService";
 
 interface ChapterBackgroundSyncContext {

@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import type { DirectorContinuationMode } from "@ai-novel/shared/types/novelDirector";
+import type { DirectorContinuationMode } from "@write-now/shared/types/novelDirector";
 import type {
   DirectorBookAutomationAction,
   DirectorBookAutomationProjection,
-} from "@ai-novel/shared/types/directorRuntime";
+} from "@write-now/shared/types/directorRuntime";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getDirectorBookAutomationProjection } from "@/api/novelDirector";

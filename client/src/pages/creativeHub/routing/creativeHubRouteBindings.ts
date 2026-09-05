@@ -1,7 +1,7 @@
 import type {
   CreativeHubResourceBinding,
   CreativeHubThread,
-} from "@ai-novel/shared/types/creativeHub";
+} from "@write-now/shared/types/creativeHub";
 
 function normalizedBindingId(value: string | null | undefined): string | null {
   return value?.trim() || null;

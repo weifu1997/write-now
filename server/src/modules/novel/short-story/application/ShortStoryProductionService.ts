@@ -3,7 +3,7 @@ import type {
   CreationIntentInterpretation,
   ShortStoryPlanContract,
   ShortStoryQualityResult,
-} from "@ai-novel/shared/types/creationStudio";
+} from "@write-now/shared/types/creationStudio";
 import { prisma } from "../../../../db/prisma";
 import { runStructuredPrompt } from "../../../../prompting/core/promptRunner";
 import {

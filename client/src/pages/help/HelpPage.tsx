@@ -15,7 +15,7 @@ import {
   WandSparkles,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import type { FirstNovelMilestone } from "@ai-novel/shared/types/onboarding";
+import type { FirstNovelMilestone } from "@write-now/shared/types/onboarding";
 import { getFirstNovelOnboarding } from "@/api/onboarding";
 import { queryKeys } from "@/api/queryKeys";
 import { Badge } from "@/components/ui/badge";

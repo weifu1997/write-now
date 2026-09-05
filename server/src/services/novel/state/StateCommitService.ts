@@ -3,8 +3,8 @@ import type {
   StateChangeProposal,
   StateCommitResult,
   StateVersionRecord,
-} from "@ai-novel/shared/types/canonicalState";
-import { characterResourceUpdatePayloadSchema } from "@ai-novel/shared/types/characterResource";
+} from "@write-now/shared/types/canonicalState";
+import { characterResourceUpdatePayloadSchema } from "@write-now/shared/types/characterResource";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "../../../db/prisma";
 import { characterResourceLedgerService } from "../characterResource/CharacterResourceLedgerService";

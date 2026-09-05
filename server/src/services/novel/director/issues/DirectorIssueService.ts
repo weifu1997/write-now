@@ -8,8 +8,8 @@ import {
   type DirectorIssueDecision,
   type DirectorIssueOccurrence,
   type DirectorIssuePolicy,
-} from "@ai-novel/shared/types/directorIssue";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+} from "@write-now/shared/types/directorIssue";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { runStructuredPrompt } from "../../../../prompting/core/promptRunner";
 import { directorIssueAssessmentPrompt } from "../../../../prompting/prompts/director/directorIssueAssessment.prompts";
 import { directorAutomationLedgerEventService } from "../runtime/DirectorAutomationLedgerEventService";

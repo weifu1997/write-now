@@ -1,5 +1,5 @@
 import { BookOpen, CircleGauge, Workflow } from "lucide-react";
-import type { NovelStoryMode } from "@ai-novel/shared/types/storyMode";
+import type { NovelStoryMode } from "@write-now/shared/types/storyMode";
 import { cn } from "@/lib/utils";
 
 const conflictCeilingLabel = {

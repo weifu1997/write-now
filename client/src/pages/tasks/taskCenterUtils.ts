@@ -1,11 +1,11 @@
 ﻿import type {
   AutoDirectorAction,
-} from "@ai-novel/shared/types/autoDirectorFollowUp";
-import type { TaskKind, TaskStatus, UnifiedTaskSummary } from "@ai-novel/shared/types/task";
+} from "@write-now/shared/types/autoDirectorFollowUp";
+import type { TaskKind, TaskStatus, UnifiedTaskSummary } from "@write-now/shared/types/task";
 import type {
   NovelWorkflowMilestoneType,
   NovelWorkflowResumeTarget,
-} from "@ai-novel/shared/types/novelWorkflow";
+} from "@write-now/shared/types/novelWorkflow";
 import type { WorkspaceTone } from "@/components/workspace";
 import type { TaskQueueSeverity } from "@/components/taskQueue";
 

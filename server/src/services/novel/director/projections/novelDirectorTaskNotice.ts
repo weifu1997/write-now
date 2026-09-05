@@ -1,4 +1,4 @@
-import type { DirectorTaskNotice } from "@ai-novel/shared/types/novelDirector";
+import type { DirectorTaskNotice } from "@write-now/shared/types/novelDirector";
 
 export function buildChapterTitleDiversityTaskNotice(input: {
   issue: string;

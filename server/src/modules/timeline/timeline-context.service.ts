@@ -4,7 +4,7 @@ import type {
   TimelineConstraint,
   TimelineHook,
   TimelineStateChange,
-} from "@ai-novel/shared/types/timeline";
+} from "@write-now/shared/types/timeline";
 import { timelineRepository, type TimelineRepository } from "./timeline.repository";
 
 function eventBrief(event: StoryTimelineEvent) {

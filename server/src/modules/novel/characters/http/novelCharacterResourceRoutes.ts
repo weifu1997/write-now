@@ -2,9 +2,9 @@ import type { Router } from "express";
 import type {
   CharacterResourceLedgerResponse,
   CharacterResourceProposalSummary,
-} from "@ai-novel/shared/types/characterResource";
-import { characterResourceUpdatePayloadSchema } from "@ai-novel/shared/types/characterResource";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
+} from "@write-now/shared/types/characterResource";
+import { characterResourceUpdatePayloadSchema } from "@write-now/shared/types/characterResource";
+import type { ApiResponse } from "@write-now/shared/types/api";
 import { z } from "zod";
 import { llmProviderSchema } from "../../../../llm/providerSchema";
 import { prisma } from "../../../../db/prisma";

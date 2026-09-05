@@ -1,4 +1,4 @@
-import type { DirectorTakeoverReadinessResponse } from "@ai-novel/shared/types/novelDirector";
+import type { DirectorTakeoverReadinessResponse } from "@write-now/shared/types/novelDirector";
 import { prisma } from "../../../../db/prisma";
 import { NovelContextService } from "../../NovelContextService";
 import { StoryMacroPlanService } from "../../storyMacro/StoryMacroPlanService";

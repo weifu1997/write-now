@@ -1,6 +1,6 @@
 import { Router } from "express";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
-import type { TaskKind, TaskStatus } from "@ai-novel/shared/types/task";
+import type { ApiResponse } from "@write-now/shared/types/api";
+import type { TaskKind, TaskStatus } from "@write-now/shared/types/task";
 import { z } from "zod";
 import { llmProviderSchema } from "../llm/providerSchema";
 import { authMiddleware } from "../middleware/auth";

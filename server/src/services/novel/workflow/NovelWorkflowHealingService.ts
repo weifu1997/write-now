@@ -1,5 +1,5 @@
 import { prisma } from "../../../db/prisma";
-import { isDirectorAutoExecutionRunMode } from "@ai-novel/shared/types/novelDirector";
+import { isDirectorAutoExecutionRunMode } from "@write-now/shared/types/novelDirector";
 import { buildChapterDetailBundleLabel, buildChapterDetailBundleProgress, DIRECTOR_PROGRESS } from "../director/projections/novelDirectorProgress";
 import {
   normalizeDirectorRunMode,

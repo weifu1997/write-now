@@ -20,7 +20,7 @@ import { resolveAssetFile } from "./ComicCharacterAssetService";
 import { comicSpriteSheetService } from "./ComicSpriteSheetService";
 import { resolveSceneFile, type SceneBible } from "./ComicSceneService";
 import { IMAGE_SIZES, type ImageSize } from "../image/types";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

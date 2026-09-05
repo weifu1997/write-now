@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { BookAnalysisCharacter } from "@ai-novel/shared/types/bookAnalysisCharacter";
-import type { ImageAsset } from "@ai-novel/shared/types/image";
+import type { BookAnalysisCharacter } from "@write-now/shared/types/bookAnalysisCharacter";
+import type { ImageAsset } from "@write-now/shared/types/image";
 import {
   deleteBookAnalysisCharacterImage,
   generateBookAnalysisCharacterImage,

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { BookAnalysisSectionKey } from "@ai-novel/shared/types/bookAnalysis";
+import type { BookAnalysisSectionKey } from "@write-now/shared/types/bookAnalysis";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";

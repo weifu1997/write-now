@@ -11,7 +11,7 @@ const appDir = path.join(buildDir, "app");
 const unpackedDir = path.join(buildDir, "dist", "win-unpacked");
 const builderWindowIcon = path.join(desktopDir, "builder", "app-icon.ico");
 const appPackageJsonPath = path.join(appDir, "package.json");
-const stagedServerEntry = path.join(appDir, "node_modules", "@ai-novel", "server", "dist", "app.js");
+const stagedServerEntry = path.join(appDir, "node_modules", "@write-now", "server", "dist", "app.js");
 const stagedPrismaRuntimeEntry = path.join(appDir, "node_modules", ".prisma", "client", "default.js");
 const stagedGeneratedPrismaClientEntry = path.join(
   appDir,
@@ -23,7 +23,7 @@ const stagedGeneratedPrismaClientEntry = path.join(
   "generated-client",
   "default.js",
 );
-const stagedServerMigrationsDir = path.join(appDir, "node_modules", "@ai-novel", "server", "src", "prisma", "migrations");
+const stagedServerMigrationsDir = path.join(appDir, "node_modules", "@write-now", "server", "src", "prisma", "migrations");
 const stagedAppUpdateConfig = path.join(buildDir, "resources", "app-update.yml");
 const stagedClientIndex = path.join(buildDir, "resources", "client", "dist", "index.html");
 const unpackedClientIndex = path.join(unpackedDir, "resources", "client", "dist", "index.html");
@@ -70,7 +70,7 @@ function main() {
   assertNotExists(path.join(appDir, "src"), "desktop source directory inside staged app");
   assertNotExists(path.join(appDir, "node_modules", "electron"), "Electron runtime inside staged app node_modules");
   assertResolvesWithinDirectory(
-    path.join(appDir, "node_modules", "@ai-novel", "server"),
+    path.join(appDir, "node_modules", "@write-now", "server"),
     appDir,
     "Staged server package",
   );
@@ -81,7 +81,7 @@ function main() {
   }
 
   const runtimeSource = fs.readFileSync(stagedRuntimeFile, "utf8");
-  if (runtimeSource.includes("pnpm --filter @ai-novel/server start")) {
+  if (runtimeSource.includes("pnpm --filter @write-now/server start")) {
     throw new Error("Packaged desktop runtime still references pnpm-based server startup.");
   }
   const stagedClientIndexSource = fs.readFileSync(stagedClientIndex, "utf8");
@@ -102,12 +102,12 @@ function main() {
   );
   assertSomeMatch(
     packagedEntries,
-    /^node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?@ai-novel\/server\/dist\/app\.js$/,
+    /^node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?@write-now\/server\/dist\/app\.js$/,
     "bundled server entry inside app.asar",
   );
   assertSomeMatch(
     packagedEntries,
-    /^node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?@ai-novel\/server\/src\/prisma\/migrations\/[^/]+\/migration\.sql$/,
+    /^node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?@write-now\/server\/src\/prisma\/migrations\/[^/]+\/migration\.sql$/,
     "bundled Prisma migration files inside app.asar",
   );
   assertSomeMatch(

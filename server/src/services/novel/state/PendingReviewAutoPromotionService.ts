@@ -1,4 +1,4 @@
-import type { StateChangeProposal, StateCommitResult } from "@ai-novel/shared/types/canonicalState";
+import type { StateChangeProposal, StateCommitResult } from "@write-now/shared/types/canonicalState";
 import { prisma } from "../../../db/prisma";
 import { withSqliteRetry } from "../../../db/sqliteRetry";
 import { directorAutomationLedgerEventService } from "../director/runtime/DirectorAutomationLedgerEventService";

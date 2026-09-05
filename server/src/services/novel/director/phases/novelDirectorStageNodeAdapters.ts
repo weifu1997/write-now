@@ -1,5 +1,5 @@
-import type { DirectorArtifactRef } from "@ai-novel/shared/types/directorRuntime";
-import type { NovelWorkflowStage } from "@ai-novel/shared/types/novelWorkflow";
+import type { DirectorArtifactRef } from "@write-now/shared/types/directorRuntime";
+import type { NovelWorkflowStage } from "@write-now/shared/types/novelWorkflow";
 import { DIRECTOR_PROGRESS, type DirectorProgressItemKey } from "../projections/novelDirectorProgress";
 
 export type DirectorPlanningStage =

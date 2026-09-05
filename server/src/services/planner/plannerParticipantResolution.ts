@@ -1,4 +1,4 @@
-import type { RuntimeDynamicCharacterOverview } from "@ai-novel/shared/types/chapterRuntime";
+import type { RuntimeDynamicCharacterOverview } from "@write-now/shared/types/chapterRuntime";
 
 type PlannerCharacterSeed = {
   id: string;

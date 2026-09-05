@@ -1,5 +1,5 @@
-import type { AgentRunStatus } from "@ai-novel/shared/types/agent";
-import type { TaskStatus, UnifiedTaskDetail, UnifiedTaskStep, UnifiedTaskSummary } from "@ai-novel/shared/types/task";
+import type { AgentRunStatus } from "@write-now/shared/types/agent";
+import type { TaskStatus, UnifiedTaskDetail, UnifiedTaskStep, UnifiedTaskSummary } from "@write-now/shared/types/task";
 import { prisma } from "../../../db/prisma";
 import { agentRuntime } from "../../../agents";
 import { AppError } from "../../../middleware/errorHandler";

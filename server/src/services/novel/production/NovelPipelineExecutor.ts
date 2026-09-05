@@ -3,11 +3,11 @@ import {
   DIRECTOR_ISSUE_GOVERNANCE_VERSION,
   type DirectorIssueAction,
   type DirectorIssueCode,
-} from "@ai-novel/shared/types/directorIssue";
+} from "@write-now/shared/types/directorIssue";
 import { prisma } from "../../../db/prisma";
 import { novelEventBus } from "../../../events";
 import { runWithLlmUsageTracking } from "../../../llm/usageTracking";
-import { buildDirectorCompletionProfile } from "@ai-novel/shared/types/directorCompletion";
+import { buildDirectorCompletionProfile } from "@write-now/shared/types/directorCompletion";
 import { ChapterRouteWindowService } from "../planning/ChapterRouteWindowService";
 import { ChapterRuntimeCoordinator } from "../runtime/ChapterRuntimeCoordinator";
 import { isChapterEmptyContentError } from "../runtime/chapterEmptyContentError";

@@ -1,8 +1,8 @@
 import type {
   CanonicalStateSnapshot,
   CanonicalTimelineEventState,
-} from "@ai-novel/shared/types/canonicalState";
-import type { GenerationContextPackage } from "@ai-novel/shared/types/chapterRuntime";
+} from "@write-now/shared/types/canonicalState";
+import type { GenerationContextPackage } from "@write-now/shared/types/chapterRuntime";
 import { prisma } from "../../../db/prisma";
 import { characterResourceLedgerService } from "../characterResource/CharacterResourceLedgerService";
 

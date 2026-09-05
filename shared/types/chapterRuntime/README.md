@@ -7,4 +7,4 @@
 - `payoffSchemas.ts`：Payoff 账本运行时投影。
 - `qualitySchemas.ts`：审计、接收、样式审查和长度控制结果。
 
-外部模块应继续从 `@ai-novel/shared/types/chapterRuntime` 导入，不应依赖本目录内部文件。子模块只能持有纯 Zod Schema 和推导类型，不得引入数据库、服务单例或运行编排。
+外部模块应继续从 `@write-now/shared/types/chapterRuntime` 导入，不应依赖本目录内部文件。子模块只能持有纯 Zod Schema 和推导类型，不得引入数据库、服务单例或运行编排。

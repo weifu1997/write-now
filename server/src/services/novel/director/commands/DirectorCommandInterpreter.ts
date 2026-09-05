@@ -1,7 +1,7 @@
 import { AppError } from "../../../../middleware/errorHandler";
 import type { DirectorRunCommandRow } from "./DirectorCommandService";
 import type { DirectorCommandPayload } from "./DirectorCommandServiceHelpers";
-import type { DirectorTakeoverRequest } from "@ai-novel/shared/types/novelDirector";
+import type { DirectorTakeoverRequest } from "@write-now/shared/types/novelDirector";
 
 export type DirectorPipelineCommandIntent =
   | "generate_candidates"

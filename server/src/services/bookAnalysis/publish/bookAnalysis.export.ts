@@ -4,12 +4,12 @@ import {
   type BookAnalysisDetail,
   type BookAnalysisSection,
   type BookAnalysisTimelineNode,
-} from "@ai-novel/shared/types/bookAnalysis";
+} from "@write-now/shared/types/bookAnalysis";
 import {
   groupBookAnalysisTimelineNodesByPhase,
   normalizeBookAnalysisTimelineNode,
   normalizeBookAnalysisTimelineNodes,
-} from "@ai-novel/shared/utils/bookAnalysisTimeline";
+} from "@write-now/shared/utils/bookAnalysisTimeline";
 import { getEffectiveContent } from "../shared/bookAnalysis.utils";
 
 function sectionContentToMarkdown(section: BookAnalysisSection): string {

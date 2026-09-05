@@ -5,8 +5,8 @@ import type {
   CharacterConversationTurn,
   CharacterSubjectProjection,
   CharacterSubjectRef,
-} from "@ai-novel/shared/types/characterConversation";
-import type { CharacterDialogueInfluence } from "@ai-novel/shared/types/characterDialogue";
+} from "@write-now/shared/types/characterConversation";
+import type { CharacterDialogueInfluence } from "@write-now/shared/types/characterDialogue";
 import { prisma } from "../../db/prisma";
 import { runStructuredPrompt } from "../../prompting/core/promptRunner";
 import {

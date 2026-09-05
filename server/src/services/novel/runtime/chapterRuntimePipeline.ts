@@ -1,7 +1,7 @@
-import type { ChapterRuntimePackage, GenerationContextPackage } from "@ai-novel/shared/types/chapterRuntime";
-import type { ContentProvenance } from "@ai-novel/shared/types/canonicalState";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
-import type { QualityScore, ReviewIssue } from "@ai-novel/shared/types/novel";
+import type { ChapterRuntimePackage, GenerationContextPackage } from "@write-now/shared/types/chapterRuntime";
+import type { ContentProvenance } from "@write-now/shared/types/canonicalState";
+import type { LLMProvider } from "@write-now/shared/types/llm";
+import type { QualityScore, ReviewIssue } from "@write-now/shared/types/novel";
 import type { ChapterRuntimeRequestInput } from "./chapterRuntimeSchema";
 import { detectForbiddenStyleEntities } from "../../styleEngine/styleGenerationSanitizer";
 import {

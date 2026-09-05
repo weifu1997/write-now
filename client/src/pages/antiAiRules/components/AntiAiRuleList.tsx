@@ -1,4 +1,4 @@
-import type { AntiAiRule } from "@ai-novel/shared/types/styleEngine";
+import type { AntiAiRule } from "@write-now/shared/types/styleEngine";
 import { CheckCircle2, Edit3, FileText, FlaskConical } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

@@ -27,8 +27,8 @@ import {
   type CreativeHubGraphStateValue,
   type CreativeHubRunSettings,
 } from "./langgraphState";
-import type { CreativeHubInterrupt, CreativeHubMessage, CreativeHubResourceBinding, CreativeHubThread } from "@ai-novel/shared/types/creativeHub";
-import type { CreativeHubStreamFrame } from "@ai-novel/shared/types/api";
+import type { CreativeHubInterrupt, CreativeHubMessage, CreativeHubResourceBinding, CreativeHubThread } from "@write-now/shared/types/creativeHub";
+import type { CreativeHubStreamFrame } from "@write-now/shared/types/api";
 
 interface CreativeHubGraphInvocation {
   emitFrame: (frame: CreativeHubStreamFrame) => void;

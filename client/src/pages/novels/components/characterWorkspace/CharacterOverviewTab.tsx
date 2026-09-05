@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { Character } from "@ai-novel/shared/types/novel";
+import type { Character } from "@write-now/shared/types/novel";
 import { Activity, AlertTriangle, Box, EyeOff, HeartPulse, Target } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getEmotionSignal, getSecretStatus } from "./characterWorkspace.helpers";

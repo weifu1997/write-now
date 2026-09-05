@@ -1,5 +1,5 @@
 import type { Prisma } from "@prisma/client";
-import { DIRECTOR_ISSUE_GOVERNANCE_VERSION, directorIssuePolicySchema } from "@ai-novel/shared/types/directorIssue";
+import { DIRECTOR_ISSUE_GOVERNANCE_VERSION, directorIssuePolicySchema } from "@write-now/shared/types/directorIssue";
 import { prisma } from "../../db/prisma";
 import {
   logPipelineInfo,

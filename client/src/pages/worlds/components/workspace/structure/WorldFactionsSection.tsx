@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import type { WorldFaction, WorldForce, WorldStructuredData } from "@ai-novel/shared/types/world";
+import type { WorldFaction, WorldForce, WorldStructuredData } from "@write-now/shared/types/world";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 

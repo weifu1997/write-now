@@ -1,5 +1,5 @@
 import { del, get, set } from "idb-keyval";
-import type { LlmLiveSessionSnapshot } from "@ai-novel/shared/types/llmLive";
+import type { LlmLiveSessionSnapshot } from "@write-now/shared/types/llmLive";
 
 const MAX_CACHED_SESSIONS = 30;
 

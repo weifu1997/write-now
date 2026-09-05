@@ -1,7 +1,7 @@
 import type {
   MarketProductionFoundationCandidate,
   MarketProductionFoundationSyncState,
-} from "@ai-novel/shared/types/marketRadar";
+} from "@write-now/shared/types/marketRadar";
 
 export function resolveMarketFoundationLibraryState(
   candidate: MarketProductionFoundationCandidate | null | undefined,

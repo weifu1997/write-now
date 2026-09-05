@@ -1,4 +1,4 @@
-import type { BookAnalysisStatus } from "@ai-novel/shared/types/bookAnalysis";
+import type { BookAnalysisStatus } from "@write-now/shared/types/bookAnalysis";
 
 export function resolveLiveBookAnalysisStatus(input: {
   status: BookAnalysisStatus;

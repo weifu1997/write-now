@@ -1,13 +1,13 @@
 import { prisma } from "../../../db/prisma";
 import { withSqliteRetry } from "../../../db/sqliteRetry";
 import { getArchivedTaskIdSet, isTaskArchived } from "../../task/taskArchive";
-import type { TaskStatus } from "@ai-novel/shared/types/task";
+import type { TaskStatus } from "@write-now/shared/types/task";
 import type {
   NovelWorkflowCheckpoint,
   NovelWorkflowLane,
   NovelWorkflowResumeTarget,
   NovelWorkflowStage,
-} from "@ai-novel/shared/types/novelWorkflow";
+} from "@write-now/shared/types/novelWorkflow";
 import { NovelVolumeService } from "../volume/NovelVolumeService";
 import { AutoDirectorFollowUpNotificationService } from "../../task/autoDirectorFollowUps/AutoDirectorFollowUpNotificationService";
 import type { AutoDirectorEventWorkflowSnapshot } from "../../task/autoDirectorFollowUps/autoDirectorFollowUpEventBuilder";
@@ -21,7 +21,7 @@ import {
   stringifyResumeTarget,
   mergeSeedPayload,
 } from "./novelWorkflow.shared";
-import { getNovelWorkflowLaneDescriptor } from "@ai-novel/shared/types/novelWorkflow";
+import { getNovelWorkflowLaneDescriptor } from "@write-now/shared/types/novelWorkflow";
 import {
   defaultProgressForStage,
   mapStageToTab,

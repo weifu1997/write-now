@@ -23,7 +23,7 @@ import { NovelVolumeService } from "../volume/NovelVolumeService";
 import { NovelChapterEditorService } from "../chapterEditor/NovelChapterEditorService";
 import { ChapterEditorWorkspaceService } from "../chapterEditor/ChapterEditorWorkspaceService";
 import type { NovelApplicationServices } from "./NovelApplicationContracts";
-import type { NovelSnapshotListItem } from "@ai-novel/shared/types/novel";
+import type { NovelSnapshotListItem } from "@write-now/shared/types/novel";
 
 function toNovelSnapshotListItem(snapshot: {
   id: string;

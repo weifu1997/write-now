@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { generatedChapterSceneCardSchema } from "@ai-novel/shared/types/chapterLengthControl";
-import { generatedReaderExperienceContractSchema } from "@ai-novel/shared/types/novel/readerExperience";
+import { generatedChapterSceneCardSchema } from "@write-now/shared/types/chapterLengthControl";
+import { generatedReaderExperienceContractSchema } from "@write-now/shared/types/novel/readerExperience";
 
 const conciseRequiredText = z.string().trim().min(1).max(240);
 const conciseTextList = z.array(z.string().trim().min(1).max(160)).max(8).default([]);

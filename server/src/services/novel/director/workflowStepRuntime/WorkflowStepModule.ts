@@ -5,12 +5,12 @@ import type {
   DirectorStepCompletionEvidence,
   DirectorStepFactInspection,
   DirectorPolicyMode,
-} from "@ai-novel/shared/types/directorRuntime";
+} from "@write-now/shared/types/directorRuntime";
 import {
   findWorkflowStepCatalogEntryById,
   type WorkflowStepCatalogEntry,
-} from "@ai-novel/shared/types/directorWorkflowStepCatalog";
-import type { NovelWorkflowStage } from "@ai-novel/shared/types/novelWorkflow";
+} from "@write-now/shared/types/directorWorkflowStepCatalog";
+import type { NovelWorkflowStage } from "@write-now/shared/types/novelWorkflow";
 import type {
   PromptAsset,
   PromptContextRequirement,

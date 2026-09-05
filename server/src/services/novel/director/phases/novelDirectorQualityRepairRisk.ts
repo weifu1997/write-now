@@ -1,4 +1,4 @@
-import type { DirectorQualityRepairRisk } from "@ai-novel/shared/types/novelDirector";
+import type { DirectorQualityRepairRisk } from "@write-now/shared/types/novelDirector";
 import {
   PIPELINE_QUALITY_NOTICE_CODE,
   PIPELINE_REPLAN_NOTICE_CODE,

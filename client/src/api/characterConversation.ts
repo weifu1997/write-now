@@ -1,11 +1,11 @@
-import type { ApiResponse } from "@ai-novel/shared/types/api";
+import type { ApiResponse } from "@write-now/shared/types/api";
 import type {
   CharacterConversationContext,
   CharacterConversationSession,
   CharacterConversationTurn,
   CharacterSubjectRef,
-} from "@ai-novel/shared/types/characterConversation";
-import type { CharacterDialogueInfluence } from "@ai-novel/shared/types/characterDialogue";
+} from "@write-now/shared/types/characterConversation";
+import type { CharacterDialogueInfluence } from "@write-now/shared/types/characterDialogue";
 import { apiClient } from "./client";
 
 export type CharacterConversationSessionView = CharacterConversationSession & {

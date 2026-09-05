@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { buildStyleIntentSummary } from "@ai-novel/shared/types/styleEngine";
-import type { UnifiedTaskDetail } from "@ai-novel/shared/types/task";
-import type { DirectorIssuePolicy } from "@ai-novel/shared/types/directorIssue";
+import { buildStyleIntentSummary } from "@write-now/shared/types/styleEngine";
+import type { UnifiedTaskDetail } from "@write-now/shared/types/task";
+import type { DirectorIssuePolicy } from "@write-now/shared/types/directorIssue";
 import {
   DIRECTOR_RUN_MODES,
   buildFullBookAutopilotExecutionPlan,
@@ -17,7 +17,7 @@ import {
   type DirectorIdeaInspiration,
   type DirectorRunMode,
   type DirectorWorldSetupMode,
-} from "@ai-novel/shared/types/novelDirector";
+} from "@write-now/shared/types/novelDirector";
 import { bootstrapNovelWorkflow, continueNovelWorkflow } from "@/api/novelWorkflow";
 import {
   composeDirectorIdeaConstellation,

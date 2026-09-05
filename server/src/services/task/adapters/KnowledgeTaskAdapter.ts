@@ -1,4 +1,4 @@
-import type { TaskStatus, UnifiedTaskDetail, UnifiedTaskSummary } from "@ai-novel/shared/types/task";
+import type { TaskStatus, UnifiedTaskDetail, UnifiedTaskSummary } from "@write-now/shared/types/task";
 import { prisma } from "../../../db/prisma";
 import { AppError } from "../../../middleware/errorHandler";
 import { ragServices } from "../../rag";

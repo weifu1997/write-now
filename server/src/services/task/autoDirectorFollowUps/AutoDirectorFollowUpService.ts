@@ -5,10 +5,10 @@ import type {
   AutoDirectorFollowUpListInput,
   AutoDirectorFollowUpListResponse,
   AutoDirectorFollowUpOverview,
-} from "@ai-novel/shared/types/autoDirectorFollowUp";
+} from "@write-now/shared/types/autoDirectorFollowUp";
 import {
   AUTO_DIRECTOR_CHANNEL_TYPES,
-} from "@ai-novel/shared/types/autoDirectorFollowUp";
+} from "@write-now/shared/types/autoDirectorFollowUp";
 import { prisma } from "../../../db/prisma";
 import { NovelWorkflowService } from "../../novel/workflow/NovelWorkflowService";
 import { NovelWorkflowTaskAdapter } from "../adapters/NovelWorkflowTaskAdapter";

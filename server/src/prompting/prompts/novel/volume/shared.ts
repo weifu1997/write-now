@@ -4,9 +4,9 @@ import type {
   VolumeCountGuidance,
   VolumePlan,
   VolumeStrategyPlan,
-} from "@ai-novel/shared/types/novel";
-import { parseChapterScenePlan } from "@ai-novel/shared/types/chapterLengthControl";
-import type { StoryMacroPlan } from "@ai-novel/shared/types/storyMacro";
+} from "@write-now/shared/types/novel";
+import { parseChapterScenePlan } from "@write-now/shared/types/chapterLengthControl";
+import type { StoryMacroPlan } from "@write-now/shared/types/storyMacro";
 import type {
   ChapterDetailMode,
   VolumeGenerationNovel,

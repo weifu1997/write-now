@@ -5,14 +5,14 @@ import type {
   ReplanResult,
   StoryPlan,
   StoryStateSnapshot,
-} from "@ai-novel/shared/types/novel";
-import type { SSEFrame } from "@ai-novel/shared/types/api";
-import type { ChapterRuntimePackage } from "@ai-novel/shared/types/chapterRuntime";
+} from "@write-now/shared/types/novel";
+import type { SSEFrame } from "@write-now/shared/types/api";
+import type { ChapterRuntimePackage } from "@write-now/shared/types/chapterRuntime";
 import {
   readChapterQualityDebtDetails,
   type ChapterQualityDebtDetails,
   type ChapterQualityDebtSource,
-} from "@ai-novel/shared/types/chapterQualityLoop";
+} from "@write-now/shared/types/chapterQualityLoop";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

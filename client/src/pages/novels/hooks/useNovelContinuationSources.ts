@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import type { BookAnalysis } from "@ai-novel/shared/types/bookAnalysis";
+import type { BookAnalysis } from "@write-now/shared/types/bookAnalysis";
 import { listBookAnalyses } from "@/api/bookAnalysis";
 import { getNovelList } from "@/api/novel";
 import { getNovelKnowledgeDocuments, listKnowledgeDocuments } from "@/api/knowledge";

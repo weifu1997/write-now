@@ -1,11 +1,11 @@
-import type { ApiResponse } from "@ai-novel/shared/types/api";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { ApiResponse } from "@write-now/shared/types/api";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import type {
   TitleFactoryMode,
   TitleFactorySuggestion,
   TitleLibraryEntry,
   TitleLibraryListResult,
-} from "@ai-novel/shared/types/title";
+} from "@write-now/shared/types/title";
 import { apiClient } from "./client";
 
 export interface TitleLibraryListParams {

@@ -1,7 +1,7 @@
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { toJSONSchema, type ZodError, type ZodType } from "zod";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
-import type { ModelRouteRequestProtocol } from "@ai-novel/shared/types/novel";
+import type { LLMProvider } from "@write-now/shared/types/llm";
+import type { ModelRouteRequestProtocol } from "@write-now/shared/types/novel";
 import { getLLM } from "./factory";
 import { runWithEnforcedTimeout } from "./invokeTimeout";
 import { logStructuredRepairSession } from "./repairLogging";

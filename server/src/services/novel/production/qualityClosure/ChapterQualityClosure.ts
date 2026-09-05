@@ -5,8 +5,8 @@ import { chapterQualityLoopService } from "../../quality/ChapterQualityLoopServi
 import type { ChapterRuntimeCoordinator } from "../../runtime/ChapterRuntimeCoordinator";
 import type { DirectorIssueTaskContext } from "../../director/issues";
 import { reportPipelineIssue } from "../issueGovernance/PipelineIssueGovernance";
-import type { ReplanResult } from "@ai-novel/shared/types/novel";
-import type { DirectorIssueDecision } from "@ai-novel/shared/types/directorIssue";
+import type { ReplanResult } from "@write-now/shared/types/novel";
+import type { DirectorIssueDecision } from "@write-now/shared/types/directorIssue";
 
 type ChapterPipelineResult = Awaited<ReturnType<ChapterRuntimeCoordinator["runPipelineChapter"]>>;
 type ChapterQualityStopAction = Extract<DirectorIssueDecision["action"], "pause_for_manual" | "fail_task">;

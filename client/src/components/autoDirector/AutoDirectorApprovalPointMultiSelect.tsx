@@ -4,7 +4,7 @@ import {
   normalizeDirectorAutoApprovalPointCodes,
   type DirectorAutoApprovalGroup,
   type DirectorAutoApprovalPoint,
-} from "@ai-novel/shared/types/autoDirectorApproval";
+} from "@write-now/shared/types/autoDirectorApproval";
 import { Badge } from "@/components/ui/badge";
 import { AUTO_DIRECTOR_MOBILE_CLASSES } from "@/mobile/autoDirector";
 

@@ -4,9 +4,9 @@ import type {
   AutoDirectorBatchActionExecutionResult,
   AutoDirectorBatchActionRequest,
   AutoDirectorMutationActionCode,
-} from "@ai-novel/shared/types/autoDirectorFollowUp";
-import type { AutoDirectorFollowUpSection } from "@ai-novel/shared/types/autoDirectorValidation";
-import type { NovelWorkflowCheckpoint } from "@ai-novel/shared/types/novelWorkflow";
+} from "@write-now/shared/types/autoDirectorFollowUp";
+import type { AutoDirectorFollowUpSection } from "@write-now/shared/types/autoDirectorValidation";
+import type { NovelWorkflowCheckpoint } from "@write-now/shared/types/novelWorkflow";
 import { prisma } from "../../../db/prisma";
 import { AppError } from "../../../middleware/errorHandler";
 import { resolveModel, type TaskType } from "../../../llm/modelRouter";

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { VolumeCountRange } from "@ai-novel/shared/types/novel";
+import type { VolumeCountRange } from "@write-now/shared/types/novel";
 import {
   getVolumeBeatSlot,
   getVolumeBeatRoleLabel,
@@ -9,8 +9,8 @@ import {
   VOLUME_BEAT_OPTIONAL_SLOT_KEYS,
   VOLUME_BEAT_REQUIRED_SLOT_KEYS,
   VOLUME_BEAT_SLOT_DEFINITIONS,
-} from "@ai-novel/shared/types/volumeBeatSlots";
-import { MAX_VOLUME_COUNT } from "@ai-novel/shared/types/volumePlanning";
+} from "@write-now/shared/types/volumeBeatSlots";
+import { MAX_VOLUME_COUNT } from "@write-now/shared/types/volumePlanning";
 
 function normalizeObjectAlias(raw: unknown, aliasMap: Record<string, string[]>): unknown {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) {

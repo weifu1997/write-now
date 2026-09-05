@@ -1,4 +1,4 @@
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { PROVIDERS } from "../../llm/providers";
 
 export type ProviderBalanceStatusKind = "available" | "missing_api_key" | "unsupported" | "error";

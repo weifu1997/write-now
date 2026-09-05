@@ -2,9 +2,9 @@ import type {
   FirstNovelMilestone,
   FirstNovelMilestoneKey,
   FirstNovelOnboardingProjection,
-} from "@ai-novel/shared/types/onboarding";
-import type { NovelWorkflowCheckpoint } from "@ai-novel/shared/types/novelWorkflow";
-import type { TaskStatus } from "@ai-novel/shared/types/task";
+} from "@write-now/shared/types/onboarding";
+import type { NovelWorkflowCheckpoint } from "@write-now/shared/types/novelWorkflow";
+import type { TaskStatus } from "@write-now/shared/types/task";
 import { prisma } from "../../../../db/prisma";
 import { getQuickSetupStatus } from "./QuickSetupService";
 

@@ -3,9 +3,9 @@ import type {
   DirectorArtifactType,
   DirectorEvent,
   DirectorEventType,
-} from "@ai-novel/shared/types/directorRuntime";
-import type { ChapterQualityLoopAssessment } from "@ai-novel/shared/types/chapterQualityLoop";
-import type { DirectorCircuitBreakerState } from "@ai-novel/shared/types/novelDirector";
+} from "@write-now/shared/types/directorRuntime";
+import type { ChapterQualityLoopAssessment } from "@write-now/shared/types/chapterQualityLoop";
+import type { DirectorCircuitBreakerState } from "@write-now/shared/types/novelDirector";
 import { prisma } from "../../../../db/prisma";
 import { withSqliteRetry } from "../../../../db/sqliteRetry";
 

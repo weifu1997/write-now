@@ -1,5 +1,5 @@
 import type { BaseMessageChunk } from "@langchain/core/messages";
-import { REASONING_EFFORTS, type LLMProvider, type ReasoningEffort } from "@ai-novel/shared/types/llm";
+import { REASONING_EFFORTS, type LLMProvider, type ReasoningEffort } from "@write-now/shared/types/llm";
 import { isBuiltInProvider } from "./providers";
 
 const THINK_OPEN_TAG = "<think>";

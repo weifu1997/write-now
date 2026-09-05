@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { NovelStoryMode, StoryModeConflictCeiling, StoryModeProfile } from "@ai-novel/shared/types/storyMode";
+import type { NovelStoryMode, StoryModeConflictCeiling, StoryModeProfile } from "@write-now/shared/types/storyMode";
 
 export const storyModeConflictCeilingSchema = z.enum(["low", "medium", "high"]);
 

@@ -89,7 +89,7 @@ function createTempDatabase(prefix) {
   const tempDir = fs.mkdtempSync(path.join(tempRoot, `${prefix}-`));
   const databasePath = path.join(tempDir, `${prefix}.db`);
   const databaseUrl = `file:${databasePath.replace(/\\/g, "/")}`;
-  childProcess.execFileSync(pnpmExecutable(), ["--filter", "@ai-novel/server", "prisma:push"], {
+  childProcess.execFileSync(pnpmExecutable(), ["--filter", "@write-now/server", "prisma:push"], {
     cwd: repoRoot,
     env: {
       ...process.env,

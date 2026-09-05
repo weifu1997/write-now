@@ -1,6 +1,6 @@
 import type { QueryClient } from "@tanstack/react-query";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
-import type { UnifiedTaskDetail } from "@ai-novel/shared/types/task";
+import type { ApiResponse } from "@write-now/shared/types/api";
+import type { UnifiedTaskDetail } from "@write-now/shared/types/task";
 import { queryKeys } from "@/api/queryKeys";
 
 const ACTIVE_AUTO_DIRECTOR_STATUSES = new Set(["queued", "running", "waiting_approval"]);

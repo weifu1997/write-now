@@ -3,10 +3,10 @@ import type {
   BookAnalysisCharacter,
   BookAnalysisCharacterDimension,
   BookAnalysisCharacterGenerationDepth,
-} from "@ai-novel/shared/types/bookAnalysisCharacter";
-import { BOOK_ANALYSIS_CHARACTER_DIMENSION_LABELS } from "@ai-novel/shared/types/bookAnalysisCharacter";
-import { CHARACTER_PROFILE_FIELD_LABELS } from "@ai-novel/shared/types/characterProfile";
-import type { CharacterProfile } from "@ai-novel/shared/types/characterProfile";
+} from "@write-now/shared/types/bookAnalysisCharacter";
+import { BOOK_ANALYSIS_CHARACTER_DIMENSION_LABELS } from "@write-now/shared/types/bookAnalysisCharacter";
+import { CHARACTER_PROFILE_FIELD_LABELS } from "@write-now/shared/types/characterProfile";
+import type { CharacterProfile } from "@write-now/shared/types/characterProfile";
 import { MessageCircle, Pencil, Sparkles, Trash2, UserRound } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

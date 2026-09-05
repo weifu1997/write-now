@@ -2,7 +2,7 @@ import type {
   ResolvedStyleContext,
   StyleProfile,
   StyleSanitizedGenerationProfile,
-} from "@ai-novel/shared/types/styleEngine";
+} from "@write-now/shared/types/styleEngine";
 import { buildWriterStyleContractText } from "./styleContractText";
 
 type StyleProfileLike = Partial<StyleProfile> & {

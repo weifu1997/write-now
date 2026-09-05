@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import type { CreativeHubProductionStatus } from "@ai-novel/shared/types/creativeHub";
+import type { CreativeHubProductionStatus } from "@write-now/shared/types/creativeHub";
 import { RefreshCw } from "lucide-react";
 import { getNovelDetail, updateNovel } from "@/api/novel";
 import { queryKeys } from "@/api/queryKeys";

@@ -1,5 +1,5 @@
 import type { RequestHandler } from "express";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
+import type { ApiResponse } from "@write-now/shared/types/api";
 import { z } from "zod";
 import { featureFlags } from "../../../../config/featureFlags";
 import { llmProviderSchema } from "../../../../llm/providerSchema";

@@ -1,7 +1,7 @@
 import {
   type BookFramingSuggestion,
   type BookFramingSuggestionInput,
-} from "@ai-novel/shared/types/novelFraming";
+} from "@write-now/shared/types/novelFraming";
 import { runStructuredPrompt } from "../../prompting/core/promptRunner";
 import { novelFramingSuggestionPrompt } from "../../prompting/prompts/novel/framing.prompts";
 

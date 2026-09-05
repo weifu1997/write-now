@@ -1,4 +1,4 @@
-import type { DirectorAutoExecutionState } from "@ai-novel/shared/types/novelDirector";
+import type { DirectorAutoExecutionState } from "@write-now/shared/types/novelDirector";
 import type { DirectorAutoExecutionRange } from "./novelDirectorAutoExecution";
 
 export function isNoChaptersToGenerateError(error: unknown): boolean {

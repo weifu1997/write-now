@@ -1,7 +1,7 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import type { ChatOpenAI } from "@langchain/openai";
 import { prisma } from "../db/prisma";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 
 export interface LlmTokenUsageSnapshot {
   promptTokens: number;

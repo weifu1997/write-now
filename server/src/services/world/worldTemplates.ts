@@ -1,4 +1,4 @@
-import type { WorldLayerKey, WorldTemplate } from "@ai-novel/shared/types/world";
+import type { WorldLayerKey, WorldTemplate } from "@write-now/shared/types/world";
 
 export const WORLD_LAYER_ORDER: WorldLayerKey[] = [
   "foundation",

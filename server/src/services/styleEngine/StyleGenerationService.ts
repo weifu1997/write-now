@@ -1,5 +1,5 @@
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
-import type { CompiledStylePromptBlocks } from "@ai-novel/shared/types/styleEngine";
+import type { LLMProvider } from "@write-now/shared/types/llm";
+import type { CompiledStylePromptBlocks } from "@write-now/shared/types/styleEngine";
 import { runTextPrompt } from "../../prompting/core/promptRunner";
 import { styleGenerationPrompt } from "../../prompting/prompts/style/style.prompts";
 import { StyleRuntimeResolver } from "./StyleRuntimeResolver";

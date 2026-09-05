@@ -3,7 +3,7 @@ import {
   isBuiltinLLMProvider,
   type BuiltinLLMProvider,
   type LLMProvider,
-} from "@ai-novel/shared/types/llm";
+} from "@write-now/shared/types/llm";
 
 export interface ProviderConfig {
   name: string;

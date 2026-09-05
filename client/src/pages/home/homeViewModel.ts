@@ -1,4 +1,4 @@
-import type { TaskOverviewSummary } from "@ai-novel/shared/types/task";
+import type { TaskOverviewSummary } from "@write-now/shared/types/task";
 import type { NovelListResponse } from "@/api/novel/shared";
 import {
   canContinueChapterBatchAutoExecution,

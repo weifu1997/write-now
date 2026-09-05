@@ -1,7 +1,7 @@
 import type {
   BookAnalysis,
   BookAnalysisStatus,
-} from "@ai-novel/shared/types/bookAnalysis";
+} from "@write-now/shared/types/bookAnalysis";
 import { Loader2, Plus, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";

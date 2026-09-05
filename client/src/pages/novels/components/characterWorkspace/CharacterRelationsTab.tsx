@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import type { Character } from "@ai-novel/shared/types/novel";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { Character } from "@write-now/shared/types/novel";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { getCharacterRelations } from "@/api/novel";
 import { getCharacterDynamicsOverview } from "@/api/novelCharacterDynamics";
 import { queryKeys } from "@/api/queryKeys";

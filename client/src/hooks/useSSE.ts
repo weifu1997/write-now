@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { SSEFrame } from "@ai-novel/shared/types/api";
-import type { ChapterRuntimePackage } from "@ai-novel/shared/types/chapterRuntime";
+import type { SSEFrame } from "@write-now/shared/types/api";
+import type { ChapterRuntimePackage } from "@write-now/shared/types/chapterRuntime";
 import { API_BASE_URL } from "@/lib/constants";
 
 interface UseSSEOptions {

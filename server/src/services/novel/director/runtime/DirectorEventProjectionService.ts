@@ -12,17 +12,17 @@ import type {
   DirectorRuntimeVisibleRiskBadge,
   DirectorStepRun,
   DirectorWorkspaceInventory,
-} from "@ai-novel/shared/types/directorRuntime";
+} from "@write-now/shared/types/directorRuntime";
 import type {
   DirectorQualityLoopBudgetEntry,
   DirectorQualityLoopBudgetNextAction,
-} from "@ai-novel/shared/types/novelDirector";
-import { classifyChapterQualityLoopRisk } from "@ai-novel/shared/types/chapterQualityLoop";
+} from "@write-now/shared/types/novelDirector";
+import { classifyChapterQualityLoopRisk } from "@write-now/shared/types/chapterQualityLoop";
 import { resolveDirectorQualityLoopBudgetNextAction } from "./DirectorQualityLoopBudgetLedgerService";
 import {
   directorIssueOccurrenceSchema,
   directorIssueDecisionSchema,
-} from "@ai-novel/shared/types/directorIssue";
+} from "@write-now/shared/types/directorIssue";
 
 export function parseDirectorIssueEventMetadata(metadata: Record<string, unknown> | null | undefined) {
   const occurrence = directorIssueOccurrenceSchema.safeParse(metadata?.occurrence);

@@ -1,7 +1,7 @@
 import { Router } from "express";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
-import type { AgentRunDetail, ReplayRequest } from "@ai-novel/shared/types/agent";
-import type { TaskStatus } from "@ai-novel/shared/types/task";
+import type { ApiResponse } from "@write-now/shared/types/api";
+import type { AgentRunDetail, ReplayRequest } from "@write-now/shared/types/agent";
+import type { TaskStatus } from "@write-now/shared/types/task";
 import { z } from "zod";
 import { agentRuntime } from "../agents";
 import { authMiddleware } from "../middleware/auth";

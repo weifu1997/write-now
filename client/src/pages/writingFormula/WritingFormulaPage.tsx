@@ -4,7 +4,7 @@ import type {
   StyleBinding,
   StyleProfile,
   StyleProfileFeature,
-} from "@ai-novel/shared/types/styleEngine";
+} from "@write-now/shared/types/styleEngine";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import OpenInCreativeHubButton from "@/components/creativeHub/OpenInCreativeHubButton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";

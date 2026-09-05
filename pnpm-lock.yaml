@@ -18,7 +18,7 @@ importers:
 
   client:
     dependencies:
-      '@ai-novel/shared':
+      '@write-now/shared':
         specifier: workspace:*
         version: link:../shared
       '@assistant-ui/react':
@@ -196,7 +196,7 @@ importers:
 
   desktop:
     dependencies:
-      '@ai-novel/server':
+      '@write-now/server':
         specifier: workspace:*
         version: link:../server
       better-sqlite3:
@@ -221,7 +221,7 @@ importers:
 
   server:
     dependencies:
-      '@ai-novel/shared':
+      '@write-now/shared':
         specifier: workspace:*
         version: link:../shared
       '@aws-sdk/client-s3':

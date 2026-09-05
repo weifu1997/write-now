@@ -1,4 +1,4 @@
-import type { StyleBinding } from "@ai-novel/shared/types/styleEngine";
+import type { StyleBinding } from "@write-now/shared/types/styleEngine";
 import { BookOpenText, FlaskConical, Link2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

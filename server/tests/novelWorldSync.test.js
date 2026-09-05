@@ -101,7 +101,7 @@ test("buildSyncDiffItems includes readable section previews", () => {
 });
 
 test("novel world sync input accepts close sync direction", async () => {
-  const { novelWorldSyncInputSchema } = await import("@ai-novel/shared/types/novelWorld");
+  const { novelWorldSyncInputSchema } = await import("@write-now/shared/types/novelWorld");
   assert.deepEqual(novelWorldSyncInputSchema.parse({ direction: "none" }), {
     direction: "none",
   });

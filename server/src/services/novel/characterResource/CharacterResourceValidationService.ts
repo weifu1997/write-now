@@ -1,9 +1,9 @@
 import type {
   CharacterResourceEventType,
   CharacterResourceUpdatePayload,
-} from "@ai-novel/shared/types/characterResource";
-import type { StateChangeProposal } from "@ai-novel/shared/types/canonicalState";
-import { characterResourceUpdatePayloadSchema } from "@ai-novel/shared/types/characterResource";
+} from "@write-now/shared/types/characterResource";
+import type { StateChangeProposal } from "@write-now/shared/types/canonicalState";
+import { characterResourceUpdatePayloadSchema } from "@write-now/shared/types/characterResource";
 import { compactText } from "./characterResourceShared";
 import {
   isDebtSourceProposal,

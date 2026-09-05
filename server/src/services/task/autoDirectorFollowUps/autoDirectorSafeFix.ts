@@ -2,7 +2,7 @@ import type {
   AutoDirectorValidationRequiredAction,
   AutoDirectorValidationRequiredActionCode,
   AutoDirectorValidationResult,
-} from "@ai-novel/shared/types/autoDirectorValidation";
+} from "@write-now/shared/types/autoDirectorValidation";
 import { prisma } from "../../../db/prisma";
 
 const SAFE_FIX_ACTION_CODES = new Set<AutoDirectorValidationRequiredActionCode>([

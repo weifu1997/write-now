@@ -4,7 +4,7 @@ import type {
   Chapter,
   VolumeChapterPlan,
   VolumePlan,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 export {
   hasPayoffLedgerRelevantPlanChanges,
   hasPayoffLedgerSourceSignals,

@@ -1,6 +1,6 @@
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
-import type { BookAnalysisSectionKey } from "@ai-novel/shared/types/bookAnalysis";
-import { BOOK_ANALYSIS_STRUCTURED_FIELD_LABELS } from "@ai-novel/shared/types/bookAnalysis";
+import type { LLMProvider } from "@write-now/shared/types/llm";
+import type { BookAnalysisSectionKey } from "@write-now/shared/types/bookAnalysis";
+import { BOOK_ANALYSIS_STRUCTURED_FIELD_LABELS } from "@write-now/shared/types/bookAnalysis";
 import { prisma } from "../../db/prisma";
 import { runTextPrompt } from "../../prompting/core/promptRunner";
 import { novelContinuationRewritePrompt } from "../../prompting/prompts/novel/continuation.prompts";

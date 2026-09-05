@@ -1,4 +1,4 @@
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import type {
   StoryDecomposition,
   StoryExpansion,
@@ -8,7 +8,7 @@ import type {
   StoryMacroLocks,
   StoryMacroPlan,
   StoryMacroState,
-} from "@ai-novel/shared/types/storyMacro";
+} from "@write-now/shared/types/storyMacro";
 import { prisma } from "../../../db/prisma";
 import { runStructuredPrompt } from "../../../prompting/core/promptRunner";
 import {

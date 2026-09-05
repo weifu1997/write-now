@@ -1,6 +1,6 @@
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
-import type { ChapterTaskSheetQualityMode } from "@ai-novel/shared/types/chapterTaskSheetQuality";
-import type { DirectorCompletionProfile } from "@ai-novel/shared/types/directorCompletion";
+import type { LLMProvider } from "@write-now/shared/types/llm";
+import type { ChapterTaskSheetQualityMode } from "@write-now/shared/types/chapterTaskSheetQuality";
+import type { DirectorCompletionProfile } from "@write-now/shared/types/directorCompletion";
 import type {
   VolumeChapterListGenerationMode,
   VolumeBeatSheet,
@@ -15,7 +15,7 @@ import type {
   VolumeStrategyPlan,
   VolumePlanVersion,
   VolumePlanVersionSummary,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "../../../db/prisma";
 

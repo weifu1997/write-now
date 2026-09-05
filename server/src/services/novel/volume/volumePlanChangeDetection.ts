@@ -9,7 +9,7 @@ import type {
   VolumePlanDiffVolume,
   VolumeSyncPreview,
   VolumeSyncPreviewItem,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 
 export interface ExistingChapterRecord {
   id: string;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { ChapterEditorOperation } from "@ai-novel/shared/types/novel";
+import type { ChapterEditorOperation } from "@write-now/shared/types/novel";
 import { Button } from "@/components/ui/button";
 import type { SelectionToolbarPosition } from "./chapterEditorTypes";
 import { CHAPTER_EDITOR_OPERATION_LABELS } from "./chapterEditorUtils";

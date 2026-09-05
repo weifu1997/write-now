@@ -1,4 +1,4 @@
-import type { NovelWorldManualInput } from "@ai-novel/shared/types/novelWorld";
+import type { NovelWorldManualInput } from "@write-now/shared/types/novelWorld";
 import { prisma } from "../../../db/prisma";
 import {
   applyStructuredWorldToLegacyFields,

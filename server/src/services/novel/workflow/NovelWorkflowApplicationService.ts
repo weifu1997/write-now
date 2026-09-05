@@ -1,6 +1,6 @@
 import { prisma } from "../../../db/prisma";
 import { AppError } from "../../../middleware/errorHandler";
-import type { NovelWorkflowCheckpoint, NovelWorkflowStage } from "@ai-novel/shared/types/novelWorkflow";
+import type { NovelWorkflowCheckpoint, NovelWorkflowStage } from "@write-now/shared/types/novelWorkflow";
 import { buildNovelCreateResumeTarget, appendMilestone, defaultWorkflowTitle, mergeSeedPayload, parseMilestones, parseResumeTarget, parseSeedPayload, stringifyResumeTarget } from "./novelWorkflow.shared";
 import {
   BootstrapWorkflowInput,
@@ -14,7 +14,7 @@ import {
 } from "./novelWorkflow.helpers";
 import { buildRestoreTaskToCheckpointResult } from "./novelWorkflowCheckpoint";
 import { applyDirectorLlmOverride, type DirectorWorkflowSeedPayload } from "../director/runtime/novelDirectorHelpers";
-import type { DirectorLLMOptions } from "@ai-novel/shared/types/novelDirector";
+import type { DirectorLLMOptions } from "@write-now/shared/types/novelDirector";
 import { NovelWorkflowStoreService } from "./NovelWorkflowStoreService";
 
 type WorkflowRow = Awaited<ReturnType<typeof prisma.novelWorkflowTask.findUnique>>;

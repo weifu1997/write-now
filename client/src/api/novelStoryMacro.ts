@@ -1,5 +1,5 @@
-import type { ApiResponse } from "@ai-novel/shared/types/api";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { ApiResponse } from "@write-now/shared/types/api";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import type {
   StoryDecomposition,
   StoryExpansion,
@@ -7,7 +7,7 @@ import type {
   StoryMacroLocks,
   StoryMacroPlan,
   StoryMacroState,
-} from "@ai-novel/shared/types/storyMacro";
+} from "@write-now/shared/types/storyMacro";
 import { apiClient } from "./client";
 
 interface LLMPayload {

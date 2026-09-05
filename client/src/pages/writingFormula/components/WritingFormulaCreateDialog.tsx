@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { BookOpenText, MessageCircleMore, Sparkles, WandSparkles } from "lucide-react";
-import type { BookAnalysis } from "@ai-novel/shared/types/bookAnalysis";
-import type { KnowledgeDocumentDetail, KnowledgeDocumentSummary } from "@ai-novel/shared/types/knowledge";
-import type { StyleExtractionSourceProcessingMode, StyleTemplate } from "@ai-novel/shared/types/styleEngine";
-import type { UnifiedTaskDetail } from "@ai-novel/shared/types/task";
+import type { BookAnalysis } from "@write-now/shared/types/bookAnalysis";
+import type { KnowledgeDocumentDetail, KnowledgeDocumentSummary } from "@write-now/shared/types/knowledge";
+import type { StyleExtractionSourceProcessingMode, StyleTemplate } from "@write-now/shared/types/styleEngine";
+import type { UnifiedTaskDetail } from "@write-now/shared/types/task";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {

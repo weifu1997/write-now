@@ -1,4 +1,4 @@
-import type { DirectorIssueCode, DirectorIssueDecision } from "@ai-novel/shared/types/directorIssue";
+import type { DirectorIssueCode, DirectorIssueDecision } from "@write-now/shared/types/directorIssue";
 import type { PipelinePayload } from "../../novelCoreShared";
 import { logPipelineWarn } from "../../novelCoreShared";
 import {

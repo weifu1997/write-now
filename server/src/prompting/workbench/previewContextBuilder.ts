@@ -13,9 +13,9 @@ import {
   parseWritingPlatformSnapshot,
   shortStoryProductionFoundationText,
 } from "../../modules/novel/short-story/application/shortStoryPromptContext";
-import type { CreationIntentInterpretation, ShortStoryPlanContract } from "@ai-novel/shared/types/creationStudio";
+import type { CreationIntentInterpretation, ShortStoryPlanContract } from "@write-now/shared/types/creationStudio";
 import { createContextBlock } from "../core/contextBudget";
-import type { WritingPlatformSnapshot } from "@ai-novel/shared/types/writingPlatform";
+import type { WritingPlatformSnapshot } from "@write-now/shared/types/writingPlatform";
 
 type UnknownPromptAsset = PromptAsset<unknown, unknown, unknown>;
 export type PromptWorkbenchPreviewDb = Pick<PrismaClient, "novel" | "chapter">;

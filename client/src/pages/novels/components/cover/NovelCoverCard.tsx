@@ -4,7 +4,7 @@ import { listImageAssets, resolveImageAssetUrl } from "@/api/images";
 import { queryKeys } from "@/api/queryKeys";
 import { Button } from "@/components/ui/button";
 import type { NovelBasicFormState } from "../../novelBasicInfo.shared";
-import type { StoryWorldSliceView } from "@ai-novel/shared/types/storyWorldSlice";
+import type { StoryWorldSliceView } from "@write-now/shared/types/storyWorldSlice";
 import { NovelCoverDialog } from "./NovelCoverDialog";
 
 interface GenreOption {

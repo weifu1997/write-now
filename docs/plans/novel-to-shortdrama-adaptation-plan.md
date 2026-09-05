@@ -392,7 +392,7 @@ UI copy 必须从用户视角说明下一步能得到什么，不写实现迁移
 
 完成标准：
 
-- `pnpm --filter @ai-novel/server typecheck` 通过。
+- `pnpm --filter @write-now/server typecheck` 通过。
 - `node --test server/tests/dramaDecoupling.test.js` 通过。
 - migrations 能创建 `Drama*` 表。
 - Prompt Workbench 能列出短剧策略和分集大纲 prompt。

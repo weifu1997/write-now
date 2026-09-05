@@ -1,15 +1,15 @@
-import type { ApiResponse } from "@ai-novel/shared/types/api";
+import type { ApiResponse } from "@write-now/shared/types/api";
 import type {
   CharacterCandidate,
   CharacterRelationStage,
   DynamicCharacterOverview,
-} from "@ai-novel/shared/types/characterDynamics";
-import type { CharacterMindSnapshot } from "@ai-novel/shared/types/characterMind";
+} from "@write-now/shared/types/characterDynamics";
+import type { CharacterMindSnapshot } from "@write-now/shared/types/characterMind";
 import type {
   CharacterDialogueInfluence,
   CharacterDialogueSession,
   CharacterDialogueTurnResult,
-} from "@ai-novel/shared/types/characterDialogue";
+} from "@write-now/shared/types/characterDialogue";
 import { apiClient } from "./client";
 
 export async function getCharacterDynamicsOverview(id: string, chapterOrder?: number) {

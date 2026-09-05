@@ -5,7 +5,7 @@ import type {
   StoryExpansion,
   StoryMacroField,
   StoryMacroLocks,
-} from "@ai-novel/shared/types/storyMacro";
+} from "@write-now/shared/types/storyMacro";
 import type { PromptAsset } from "../../core/promptTypes";
 import { renderSelectedContextBlocks } from "../../core/renderContextBlocks";
 import { STORY_MACRO_RESPONSE_SCHEMA } from "../../../services/novel/storyMacro/storyMacroPlanSchema";

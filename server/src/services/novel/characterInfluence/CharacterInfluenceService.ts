@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { CharacterInfluenceProposal } from "@ai-novel/shared/types/characterInfluence";
+import type { CharacterInfluenceProposal } from "@write-now/shared/types/characterInfluence";
 import { prisma } from "../../../db/prisma";
 import { runStructuredPrompt } from "../../../prompting/core/promptRunner";
 import {

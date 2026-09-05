@@ -1,5 +1,5 @@
-import type { BookAnalysis, BookAnalysisSection, BookAnalysisSectionKey, BookAnalysisStatus } from "@ai-novel/shared/types/bookAnalysis";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { BookAnalysis, BookAnalysisSection, BookAnalysisSectionKey, BookAnalysisStatus } from "@write-now/shared/types/bookAnalysis";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { resolveLiveBookAnalysisStatus } from "../shared/bookAnalysis.status";
 import { decodeEvidence, decodeNormalizationWarnings, decodeStructuredData } from "../shared/bookAnalysis.utils";
 

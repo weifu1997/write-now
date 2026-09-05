@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { AntiAiRule } from "@ai-novel/shared/types/styleEngine";
+import type { AntiAiRule } from "@write-now/shared/types/styleEngine";
 import { Plus, ShieldCheck } from "lucide-react";
 import {
   createAntiAiRule,

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BOOK_ANALYSIS_SECTIONS } from "@ai-novel/shared/types/bookAnalysis";
+import { BOOK_ANALYSIS_SECTIONS } from "@write-now/shared/types/bookAnalysis";
 import { flattenGenreTreeOptions, getGenreTree } from "@/api/genre";
 import { bootstrapNovelWorkflow } from "@/api/novelWorkflow";
 import { createNovel } from "@/api/novel";

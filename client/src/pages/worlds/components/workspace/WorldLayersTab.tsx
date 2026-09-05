@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import type { World } from "@ai-novel/shared/types/world";
+import type { World } from "@write-now/shared/types/world";
 import { Button } from "@/components/ui/button";
 import StreamOutput from "@/components/common/StreamOutput";
 import {

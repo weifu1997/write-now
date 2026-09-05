@@ -13,9 +13,9 @@ import {
   type DirectorProjectContextInput,
   type DirectorRefineResponse,
   type DirectorRefinementRequest,
-} from "@ai-novel/shared/types/novelDirector";
-import type { TitleFactorySuggestion } from "@ai-novel/shared/types/title";
-import type { NovelCreateResourceRecommendation } from "@ai-novel/shared/types/novelResourceRecommendation";
+} from "@write-now/shared/types/novelDirector";
+import type { TitleFactorySuggestion } from "@write-now/shared/types/title";
+import type { NovelCreateResourceRecommendation } from "@write-now/shared/types/novelResourceRecommendation";
 import { runStructuredPrompt } from "../../../../prompting/core/promptRunner";
 import { novelCreateResourceRecommendationService } from "../../NovelCreateResourceRecommendationService";
 import {

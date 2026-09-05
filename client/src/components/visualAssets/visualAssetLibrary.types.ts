@@ -2,7 +2,7 @@ import type {
   VisualAssetKind,
   VisualAssetScopeRef,
   VisualAssetSelection,
-} from "@ai-novel/shared/types/visualAsset";
+} from "@write-now/shared/types/visualAsset";
 
 export type VisualAssetSelectionMode = "browse" | "single" | "multiple";
 

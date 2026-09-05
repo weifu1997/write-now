@@ -1,5 +1,5 @@
-import type { ApiResponse } from "@ai-novel/shared/types/api";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { ApiResponse } from "@write-now/shared/types/api";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import type {
   VolumeChapterListGenerationMode,
   VolumeImpactResult,
@@ -10,7 +10,7 @@ import type {
   VolumePlanVersion,
   VolumePlanVersionSummary,
   VolumeSyncPreview,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import { apiClient } from "../client";
 
 export type SlimVolumeGenerationResponse = VolumePlanDocument & {

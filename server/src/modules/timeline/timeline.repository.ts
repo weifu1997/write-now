@@ -6,7 +6,7 @@ import type {
   TimelineHook,
   TimelineHookResolveMode,
   TimelineIssue,
-} from "@ai-novel/shared/types/timeline";
+} from "@write-now/shared/types/timeline";
 import { prisma } from "../../db/prisma";
 
 function parseJsonArray(value: string | null | undefined): string[] {

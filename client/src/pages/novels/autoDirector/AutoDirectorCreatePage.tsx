@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import type { UnifiedTaskDetail } from "@ai-novel/shared/types/task";
+import type { UnifiedTaskDetail } from "@write-now/shared/types/task";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { flattenGenreTreeOptions, getGenreTree } from "@/api/genre";

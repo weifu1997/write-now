@@ -5,9 +5,9 @@ import type {
   NovelWritingMode,
   PacePreference,
   ProjectMode,
-} from "@ai-novel/shared/types/novel";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
-import type { NovelCreateResourceRecommendation } from "@ai-novel/shared/types/novelResourceRecommendation";
+} from "@write-now/shared/types/novel";
+import type { LLMProvider } from "@write-now/shared/types/llm";
+import type { NovelCreateResourceRecommendation } from "@write-now/shared/types/novelResourceRecommendation";
 import { runStructuredPrompt } from "../../prompting/core/promptRunner";
 import { novelCreateResourceRecommendationPrompt } from "../../prompting/prompts/novel/resourceRecommendation.prompts";
 import { ensureSystemResourceStarterData } from "../bootstrap/SystemResourceBootstrapService";

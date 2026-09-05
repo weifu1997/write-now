@@ -3,7 +3,7 @@
  *
  * 读取项目内容包 + 赛道模板 → LLM 生成改编策略 → 落库 project.strategy。
  */
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { prisma } from "../../db/prisma";
 import { runStructuredPrompt } from "../../prompting/core/promptRunner";
 import { dramaStrategyPrompt } from "../../prompting/prompts/drama/drama.prompts";

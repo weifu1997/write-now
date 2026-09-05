@@ -1,9 +1,9 @@
 import {
   buildDefaultNovelCoverSourceDescription,
   type NovelCoverImagePromptNovelContext,
-} from "@ai-novel/shared/imagePrompt";
-import { normalizeCommercialTags } from "@ai-novel/shared/types/novelFraming";
-import type { StoryWorldSliceView } from "@ai-novel/shared/types/storyWorldSlice";
+} from "@write-now/shared/imagePrompt";
+import { normalizeCommercialTags } from "@write-now/shared/types/novelFraming";
+import type { StoryWorldSliceView } from "@write-now/shared/types/storyWorldSlice";
 import type { NovelBasicFormState } from "../../novelBasicInfo.shared";
 
 interface GenreOption {

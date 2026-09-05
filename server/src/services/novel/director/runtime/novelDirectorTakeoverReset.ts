@@ -1,6 +1,6 @@
-import type { VolumeBeat, VolumeBeatSheet, VolumePlanDocument } from "@ai-novel/shared/types/novel";
+import type { VolumeBeat, VolumeBeatSheet, VolumePlanDocument } from "@write-now/shared/types/novel";
 import { prisma } from "../../../../db/prisma";
-import type { DirectorAutoExecutionPlan } from "@ai-novel/shared/types/novelDirector";
+import type { DirectorAutoExecutionPlan } from "@write-now/shared/types/novelDirector";
 import { parseBeatSheetChapterSpan } from "../../volume/volumeBeatSheetChapterBudget";
 import {
   normalizeDirectorAutoExecutionPlan,

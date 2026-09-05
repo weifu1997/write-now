@@ -1,4 +1,4 @@
-import type { ReviewIssue } from "@ai-novel/shared/types/novel";
+import type { ReviewIssue } from "@write-now/shared/types/novel";
 
 export interface ChapterExecutionStrategy {
   runMode: "fast" | "polish";

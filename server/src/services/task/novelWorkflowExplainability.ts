@@ -1,8 +1,8 @@
 import type {
   NovelWorkflowCheckpoint,
   NovelWorkflowStage,
-} from "@ai-novel/shared/types/novelWorkflow";
-import type { TaskStatus } from "@ai-novel/shared/types/task";
+} from "@write-now/shared/types/novelWorkflow";
+import type { TaskStatus } from "@write-now/shared/types/task";
 import { isAutoDirectorRecoveryInProgress } from "../novel/workflow/novelWorkflowRecoveryHeuristics";
 import { normalizeFailureSummary } from "./taskSupport";
 import { NOVEL_WORKFLOW_STAGE_LABELS } from "../novel/workflow/novelWorkflow.shared";

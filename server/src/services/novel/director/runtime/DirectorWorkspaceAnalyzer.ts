@@ -6,8 +6,8 @@ import type {
   DirectorManualEditInventory,
   DirectorWorkspaceAnalysis,
   DirectorWorkspaceInventory,
-} from "@ai-novel/shared/types/directorRuntime";
-import type { DirectorLLMOptions } from "@ai-novel/shared/types/novelDirector";
+} from "@write-now/shared/types/directorRuntime";
+import type { DirectorLLMOptions } from "@write-now/shared/types/novelDirector";
 import { prisma } from "../../../../db/prisma";
 import { runStructuredPrompt } from "../../../../prompting/core/promptRunner";
 import { resolvePromptContextBlocksForAsset } from "../../../../prompting/context/promptContextResolution";

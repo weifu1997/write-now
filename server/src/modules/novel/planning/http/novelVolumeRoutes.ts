@@ -1,9 +1,9 @@
 import type { Router } from "express";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
+import type { ApiResponse } from "@write-now/shared/types/api";
 import { z } from "zod";
 import { validate } from "../../../../middleware/validate";
 import type { NovelApplicationServices } from "../../../../services/novel/application/NovelApplicationContracts";
-import type { VolumePlanDocument } from "@ai-novel/shared/types/novel";
+import type { VolumePlanDocument } from "@write-now/shared/types/novel";
 
 interface RegisterNovelVolumeRoutesInput {
   router: Router;

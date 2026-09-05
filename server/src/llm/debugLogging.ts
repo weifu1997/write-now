@@ -1,4 +1,4 @@
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import type { ChatOpenAI } from "@langchain/openai";
 import type { TaskType } from "./modelRouter";
 import type { PromptInvocationMeta } from "../prompting/core/promptTypes";

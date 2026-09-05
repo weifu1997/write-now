@@ -7,7 +7,7 @@ import type {
   BookAnalysisSectionOptimizePreview,
   BookAnalysisSectionKey,
   BookAnalysisStatus,
-} from "@ai-novel/shared/types/bookAnalysis";
+} from "@write-now/shared/types/bookAnalysis";
 import type {
   BookAnalysisCharacter,
   BookAnalysisCharacterAppearance,
@@ -20,12 +20,12 @@ import type {
   BookAnalysisCharacterGenerationDepth,
   BookAnalysisCharacterIdentifyInput,
   BookAnalysisCharacterProfileGenerateInput,
-} from "@ai-novel/shared/types/bookAnalysisCharacter";
-import type { CharacterProfile } from "@ai-novel/shared/types/characterProfile";
-import type { ImageAsset, ImageGenerationTask } from "@ai-novel/shared/types/image";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
-import type { BaseCharacter } from "@ai-novel/shared/types/novel";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
+} from "@write-now/shared/types/bookAnalysisCharacter";
+import type { CharacterProfile } from "@write-now/shared/types/characterProfile";
+import type { ImageAsset, ImageGenerationTask } from "@write-now/shared/types/image";
+import type { LLMProvider } from "@write-now/shared/types/llm";
+import type { BaseCharacter } from "@write-now/shared/types/novel";
+import type { ApiResponse } from "@write-now/shared/types/api";
 import { apiClient } from "./client";
 import type { ImageGenerationOverrides, ImageGenerationPreview } from "./comic";
 

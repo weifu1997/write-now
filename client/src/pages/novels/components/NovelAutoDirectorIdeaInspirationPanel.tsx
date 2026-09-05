@@ -1,4 +1,4 @@
-import type { DirectorIdeaInspiration } from "@ai-novel/shared/types/novelDirector";
+import type { DirectorIdeaInspiration } from "@write-now/shared/types/novelDirector";
 import { motion, useReducedMotion } from "framer-motion";
 import { Check, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";

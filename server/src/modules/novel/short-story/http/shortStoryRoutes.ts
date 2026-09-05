@@ -1,11 +1,11 @@
 import type { Router } from "express";
 import { z } from "zod";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
+import type { ApiResponse } from "@write-now/shared/types/api";
 import type {
   DeriveLongFormResponse,
   ShortStoryProjection,
   ShortStoryRevisionImpact,
-} from "@ai-novel/shared/types/creationStudio";
+} from "@write-now/shared/types/creationStudio";
 import { validate } from "../../../../middleware/validate";
 import { creationStudioService } from "../../creation-studio/application/CreationStudioService";
 import { shortStoryStudioService } from "../application/ShortStoryStudioService";

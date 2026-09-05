@@ -1,5 +1,5 @@
 {
-  "name": "@ai-novel/client",
+  "name": "@write-now/client",
   "version": "0.1.0",
   "private": true,
   "license": "AGPL-3.0-only",
@@ -14,7 +14,7 @@
     "lint": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@ai-novel/shared": "workspace:*",
+    "@write-now/shared": "workspace:*",
     "@assistant-ui/react": "^0.12.17",
     "@assistant-ui/react-devtools": "^1.0.2",
     "@assistant-ui/react-langgraph": "^0.13.3",

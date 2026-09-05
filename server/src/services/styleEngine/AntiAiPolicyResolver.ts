@@ -4,7 +4,7 @@ import type {
   AntiAiRule,
   StyleBinding,
   StyleProfile,
-} from "@ai-novel/shared/types/styleEngine";
+} from "@write-now/shared/types/styleEngine";
 import { prisma } from "../../db/prisma";
 import { ensureStyleEngineSeedData } from "./StyleEngineSeedService";
 import { mapAntiAiRuleRow, mapStyleProfileRow } from "./helpers";

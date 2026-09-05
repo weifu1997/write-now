@@ -1,5 +1,5 @@
 import type { BaseMessage, BaseMessageChunk } from "@langchain/core/messages";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { prisma } from "../db/prisma";
 import { getLLM, getResolvedLLMClientOptionsFromInstance } from "../llm/factory";
 import type { TaskType } from "../llm/modelRouter";

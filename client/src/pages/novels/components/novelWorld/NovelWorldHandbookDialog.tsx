@@ -7,7 +7,7 @@ import type {
   NovelWorldSyncDiff,
   NovelWorldSyncInput,
   NovelWorldSyncRecordSummary,
-} from "@ai-novel/shared/types/novelWorld";
+} from "@write-now/shared/types/novelWorld";
 import { Button } from "@/components/ui/button";
 import { AppDialogContent, Dialog } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

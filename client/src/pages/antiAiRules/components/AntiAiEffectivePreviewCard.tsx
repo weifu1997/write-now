@@ -1,4 +1,4 @@
-import type { AntiAiEffectiveRulesResult, StyleProfile } from "@ai-novel/shared/types/styleEngine";
+import type { AntiAiEffectiveRulesResult, StyleProfile } from "@write-now/shared/types/styleEngine";
 import { SlidersHorizontal } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";

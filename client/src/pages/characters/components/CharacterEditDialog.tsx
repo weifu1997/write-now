@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { BaseCharacter } from "@ai-novel/shared/types/novel";
+import type { BaseCharacter } from "@write-now/shared/types/novel";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";

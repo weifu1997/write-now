@@ -7,7 +7,7 @@ import type {
   ChapterStateGoal,
   GenerationNextAction,
   NovelControlPolicy,
-} from "@ai-novel/shared/types/canonicalState";
+} from "@write-now/shared/types/canonicalState";
 import { canonicalStateService, type CanonicalStateScope } from "../state/CanonicalStateService";
 import { generationDecisionEngine } from "./GenerationDecisionEngine";
 

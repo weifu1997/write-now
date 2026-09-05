@@ -2,8 +2,8 @@ import type {
   DirectorAutoExecutionState,
   DirectorCircuitBreakerState,
   DirectorConfirmRequest,
-} from "@ai-novel/shared/types/novelDirector";
-import type { PipelineJobStatus } from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novelDirector";
+import type { PipelineJobStatus } from "@write-now/shared/types/novel";
 import {
   buildDirectorAutoExecutionPausedLabel,
   buildDirectorAutoExecutionPausedSummary,
@@ -31,7 +31,7 @@ import {
   directorIssuePolicySchema,
   type DirectorIssueAction,
   type DirectorIssueCode,
-} from "@ai-novel/shared/types/directorIssue";
+} from "@write-now/shared/types/directorIssue";
 
 type AutomationLedgerEventPort = Pick<
   typeof directorAutomationLedgerEventService,

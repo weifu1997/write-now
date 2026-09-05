@@ -7,7 +7,7 @@ import {
   type DirectorIssueAction,
   type DirectorIssueCategory,
   type DirectorIssuePolicy,
-} from "@ai-novel/shared/types/directorIssue";
+} from "@write-now/shared/types/directorIssue";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 

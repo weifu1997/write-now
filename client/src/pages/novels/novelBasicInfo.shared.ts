@@ -1,6 +1,6 @@
-import type { BookAnalysisSectionKey } from "@ai-novel/shared/types/bookAnalysis";
-import { formatCommercialTagsInput, normalizeCommercialTags } from "@ai-novel/shared/types/novelFraming";
-import type { WritingPlatformPreference } from "@ai-novel/shared/types/writingPlatform";
+import type { BookAnalysisSectionKey } from "@write-now/shared/types/bookAnalysis";
+import { formatCommercialTagsInput, normalizeCommercialTags } from "@write-now/shared/types/novelFraming";
+import type { WritingPlatformPreference } from "@write-now/shared/types/writingPlatform";
 
 export interface NovelBasicFormState {
   title: string;

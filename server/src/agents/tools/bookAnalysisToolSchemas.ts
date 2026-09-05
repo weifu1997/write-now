@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { BookAnalysisStatus } from "@ai-novel/shared/types/bookAnalysis";
+import type { BookAnalysisStatus } from "@write-now/shared/types/bookAnalysis";
 import {
   toolCountSchema,
   toolListLimitSchema,

@@ -1,4 +1,4 @@
-import type { Character } from "@ai-novel/shared/types/novel";
+import type { Character } from "@write-now/shared/types/novel";
 import AiButton from "@/components/common/AiButton";
 import { Button } from "@/components/ui/button";
 import { StatusRail, StepActionBar, StepHero } from "../workspaceShell";

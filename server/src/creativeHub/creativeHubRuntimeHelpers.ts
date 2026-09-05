@@ -4,8 +4,8 @@ import type {
   CreativeHubMessage,
   CreativeHubResourceBinding,
   CreativeHubThread,
-} from "@ai-novel/shared/types/creativeHub";
-import type { AgentRunStatus } from "@ai-novel/shared/types/agent";
+} from "@write-now/shared/types/creativeHub";
+import type { AgentRunStatus } from "@write-now/shared/types/agent";
 
 export function toBindings(bindings?: CreativeHubResourceBinding): CreativeHubResourceBinding {
   return {

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { DocumentChapter } from "@ai-novel/shared/types/knowledge";
+import type { DocumentChapter } from "@write-now/shared/types/knowledge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";

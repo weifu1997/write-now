@@ -2,14 +2,14 @@ import {
   DEFAULT_NOVEL_COVER_NEGATIVE_PROMPT,
   DEFAULT_NOVEL_COVER_STYLE_PRESET,
   buildNovelCoverTitleInstruction,
-} from "@ai-novel/shared/imagePrompt";
+} from "@write-now/shared/imagePrompt";
 import {
   DEFAULT_NOVEL_COVER_IMAGE_COUNT,
   DEFAULT_NOVEL_COVER_IMAGE_SIZE,
   type ImageAsset,
   type ImageGenerationTask,
-} from "@ai-novel/shared/types/image";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+} from "@write-now/shared/types/image";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/errorHandler";
 import {

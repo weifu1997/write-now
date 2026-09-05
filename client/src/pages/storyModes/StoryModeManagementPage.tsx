@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import type { NovelStoryMode, StoryModeProfile } from "@ai-novel/shared/types/storyMode";
+import type { NovelStoryMode, StoryModeProfile } from "@write-now/shared/types/storyMode";
 import {
   createStoryModeChildren,
   createStoryModeTree,

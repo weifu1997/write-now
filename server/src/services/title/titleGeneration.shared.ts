@@ -1,4 +1,4 @@
-import type { TitleFactorySuggestion, TitleSuggestionStyle } from "@ai-novel/shared/types/title";
+import type { TitleFactorySuggestion, TitleSuggestionStyle } from "@write-now/shared/types/title";
 
 export type TitleGenerationMode = "brief" | "adapt" | "novel";
 

@@ -1,5 +1,5 @@
 import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
-import type { WorldDeepeningQuestion } from "@ai-novel/shared/types/world";
+import type { WorldDeepeningQuestion } from "@write-now/shared/types/world";
 import { Button } from "@/components/ui/button";
 
 interface WorldDeepeningTabProps {

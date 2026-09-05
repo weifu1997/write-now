@@ -1,13 +1,13 @@
 import { asObject, summarizeOutput } from "../agents/runtime/runtimeHelpers";
 import type { AgentRuntimeResult, PlannerResult, StructuredIntent } from "../agents/types";
 import type { ProductionStatusResult } from "../services/novel/NovelProductionStatusService";
-import type { AgentStep } from "@ai-novel/shared/types/agent";
+import type { AgentStep } from "@write-now/shared/types/agent";
 import type {
   CreativeHubInterrupt,
   CreativeHubThread,
   CreativeHubTurnStatus,
   CreativeHubTurnSummary,
-} from "@ai-novel/shared/types/creativeHub";
+} from "@write-now/shared/types/creativeHub";
 
 function truncateText(value: string, max = 180): string {
   const normalized = value.replace(/\s+/g, " ").trim();

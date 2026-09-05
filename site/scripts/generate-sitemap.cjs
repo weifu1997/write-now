@@ -1,8 +1,8 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const SITE_ORIGIN = "https://explosivecoderflome.github.io";
-const SITE_PATH = "/AI-Novel-Writing-Assistant";
+const SITE_ORIGIN = "https://weifu1997.github.io";
+const SITE_PATH = "/write-now";
 const SITE_BASE = `${SITE_ORIGIN}${SITE_PATH}/`;
 
 const repoRoot = path.resolve(__dirname, "..", "..");

@@ -1,4 +1,4 @@
-import type { TaskTokenUsageSummary } from "@ai-novel/shared/types/task";
+import type { TaskTokenUsageSummary } from "@write-now/shared/types/task";
 import { prisma } from "../../db/prisma";
 import { toTaskTokenUsageSummary } from "../task/taskTokenUsageSummary";
 

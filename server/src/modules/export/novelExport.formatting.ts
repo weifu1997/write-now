@@ -1,4 +1,4 @@
-import { NOVEL_EXPORT_SCOPE_LABELS, type NovelExportScope } from "@ai-novel/shared/types/novelExport";
+import { NOVEL_EXPORT_SCOPE_LABELS, type NovelExportScope } from "@write-now/shared/types/novelExport";
 import type {
   NovelExportBasicSection,
   NovelExportBundle,

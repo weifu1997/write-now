@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { ChapterRuntimePackage, GenerationContextPackage } from "@ai-novel/shared/types/chapterRuntime";
+import type { ChapterRuntimePackage, GenerationContextPackage } from "@write-now/shared/types/chapterRuntime";
 import { novelEventBus } from "../../../events";
 import { openConflictService } from "../../state/OpenConflictService";
 import { directorAutomationLedgerEventService } from "../director/runtime/DirectorAutomationLedgerEventService";

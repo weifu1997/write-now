@@ -6,12 +6,12 @@ import type {
   DirectorDisplayStep,
   DirectorRuntimeProjection,
   DirectorTaskFactSummary,
-} from "@ai-novel/shared/types/directorRuntime";
+} from "@write-now/shared/types/directorRuntime";
 import {
   getWorkflowCheckpointLabel,
   resolveWorkflowDisplayStage,
   WORKFLOW_DISPLAY_STAGES,
-} from "@ai-novel/shared/types/directorWorkflowStepCatalog";
+} from "@write-now/shared/types/directorWorkflowStepCatalog";
 import type { WorkflowStepProgress } from "../workflowStepRuntime/WorkflowStepModule";
 
 type FactStepStateLike = {

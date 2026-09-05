@@ -1,5 +1,5 @@
-import type { LLMProvider, ProviderAuthMode, ReasoningEffort } from "@ai-novel/shared/types/llm";
-import type { ModelRouteRequestProtocol } from "@ai-novel/shared/types/novel";
+import type { LLMProvider, ProviderAuthMode, ReasoningEffort } from "@write-now/shared/types/llm";
+import type { ModelRouteRequestProtocol } from "@write-now/shared/types/novel";
 import { ChatOpenAI } from "@langchain/openai";
 import type { PromptInvocationMeta } from "../prompting/core/promptTypes";
 import { secretStore } from "../services/settings/secretStore";

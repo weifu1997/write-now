@@ -33,7 +33,7 @@ export default function Navbar(props: NavbarProps) {
         <DesktopBrandMark className="h-8 w-8 shrink-0 drop-shadow-none" />
         <div className="flex min-w-0 flex-col leading-tight">
           <div className="flex min-w-0 items-center gap-1.5">
-            <span className="min-w-0 truncate text-sm font-semibold">AI 小说创作工作台</span>
+            <span className="min-w-0 truncate text-sm font-semibold">Write Now</span>
             <AppVersionBadge />
             <DesktopReleaseNotesDialog />
             <ProjectGithubLink />

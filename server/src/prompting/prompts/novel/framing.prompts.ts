@@ -3,7 +3,7 @@
  */
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { z } from "zod";
-import { normalizeCommercialTags, type BookFramingSuggestion } from "@ai-novel/shared/types/novelFraming";
+import { normalizeCommercialTags, type BookFramingSuggestion } from "@write-now/shared/types/novelFraming";
 import type { PromptAsset } from "../../core/promptTypes";
 
 export interface NovelFramingSuggestionPromptInput {

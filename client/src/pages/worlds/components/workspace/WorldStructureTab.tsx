@@ -9,7 +9,7 @@ import type {
   WorldRule,
   WorldStructuredData,
   WorldStructureSectionKey,
-} from "@ai-novel/shared/types/world";
+} from "@write-now/shared/types/world";
 import type { WorldStructurePayload } from "@/api/world";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

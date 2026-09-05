@@ -3,7 +3,7 @@ import type {
   CharacterResourceLedgerItem,
   CharacterResourceRiskSignal,
   CharacterResourceSourceRef,
-} from "@ai-novel/shared/types/characterResource";
+} from "@write-now/shared/types/characterResource";
 
 export type CharacterResourceRowLike = {
   id: string;

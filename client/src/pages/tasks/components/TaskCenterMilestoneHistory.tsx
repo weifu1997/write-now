@@ -1,4 +1,4 @@
-import type { NovelWorkflowMilestone } from "@ai-novel/shared/types/novelWorkflow";
+import type { NovelWorkflowMilestone } from "@write-now/shared/types/novelWorkflow";
 import { formatCheckpoint, formatDate } from "../taskCenterUtils";
 
 interface TaskCenterMilestoneHistoryProps {

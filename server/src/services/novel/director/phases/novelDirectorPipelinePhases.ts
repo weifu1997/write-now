@@ -1,5 +1,5 @@
-import type { VolumePlanDocument } from "@ai-novel/shared/types/novel";
-import type { DirectorConfirmRequest } from "@ai-novel/shared/types/novelDirector";
+import type { VolumePlanDocument } from "@write-now/shared/types/novel";
+import type { DirectorConfirmRequest } from "@write-now/shared/types/novelDirector";
 import { buildCharacterCastBlockedMessage } from "../../characterPrep/characterCastQuality";
 import type { VolumeGenerationPhaseEvent } from "../../volume/volumeModels";
 import { buildNovelEditResumeTarget } from "../../workflow/novelWorkflow.shared";
@@ -16,7 +16,7 @@ import {
 import {
   normalizeDirectorAutoApprovalConfig,
   shouldAutoApproveDirectorCheckpoint,
-} from "@ai-novel/shared/types/autoDirectorApproval";
+} from "@write-now/shared/types/autoDirectorApproval";
 import { recordAutoDirectorAutoApproval } from "../../../task/autoDirectorFollowUps/autoDirectorAutoApprovalAudit";
 import { runDirectorTrackedStep } from "../projections/directorProgressTracker";
 import type { DirectorPhaseCallbacks, DirectorPhaseDependencies } from "./novelDirectorPhaseTypes";

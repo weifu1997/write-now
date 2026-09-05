@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { NOVEL_LIST_PAGE_LIMIT_MAX } from "@ai-novel/shared/types/pagination";
+import { NOVEL_LIST_PAGE_LIMIT_MAX } from "@write-now/shared/types/pagination";
 import { useQuery } from "@tanstack/react-query";
 import { flattenGenreTreeOptions, getGenreTree } from "@/api/genre";
 import { getNovelList } from "@/api/novel";

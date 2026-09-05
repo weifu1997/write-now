@@ -1,4 +1,4 @@
-import type { ResolvedStyleContext, StyleBinding, StyleProfile, StyleRuleSet } from "@ai-novel/shared/types/styleEngine";
+import type { ResolvedStyleContext, StyleBinding, StyleProfile, StyleRuleSet } from "@write-now/shared/types/styleEngine";
 import { prisma } from "../../db/prisma";
 import { AntiAiPolicyResolver } from "./AntiAiPolicyResolver";
 import { StyleCompiler } from "./StyleCompiler";

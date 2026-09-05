@@ -2,7 +2,7 @@ import type {
   DirectorArtifactRef,
   DirectorRuntimeSnapshot,
   DirectorStepRun,
-} from "@ai-novel/shared/types/directorRuntime";
+} from "@write-now/shared/types/directorRuntime";
 import { runWithLlmUsageTracking } from "../../../../llm/usageTracking";
 import { DirectorPolicyEngine, type DirectorPolicyRequest } from "./DirectorPolicyEngine";
 import { DirectorRuntimeStore } from "./DirectorRuntimeStore";

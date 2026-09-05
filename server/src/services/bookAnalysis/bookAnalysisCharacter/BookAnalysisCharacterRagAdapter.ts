@@ -1,8 +1,8 @@
 import type {
   BookAnalysisCharacterDimension,
   BookAnalysisCharacterEvidenceItem,
-} from "@ai-novel/shared/types/bookAnalysisCharacter";
-import { BOOK_ANALYSIS_CHARACTER_DIMENSION_LABELS } from "@ai-novel/shared/types/bookAnalysisCharacter";
+} from "@write-now/shared/types/bookAnalysisCharacter";
+import { BOOK_ANALYSIS_CHARACTER_DIMENSION_LABELS } from "@write-now/shared/types/bookAnalysisCharacter";
 import { ragServices } from "../../rag";
 import { compactSnippet } from "../../rag/utils";
 import type { RetrievedChunk } from "../../rag/types";

@@ -3,7 +3,7 @@ import type {
   DirectorIdeaConstellationComposeResponse,
   DirectorIdeaConstellationOptionsRequest,
   DirectorIdeaConstellationOptionsResponse,
-} from "@ai-novel/shared/types/novelDirector";
+} from "@write-now/shared/types/novelDirector";
 import { runStructuredPrompt } from "../../../../prompting/core/promptRunner";
 import {
   directorIdeaConstellationComposePrompt,

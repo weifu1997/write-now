@@ -1,6 +1,6 @@
-import type { NovelAutoDirectorTaskSummary } from "@ai-novel/shared/types/novel";
-import type { NovelWorkflowCheckpoint } from "@ai-novel/shared/types/novelWorkflow";
-import type { TaskStatus } from "@ai-novel/shared/types/task";
+import type { NovelAutoDirectorTaskSummary } from "@write-now/shared/types/novel";
+import type { NovelWorkflowCheckpoint } from "@write-now/shared/types/novelWorkflow";
+import type { TaskStatus } from "@write-now/shared/types/task";
 import { buildWorkflowExplainability, buildWorkflowResumeAction } from "./novelWorkflowExplainability";
 import type { DirectorWorkflowSeedPayload } from "../novel/director/runtime/novelDirectorHelpers";
 import { parseSeedPayload } from "../novel/workflow/novelWorkflow.shared";

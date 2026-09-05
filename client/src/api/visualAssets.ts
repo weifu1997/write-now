@@ -1,4 +1,4 @@
-import type { ApiResponse } from "@ai-novel/shared/types/api";
+import type { ApiResponse } from "@write-now/shared/types/api";
 import type {
   VisualAssetCatalogFacets,
   VisualAssetCatalogPage,
@@ -6,7 +6,7 @@ import type {
   VisualAssetScopeRef,
   VisualAssetSelection,
   VisualAssetSourceDomain,
-} from "@ai-novel/shared/types/visualAsset";
+} from "@write-now/shared/types/visualAsset";
 import { apiClient } from "./client";
 
 export interface VisualAssetCatalogRequest {

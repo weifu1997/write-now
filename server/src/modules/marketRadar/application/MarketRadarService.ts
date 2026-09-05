@@ -11,12 +11,12 @@ import type {
   MarketRankingItem,
   MarketScanRun,
   MarketTrendReport,
-} from "@ai-novel/shared/types/marketRadar";
-import { MARKET_RADAR_PLATFORMS } from "@ai-novel/shared/types/marketRadar";
+} from "@write-now/shared/types/marketRadar";
+import { MARKET_RADAR_PLATFORMS } from "@write-now/shared/types/marketRadar";
 import type {
   NovelCreateResourceRecommendation,
   NovelResourceRecommendationOption,
-} from "@ai-novel/shared/types/novelResourceRecommendation";
+} from "@write-now/shared/types/novelResourceRecommendation";
 import { prisma } from "../../../db/prisma";
 import { runStructuredPrompt } from "../../../prompting/core/promptRunner";
 import {

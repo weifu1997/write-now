@@ -1,5 +1,5 @@
 import { UsersRound } from "lucide-react";
-import type { StoryStateSnapshot } from "@ai-novel/shared/types/novel";
+import type { StoryStateSnapshot } from "@write-now/shared/types/novel";
 import type {
   ParsedSnapshotData,
   SnapshotCharacterItem,

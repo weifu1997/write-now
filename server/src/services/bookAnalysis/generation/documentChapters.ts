@@ -1,4 +1,4 @@
-import type { DocumentChapter } from "@ai-novel/shared/types/knowledge";
+import type { DocumentChapter } from "@write-now/shared/types/knowledge";
 import type { DocumentChapterService } from "../../knowledge/DocumentChapterService";
 
 export async function getDocumentChaptersSafely(

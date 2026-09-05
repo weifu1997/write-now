@@ -1,5 +1,5 @@
-import type { AutoDirectorFollowUpItem, AutoDirectorMutationActionCode } from "@ai-novel/shared/types/autoDirectorFollowUp";
-import type { AutoDirectorFollowUpSection } from "@ai-novel/shared/types/autoDirectorValidation";
+import type { AutoDirectorFollowUpItem, AutoDirectorMutationActionCode } from "@write-now/shared/types/autoDirectorFollowUp";
+import type { AutoDirectorFollowUpSection } from "@write-now/shared/types/autoDirectorValidation";
 import { Button } from "@/components/ui/button";
 import { TaskQueueActionRow } from "@/components/taskQueue";
 import { AUTO_DIRECTOR_MOBILE_CLASSES } from "@/mobile/autoDirector";

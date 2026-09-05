@@ -2,7 +2,7 @@ import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { z } from "zod";
 import type { PromptAsset } from "../../core/promptTypes";
 import { characterMindDeltaSchema } from "./characterMind.promptSchemas";
-import { characterDialogueInfluenceResolutionSchema } from "@ai-novel/shared/types/characterDialogue";
+import { characterDialogueInfluenceResolutionSchema } from "@write-now/shared/types/characterDialogue";
 import { chapterConcreteFactSchema } from "../../../services/novel/chapterSummarySchemas";
 import { characterResourceExtractionUpdateSchema } from "./characterResource.promptSchemas";
 import { NOVEL_PROMPT_BUDGETS } from "./promptBudgetProfiles";

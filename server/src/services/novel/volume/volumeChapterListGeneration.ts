@@ -3,8 +3,8 @@ import type {
   VolumeBeatSheet,
   VolumePlan,
   VolumePlanDocument,
-} from "@ai-novel/shared/types/novel";
-import type { StoryMacroPlan } from "@ai-novel/shared/types/storyMacro";
+} from "@write-now/shared/types/novel";
+import type { StoryMacroPlan } from "@write-now/shared/types/storyMacro";
 import { runStructuredPrompt } from "../../../prompting/core/promptRunner";
 import { logMemoryUsage } from "../../../runtime/memoryTelemetry";
 import { createVolumeChapterListPrompt } from "../../../prompting/prompts/novel/volume/chapterList.prompts";

@@ -1,4 +1,4 @@
-import type { VisualAssetSelection } from "@ai-novel/shared/types/visualAsset";
+import type { VisualAssetSelection } from "@write-now/shared/types/visualAsset";
 import { ExternalLink, LoaderCircle, X } from "lucide-react";
 import { resolveImageAssetUrl } from "@/api/images";
 import { Button } from "@/components/ui/button";

@@ -1,4 +1,4 @@
-import type { BookContract, BookContractDraft } from "@ai-novel/shared/types/novelWorkflow";
+import type { BookContract, BookContractDraft } from "@write-now/shared/types/novelWorkflow";
 import { prisma } from "../../db/prisma";
 import { novelEventBus } from "../../events";
 import { hasBookContractPayoffChanges } from "../payoff/sources/bookContractPayoffSources";

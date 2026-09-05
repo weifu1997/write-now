@@ -1,6 +1,6 @@
 import { MapPinned, Plus } from "lucide-react";
 import type { Dispatch, SetStateAction } from "react";
-import type { WorldLocation, WorldStructuredData } from "@ai-novel/shared/types/world";
+import type { WorldLocation, WorldStructuredData } from "@write-now/shared/types/world";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { HandbookField, HandbookTextarea, SectionHeader } from "./HandbookPrimitives";

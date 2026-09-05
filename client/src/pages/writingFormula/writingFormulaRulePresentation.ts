@@ -3,7 +3,7 @@ import type {
   LanguageRules,
   NarrativeRules,
   RhythmRules,
-} from "@ai-novel/shared/types/styleEngine";
+} from "@write-now/shared/types/styleEngine";
 
 export type RuleSection = "narrativeRules" | "characterRules" | "languageRules" | "rhythmRules";
 type RuleObject = NarrativeRules | CharacterRules | LanguageRules | RhythmRules;

@@ -2,18 +2,6 @@ name: Project Site Pages
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - "site/**"
-      - "docs/public/**"
-      - "docs/releases/release-notes.md"
-      - "scripts/check-docs-manifest.cjs"
-      - "package.json"
-      - ".github/workflows/site-pages.yml"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
 
 permissions:
   contents: read
@@ -49,7 +37,7 @@ jobs:
         run: pnpm check:docs-manifest
 
       - name: Build project site
-        run: pnpm --filter @ai-novel/site build
+        run: pnpm --filter @write-now/site build
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v6

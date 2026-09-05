@@ -4,8 +4,8 @@ import type {
   NovelWorldSyncDiff,
   NovelWorldSyncInput,
   NovelWorldView,
-} from "@ai-novel/shared/types/novelWorld";
-import type { StoryWorldSliceOverrides, StoryWorldSliceView } from "@ai-novel/shared/types/storyWorldSlice";
+} from "@write-now/shared/types/novelWorld";
+import type { StoryWorldSliceOverrides, StoryWorldSliceView } from "@write-now/shared/types/storyWorldSlice";
 import { Button } from "@/components/ui/button";
 import NovelWorldSourcePanel, { type WorldOption } from "./novelWorld/NovelWorldSourcePanel";
 import {

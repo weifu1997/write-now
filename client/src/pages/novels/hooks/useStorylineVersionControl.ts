@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, type QueryClient } from "@tanstack/react-query";
-import type { StorylineDiff, StorylineVersion } from "@ai-novel/shared/types/novel";
+import type { StorylineDiff, StorylineVersion } from "@write-now/shared/types/novel";
 import {
   activateStorylineVersion,
   analyzeStorylineImpact,

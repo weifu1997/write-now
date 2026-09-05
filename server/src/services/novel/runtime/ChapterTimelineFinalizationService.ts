@@ -1,12 +1,12 @@
 import { createHash } from "node:crypto";
-import type { GenerationContextPackage } from "@ai-novel/shared/types/chapterRuntime";
+import type { GenerationContextPackage } from "@write-now/shared/types/chapterRuntime";
 import type {
   ExtractedTimelineEvent,
   TimelineCheckResult,
   TimelineContextForChapter,
   TimelineHookDraft,
-} from "@ai-novel/shared/types/timeline";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+} from "@write-now/shared/types/timeline";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { prisma } from "../../../db/prisma";
 import {
   storyTimelineService,

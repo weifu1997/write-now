@@ -1,5 +1,5 @@
 import { Router } from "express";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
+import type { ApiResponse } from "@write-now/shared/types/api";
 import { AIMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
 import type { BaseMessageChunk } from "@langchain/core/messages";
 import { z } from "zod";

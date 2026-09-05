@@ -1,4 +1,4 @@
-import { parseCommercialTagsJson } from "@ai-novel/shared/types/novelFraming";
+import { parseCommercialTagsJson } from "@write-now/shared/types/novelFraming";
 
 interface BookFramingSource {
   targetAudience?: string | null;

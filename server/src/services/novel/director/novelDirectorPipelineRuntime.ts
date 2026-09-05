@@ -1,15 +1,15 @@
-import type { CharacterCastOption, VolumePlanDocument } from "@ai-novel/shared/types/novel";
-import type { DirectorConfirmRequest } from "@ai-novel/shared/types/novelDirector";
+import type { CharacterCastOption, VolumePlanDocument } from "@write-now/shared/types/novel";
+import type { DirectorConfirmRequest } from "@write-now/shared/types/novelDirector";
 import {
   isDirectorAutoExecutionRunMode,
   isFullBookAutopilotRunMode,
-} from "@ai-novel/shared/types/novelDirector";
+} from "@write-now/shared/types/novelDirector";
 import {
   normalizeDirectorAutoApprovalConfig,
   shouldAutoApproveDirectorApprovalPoint,
   shouldAutoApproveDirectorCheckpoint,
   type DirectorAutoApprovalPointCode,
-} from "@ai-novel/shared/types/autoDirectorApproval";
+} from "@write-now/shared/types/autoDirectorApproval";
 import type { BookContractService } from "../BookContractService";
 import type { CharacterPreparationService } from "../characterPrep/CharacterPreparationService";
 import { generateAutoCharacterCastDraft, persistCharacterCastOptionsDraft } from "../characterPrep/characterCastGeneration";
@@ -45,7 +45,7 @@ import {
 } from "./workflowStepRuntime/WorkflowStepModule";
 import type { DirectorPipelinePhase } from "./recovery/novelDirectorRecovery";
 import { WorldContextGateway } from "../worldContext/WorldContextGateway";
-import type { NovelWorkflowStage } from "@ai-novel/shared/types/novelWorkflow";
+import type { NovelWorkflowStage } from "@write-now/shared/types/novelWorkflow";
 
 export interface DirectorPipelineRunInput {
   taskId: string;

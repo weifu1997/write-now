@@ -1,7 +1,7 @@
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { z } from "zod";
 import type { PromptAsset } from "../../core/promptTypes";
-import type { StoryModeProfile } from "@ai-novel/shared/types/storyMode";
+import type { StoryModeProfile } from "@write-now/shared/types/storyMode";
 import {
   storyModeChildDraftListSchema,
   storyModeChildDraftNodeSchema,

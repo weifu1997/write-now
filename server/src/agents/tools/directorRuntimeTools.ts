@@ -4,7 +4,7 @@ import type {
   DirectorPolicyMode,
   DirectorRuntimeProjection,
   DirectorWorkspaceAnalysis,
-} from "@ai-novel/shared/types/directorRuntime";
+} from "@write-now/shared/types/directorRuntime";
 import type { NovelDirectorService } from "../../services/novel/director/NovelDirectorService";
 import type { DirectorCommandService } from "../../services/novel/director/commands/DirectorCommandService";
 import type { NovelWorkflowService } from "../../services/novel/workflow/NovelWorkflowService";

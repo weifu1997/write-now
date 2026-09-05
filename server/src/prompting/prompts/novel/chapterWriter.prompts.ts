@@ -2,7 +2,7 @@ import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import type { PromptAsset } from "../../core/promptTypes";
 import { renderSelectedContextBlocks } from "../../core/renderContextBlocks";
 import { NOVEL_PROMPT_BUDGETS } from "./promptBudgetProfiles";
-import { CHAPTER_PROSE_QUALITY_RULES } from "@ai-novel/shared/types/chapterProseContract";
+import { CHAPTER_PROSE_QUALITY_RULES } from "@write-now/shared/types/chapterProseContract";
 
 export interface ChapterWriterPromptInput {
   novelTitle: string;

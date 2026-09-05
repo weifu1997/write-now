@@ -2,7 +2,7 @@ import type {
   CanonicalStateSnapshot,
   GenerationNextAction,
   NovelControlPolicy,
-} from "@ai-novel/shared/types/canonicalState";
+} from "@write-now/shared/types/canonicalState";
 
 export interface GenerationDecisionInput {
   snapshot: CanonicalStateSnapshot;

@@ -14,10 +14,10 @@ import type {
   DirectorTakeoverStartPhase,
   DirectorTakeoverStrategy,
   DirectorTakeoverCheckpointSnapshot,
-} from "@ai-novel/shared/types/novelDirector";
-import type { NovelWorkflowStage, BookContract } from "@ai-novel/shared/types/novelWorkflow";
-import type { StoryMacroPlan } from "@ai-novel/shared/types/storyMacro";
-import { DIRECTOR_TAKEOVER_ENTRY_STEPS } from "@ai-novel/shared/types/novelDirector";
+} from "@write-now/shared/types/novelDirector";
+import type { NovelWorkflowStage, BookContract } from "@write-now/shared/types/novelWorkflow";
+import type { StoryMacroPlan } from "@write-now/shared/types/storyMacro";
+import { DIRECTOR_TAKEOVER_ENTRY_STEPS } from "@write-now/shared/types/novelDirector";
 import { normalizeDirectorTargetChapterCount } from "./novelDirectorHelpers";
 
 export interface DirectorTakeoverNovelContext extends Omit<DirectorProjectContextInput, "description"> {

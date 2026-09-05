@@ -7,7 +7,7 @@ import type {
   VisualAssetScopeRef,
   VisualAssetSelection,
   VisualAssetSourceDomain,
-} from "@ai-novel/shared/types/visualAsset";
+} from "@write-now/shared/types/visualAsset";
 import { prisma } from "../../../db/prisma";
 import { AppError } from "../../../middleware/errorHandler";
 import { collectVisualAssetSources, type VisualAssetSourceItem } from "../adapters/visualAssetSources";

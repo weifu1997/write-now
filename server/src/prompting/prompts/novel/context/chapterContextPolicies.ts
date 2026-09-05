@@ -1,12 +1,12 @@
 import type {
   ChapterExecutionObligationContract,
   ChapterWriteContext,
-} from "@ai-novel/shared/types/chapterRuntime";
+} from "@write-now/shared/types/chapterRuntime";
 import {
   hasReaderExperienceContractValue,
   normalizeReaderExperienceContract,
   type ReaderExperienceContract,
-} from "@ai-novel/shared/types/novel/readerExperience";
+} from "@write-now/shared/types/novel/readerExperience";
 
 const EMPTY_OBLIGATION_CONTRACT: ChapterExecutionObligationContract = {
   mustHitNow: [],

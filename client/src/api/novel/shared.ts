@@ -1,5 +1,5 @@
-import { NOVEL_LIST_PAGE_LIMIT_DEFAULT, NOVEL_LIST_PAGE_LIMIT_MAX } from "@ai-novel/shared/types/pagination";
-import type { NovelExportFormat, NovelExportScope } from "@ai-novel/shared/types/novelExport";
+import { NOVEL_LIST_PAGE_LIMIT_DEFAULT, NOVEL_LIST_PAGE_LIMIT_MAX } from "@write-now/shared/types/pagination";
+import type { NovelExportFormat, NovelExportScope } from "@write-now/shared/types/novelExport";
 import type {
   Chapter,
   Character,
@@ -8,8 +8,8 @@ import type {
   NovelBible,
   NovelStoryMode,
   PlotBeat,
-} from "@ai-novel/shared/types/novel";
-import type { ImageAsset, ImageTaskStatus } from "@ai-novel/shared/types/image";
+} from "@write-now/shared/types/novel";
+import type { ImageAsset, ImageTaskStatus } from "@write-now/shared/types/image";
 
 export type NovelListItem = Pick<
   Novel,

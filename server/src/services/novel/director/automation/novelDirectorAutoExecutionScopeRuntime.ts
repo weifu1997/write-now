@@ -1,9 +1,9 @@
 import type {
   DirectorAutoExecutionState,
   DirectorConfirmRequest,
-} from "@ai-novel/shared/types/novelDirector";
-import { buildDirectorCompletionProfile } from "@ai-novel/shared/types/directorCompletion";
-import type { PipelineJobStatus, VolumePlanDocument } from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novelDirector";
+import { buildDirectorCompletionProfile } from "@write-now/shared/types/directorCompletion";
+import type { PipelineJobStatus, VolumePlanDocument } from "@write-now/shared/types/novel";
 import {
   buildDirectorAutoExecutionScopeLabelFromState,
   buildDirectorAutoExecutionState,

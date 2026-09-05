@@ -1,11 +1,11 @@
 import { Router } from "express";
 import type { Response } from "express";
 import { z } from "zod";
-import type { ApiResponse, CreativeHubStreamFrame } from "@ai-novel/shared/types/api";
+import type { ApiResponse, CreativeHubStreamFrame } from "@write-now/shared/types/api";
 import type {
   CreativeHubMessage,
   CreativeHubThreadState,
-} from "@ai-novel/shared/types/creativeHub";
+} from "@write-now/shared/types/creativeHub";
 import { creativeHubLangGraph } from "../creativeHub/CreativeHubLangGraph";
 import { creativeHubInterruptLangGraph } from "../creativeHub/CreativeHubInterruptLangGraph";
 import { llmProviderSchema } from "../llm/providerSchema";

@@ -1,5 +1,5 @@
-import type { ApiResponse } from "@ai-novel/shared/types/api";
-import type { WritingPlatform, WritingPlatformProfileDefinition, WritingPlatformProfileVersionView } from "@ai-novel/shared/types/writingPlatform";
+import type { ApiResponse } from "@write-now/shared/types/api";
+import type { WritingPlatform, WritingPlatformProfileDefinition, WritingPlatformProfileVersionView } from "@write-now/shared/types/writingPlatform";
 import { apiClient } from "@/api/client";
 
 export interface PromptContextRequirement {

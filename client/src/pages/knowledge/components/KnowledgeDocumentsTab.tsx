@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { CircleAlert, FileText, LoaderCircle, MoreHorizontal, RefreshCw, Upload, X } from "lucide-react";
-import type { KnowledgeDocumentStatus, KnowledgeDocumentSummary } from "@ai-novel/shared/types/knowledge";
+import type { KnowledgeDocumentStatus, KnowledgeDocumentSummary } from "@write-now/shared/types/knowledge";
 import {
   AssetLibraryEmptyState,
 } from "@/components/assetLibrary";

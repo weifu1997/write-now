@@ -1,4 +1,4 @@
-import type { BookAnalysisDetail } from "@ai-novel/shared/types/bookAnalysis";
+import type { BookAnalysisDetail } from "@write-now/shared/types/bookAnalysis";
 import { Columns2, Pencil, WandSparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import OpenInCreativeHubButton from "@/components/creativeHub/OpenInCreativeHubButton";

@@ -1,4 +1,4 @@
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import {
   baseCharacterDraftSchema,
   characterLibraryLinkSchema,
@@ -15,7 +15,7 @@ import {
   type CharacterSyncProposalPayload,
   type ImportBaseCharacterToNovelInput,
   type NovelCharacterSaveToLibraryInput,
-} from "@ai-novel/shared/types/characterSync";
+} from "@write-now/shared/types/characterSync";
 import { prisma } from "../../db/prisma";
 import { runStructuredPrompt } from "../../prompting/core/promptRunner";
 import { characterSyncClassificationPrompt } from "../../prompting/prompts/character/characterSync.prompts";

@@ -3,7 +3,7 @@ import type {
   DirectorAutoExecutionPlan,
   DirectorTakeoverExecutableRangeSnapshot,
   DirectorTakeoverStrategy,
-} from "@ai-novel/shared/types/novelDirector";
+} from "@write-now/shared/types/novelDirector";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { AUTO_DIRECTOR_MOBILE_CLASSES } from "@/mobile/autoDirector";

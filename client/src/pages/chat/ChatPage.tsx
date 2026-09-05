@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import type { SSEFrame } from "@ai-novel/shared/types/api";
-import type { AgentStep } from "@ai-novel/shared/types/agent";
+import type { SSEFrame } from "@write-now/shared/types/api";
+import type { AgentStep } from "@write-now/shared/types/agent";
 import { useSearchParams } from "react-router-dom";
 import { getAgentRunDetail, replayAgentRunFromStep } from "@/api/agentRuns";
 import { getNovelList } from "@/api/novel";

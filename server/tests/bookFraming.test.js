@@ -66,7 +66,7 @@ function buildStructuredWorld() {
 }
 
 test("normalizeCommercialTags dedupes, truncates and limits output", async () => {
-  const { formatCommercialTagsInput, normalizeCommercialTags } = await import("@ai-novel/shared/types/novelFraming");
+  const { formatCommercialTagsInput, normalizeCommercialTags } = await import("@write-now/shared/types/novelFraming");
 
   const normalized = normalizeCommercialTags("逆袭，强冲突，逆袭，持续追更钩子，情感拉扯，资源博弈，长线成长，第七个标签");
 

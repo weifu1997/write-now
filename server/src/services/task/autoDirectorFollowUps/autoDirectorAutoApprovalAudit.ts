@@ -1,9 +1,9 @@
-import type { NovelWorkflowCheckpoint } from "@ai-novel/shared/types/novelWorkflow";
+import type { NovelWorkflowCheckpoint } from "@write-now/shared/types/novelWorkflow";
 import {
   DIRECTOR_AUTO_APPROVAL_POINTS,
   resolveDirectorAutoApprovalPointForCheckpoint,
   type DirectorAutoApprovalPointCode,
-} from "@ai-novel/shared/types/autoDirectorApproval";
+} from "@write-now/shared/types/autoDirectorApproval";
 import { prisma } from "../../../db/prisma";
 import { appendMilestone, parseSeedPayload } from "../../novel/workflow/novelWorkflow.shared";
 import { AutoDirectorFollowUpNotificationService } from "./AutoDirectorFollowUpNotificationService";

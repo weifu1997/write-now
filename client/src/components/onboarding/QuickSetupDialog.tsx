@@ -17,8 +17,8 @@ import type {
   CompleteQuickSetupRequest,
   QuickSetupProviderOption,
   QuickSetupStatus,
-} from "@ai-novel/shared/types/onboarding";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+} from "@write-now/shared/types/onboarding";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { completeQuickSetup } from "@/api/onboarding";
 import { previewCustomProviderModels } from "@/api/settings";
 import { queryKeys } from "@/api/queryKeys";

@@ -1,6 +1,6 @@
-import type { ChapterRepairContext, ChapterRuntimePackage } from "@ai-novel/shared/types/chapterRuntime";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
-import type { ReviewIssue } from "@ai-novel/shared/types/novel";
+import type { ChapterRepairContext, ChapterRuntimePackage } from "@write-now/shared/types/chapterRuntime";
+import type { LLMProvider } from "@write-now/shared/types/llm";
+import type { ReviewIssue } from "@write-now/shared/types/novel";
 import { runTextPrompt } from "../../../../prompting/core/promptRunner";
 import { buildChapterRepairContextBlocks } from "../../../../prompting/prompts/novel/chapterLayeredContext";
 import { chapterRepairPrompt } from "../../../../prompting/prompts/novel/review.prompts";

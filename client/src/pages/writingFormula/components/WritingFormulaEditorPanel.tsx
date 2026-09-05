@@ -5,7 +5,7 @@ import {
   type StyleProfile,
   type StyleProfileFeature,
   type StyleRulePatch,
-} from "@ai-novel/shared/types/styleEngine";
+} from "@write-now/shared/types/styleEngine";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

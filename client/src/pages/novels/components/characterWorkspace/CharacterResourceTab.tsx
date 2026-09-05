@@ -1,5 +1,5 @@
-import type { Character } from "@ai-novel/shared/types/novel";
-import type { CharacterResourceLedgerItem } from "@ai-novel/shared/types/characterResource";
+import type { Character } from "@write-now/shared/types/novel";
+import type { CharacterResourceLedgerItem } from "@write-now/shared/types/characterResource";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {

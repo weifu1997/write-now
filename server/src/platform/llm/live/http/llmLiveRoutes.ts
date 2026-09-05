@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import type { LlmLiveStreamFrame } from "@ai-novel/shared/types/llmLive";
+import type { LlmLiveStreamFrame } from "@write-now/shared/types/llmLive";
 import { validate } from "../../../../middleware/validate";
 import { llmLiveBroker } from "../LlmLiveBroker";
 

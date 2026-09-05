@@ -1,4 +1,4 @@
-# AI 小说创作工作台 / AI Novel Production Engine
+# Write Now / AI Novel Production Engine
 一个面向长篇小说创作的 AI Native 开源项目。
 
 当前开发主线：
@@ -13,9 +13,6 @@
 ![Database](https://img.shields.io/badge/Database-SQLite%20%2B%20Prisma-111827)
 ![Vector DB](https://img.shields.io/badge/RAG-Qdrant-E63946)
 
-<a href="https://trendshift.io/repositories/26664?utm_source=repository-badge&amp;utm_medium=badge&amp;utm_campaign=badge-repository-26664" target="_blank" rel="noopener noreferrer">
-  <img src="https://trendshift.io/api/badge/repositories/26664" alt="ExplosiveCoderflome/AI-Novel-Writing-Assistant | Trendshift" width="250" height="55" />
-</a>
 
 ## ✨ 项目简介
 
@@ -35,19 +32,19 @@
 
 如果你只是想直接下载安装并开始使用，优先从桌面版入口进入：
 
-- 下载入口：[GitHub Releases](https://github.com/ExplosiveCoderflome/AI-Novel-Writing-Assistant/releases)
-- 最新版本页：[Latest Release](https://github.com/ExplosiveCoderflome/AI-Novel-Writing-Assistant/releases/latest)
+- 下载入口：[GitHub Releases](https://github.com/weifu1997/write-now/releases)
+- 最新版本页：[Latest Release](https://github.com/weifu1997/write-now/releases/latest)
 - 建议优先下载 `Setup.exe` 安装版；如果你不想安装，或者想放在 U 盘 / 临时目录里直接运行，再选择 `portable` 版本
-- 公开介绍站：[GitHub Pages 介绍站](https://explosivecoderflome.github.io/AI-Novel-Writing-Assistant/) 提供功能预览、模块文档和使用指南
+- 公开介绍站：[GitHub Pages 介绍站](https://weifu1997.github.io/write-now/) 提供功能预览、模块文档和使用指南
 
 ## 用 Codex 持续创作长篇：Ani Book Skill
 
-如果你希望直接在 Codex 的本地工作区推进小说，可以使用 [Ani Book Skill](https://github.com/ExplosiveCoderflome/ani-book-skill)。它将方向判断、故事发动机、章节推进、审校修复和连续性管理组织为一条可恢复、可追溯的长篇创作流程。
+如果你希望直接在 Codex 的本地工作区推进小说，可以使用 [Ani Book Skill](https://github.com/weifu1997/ani-book-skill)。它将方向判断、故事发动机、章节推进、审校修复和连续性管理组织为一条可恢复、可追溯的长篇创作流程。
 
 这是一条与本项目互补的创作入口：
 
 - 需要可视化创作工作台、模型配置、运行实况与小说资产管理：使用本仓库。
-- 希望在 Codex 中通过本地文件、阶段工件和 Skill 直接持续创作：前往 [Ani Book Skill](https://github.com/ExplosiveCoderflome/ani-book-skill)。
+- 希望在 Codex 中通过本地文件、阶段工件和 Skill 直接持续创作：前往 [Ani Book Skill](https://github.com/weifu1997/ani-book-skill)。
 
 ## 项目定位
 
@@ -150,26 +147,12 @@
 
 ## 最新更新
 
-### 2026-09-04
+### 2026-09-06
 
-- 模型厂商的候选模型可逐个隐藏，并能在高级维护区单独或全部恢复；隐藏结果会随配置保存，刷新或重启后仍然有效。
-- 当前使用的模型会受到保护，已有任务路由也会继续显示和运行原先选择的模型。
-- DeepSeek V4 可选择关闭、低、高或最大思考深度，默认使用高；结构化任务仍会优先保证稳定输出。
-- AI 实况会把厂商返回的思考过程与生成内容分开完整展示；关闭模型思考后，厂商仍然返回的思考内容也不会被隐藏。
-- AI 实况会实时显示本次调用的总耗时和首个返回耗时，并在结束后列出输入、输出、思考与合计 Token；近期实况保存在本机，缓存不可用时也不影响生成。
-- “模型路由管理”成为独立设置入口；模型与厂商页面只负责连接和模型目录，任务用哪个模型可在路由页面集中设置。
-- DeepSeek 内置候选聚焦 V4 Flash 与 V4 Pro，旧模型只在已有配置或历史路由需要时保留。
-- 从已有项目继续自动导演时，弹窗会直接展示推荐接续方式；主要动作更集中，模型、写法和接续位置等调整收在按需展开的高级设置中。
-- 接续目标超过当前卷的章节范围时，AI 会先补齐后续卷规划与近期拆章，再持续推进到选定章节。
-- 调整卷规划的审查或其他局部内容时，会保留已有卷和章节规划，不会因一次局部保存误清空整本结构。
-- 30 至 59 章的紧凑全书会按三卷安排开局、转向和终局，第三卷末会完成整书收尾。
-- 新小说的空白占位卷不会再把自动导演锁成一卷；系统会按整书篇幅正确分卷，同时保留用户明确设置的分卷方案。
-- 从热门题材雷达开书时，AI 会先用通用角色称谓整理创意种子，具体人物与世界命名留到后续规划。
-- 章节场景拆解不完整时会自动携带中文原因修正一次，不再直接显示内部英文错误。
-- 章节完成审校且有待处理建议时，右侧 AI 执行台也会提供修复入口。
-- 自定义模型厂商可选择 Bearer、x-api-key 或无需鉴权，模型列表、连接测试和正式生成保持一致。
-- 模型地址已包含 `/models` 时不会重复追加路径，避免 Gemini 和第三方网关获取模型失败。
-- Windows 桌面版更新至 0.4.19，包含章节执行保护、模型路由管理以及 AI 实况耗时与 Token 统计。
+- 产品更名为 Write Now，应用界面、官网介绍站、桌面应用与文档统一采用新名称。
+- 项目仓库迁移至 [weifu1997/write-now](https://github.com/weifu1997/write-now)，项目链接与桌面端更新地址同步更新。
+- 数据库、向量知识库与导出文件格式保持兼容，现有数据可继续使用。
+- Docker 自托管部署开箱即用：数据库、后端与前端一个命令启动，前端网关默认同源代理接口，长耗时生成与流式输出已适配，配套安装指南与常见问题文档。
 
 完整历史更新见 [docs/releases/release-notes.md](./docs/releases/release-notes.md)。
 
@@ -563,9 +546,9 @@ pnpm lint
 pnpm db:migrate
 pnpm db:seed
 pnpm db:studio
-pnpm --filter @ai-novel/server test
-pnpm --filter @ai-novel/server test:routes
-pnpm --filter @ai-novel/server test:book-analysis
+pnpm --filter @write-now/server test
+pnpm --filter @write-now/server test:routes
+pnpm --filter @write-now/server test:book-analysis
 ```
 
 ## 技术栈与架构

@@ -80,9 +80,9 @@ User Command
 
 本轮验证：
 
-- `pnpm --filter @ai-novel/shared build`
-- `pnpm --filter @ai-novel/server build`
-- `pnpm --filter @ai-novel/client typecheck`
+- `pnpm --filter @write-now/shared build`
+- `pnpm --filter @write-now/server build`
+- `pnpm --filter @write-now/client typecheck`
 - `node --test server/tests/directorWorkflowStepModules.test.js server/tests/directorExecutionService.test.js server/tests/directorRuntimeExecutionService.test.js server/tests/directorChapterExecutionProgress.test.js`
 
 ### P0-1 统一入口语义
@@ -108,7 +108,7 @@ User Command
 - 已覆盖 command 类型：`generate_candidates`、`refine_candidates`、`patch_candidate`、`refine_titles`、`confirm_candidate`、`continue`、`resume_from_checkpoint`、`retry`、`takeover`、`approve_gate`、`repair_chapter_titles`、`policy_update`、`workspace_analysis`、`manual_edit_impact`、`cancel`。
 - 写入型 route 已收口为 `DirectorCommandService.enqueue*Command()`，候选弹窗改为提交 command 后读取 command result projection。
 - `DirectorRuntimeExecutionService` 保持旧 API 兼容，但 Worker 执行路径进入 `DirectorPipelineEngine.dispatch()`；Pipeline 内部 adapter 包装旧重型服务，route 层不再直调。
-- 验证命令：`pnpm --filter @ai-novel/shared build`、`pnpm --filter @ai-novel/server build`、`pnpm --filter @ai-novel/client typecheck`、`node --test server/tests/directorControlPlaneBoundary.test.js server/tests/directorRunCommandService.test.js server/tests/directorExecutionService.test.js server/tests/directorWorker.test.js`。
+- 验证命令：`pnpm --filter @write-now/shared build`、`pnpm --filter @write-now/server build`、`pnpm --filter @write-now/client typecheck`、`node --test server/tests/directorControlPlaneBoundary.test.js server/tests/directorRunCommandService.test.js server/tests/directorExecutionService.test.js server/tests/directorWorker.test.js`。
 
 ### P0-2 做实 StepModule 契约
 

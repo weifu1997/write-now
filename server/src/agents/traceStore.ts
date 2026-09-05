@@ -5,7 +5,7 @@ import type {
   AgentRunMetrics,
   AgentStep,
   AgentToolErrorCode,
-} from "@ai-novel/shared/types/agent";
+} from "@write-now/shared/types/agent";
 import {
   AgentApprovalStatus,
   AgentRunStatus,

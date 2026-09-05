@@ -1,4 +1,4 @@
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import type { TaskType } from "../../llm/modelRouter";
 import type { LlmTokenUsageSnapshot } from "../../llm/usageTracking";
 import type { PromptMode } from "./promptTypes";

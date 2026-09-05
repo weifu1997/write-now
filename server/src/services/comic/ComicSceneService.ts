@@ -14,7 +14,7 @@ import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/errorHandler";
 import { resolveGeneratedImagesRoot } from "../../runtime/appPaths";
 import { runImageGeneration, safeJsonParse, type ImageTargetAdapter } from "../image/runtime";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { resolveComicStyleKeywords } from "./comicStylePrompt";
 
 // ─── Types ────────────────────────────────────────────────────────────────────

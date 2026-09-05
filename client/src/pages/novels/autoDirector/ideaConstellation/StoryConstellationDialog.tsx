@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   DirectorIdeaConstellationOption,
   DirectorIdeaConstellationSelection,
-} from "@ai-novel/shared/types/novelDirector";
+} from "@write-now/shared/types/novelDirector";
 import { motion, useReducedMotion } from "framer-motion";
 import { Check, Loader2, RotateCcw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";

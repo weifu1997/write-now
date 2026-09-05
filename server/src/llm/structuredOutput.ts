@@ -1,6 +1,6 @@
 import { toJSONSchema, type ZodType } from "zod";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
-import type { ModelRouteRequestProtocol } from "@ai-novel/shared/types/novel";
+import type { LLMProvider } from "@write-now/shared/types/llm";
+import type { ModelRouteRequestProtocol } from "@write-now/shared/types/novel";
 import { isBuiltInProvider } from "./providers";
 import { isDeepSeekThinkingModeProvider } from "./reasoning";
 

@@ -2,7 +2,7 @@ import type {
   NovelWorkflowLane,
   NovelWorkflowResumeTarget,
   NovelWorkflowStage,
-} from "@ai-novel/shared/types/novelWorkflow";
+} from "@write-now/shared/types/novelWorkflow";
 import { DIRECTOR_PROGRESS } from "../director/projections/novelDirectorProgress";
 import { NOVEL_WORKFLOW_STAGE_PROGRESS, parseResumeTarget } from "./novelWorkflow.shared";
 

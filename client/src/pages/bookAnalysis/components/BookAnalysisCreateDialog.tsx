@@ -3,8 +3,8 @@ import {
   BOOK_ANALYSIS_SECTIONS,
   DEFAULT_BOOK_ANALYSIS_BUDGET_TOKENS,
   type BookAnalysisPreset,
-} from "@ai-novel/shared/types/bookAnalysis";
-import type { DocumentChapter, KnowledgeDocumentDetail, KnowledgeDocumentSummary } from "@ai-novel/shared/types/knowledge";
+} from "@write-now/shared/types/bookAnalysis";
+import type { DocumentChapter, KnowledgeDocumentDetail, KnowledgeDocumentSummary } from "@write-now/shared/types/knowledge";
 import LLMSelector from "@/components/common/LLMSelector";
 import BookAnalysisSourceRangePicker from "./BookAnalysisSourceRangePicker";
 import { Button } from "@/components/ui/button";

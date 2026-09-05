@@ -6,15 +6,15 @@
   AutoDirectorTakeoverValidationInput,
   AutoDirectorValidationResult,
   AutoDirectorValidationRequiredAction,
-} from "@ai-novel/shared/types/autoDirectorValidation";
+} from "@write-now/shared/types/autoDirectorValidation";
 import {
   AUTO_DIRECTOR_TAKEOVER_ENTRY_ORDER,
-} from "@ai-novel/shared/types/autoDirectorValidation";
+} from "@write-now/shared/types/autoDirectorValidation";
 import type {
   DirectorAutoExecutionPlan,
   DirectorTakeoverEntryStep,
-} from "@ai-novel/shared/types/novelDirector";
-import type { NovelWorkflowCheckpoint } from "@ai-novel/shared/types/novelWorkflow";
+} from "@write-now/shared/types/novelDirector";
+import type { NovelWorkflowCheckpoint } from "@write-now/shared/types/novelWorkflow";
 
 const WEB_SOURCES = new Set(["web", "follow_up_action", "batch_action", "takeover", "continue", "retry"]);
 const CHANNEL_SOURCES = new Set(["dingtalk", "wecom", "channel_callback"]);

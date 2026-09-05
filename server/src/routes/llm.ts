@@ -1,6 +1,6 @@
 import { Router } from "express";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
-import { PROVIDER_AUTH_MODES } from "@ai-novel/shared/types/llm";
+import type { ApiResponse } from "@write-now/shared/types/api";
+import { PROVIDER_AUTH_MODES } from "@write-now/shared/types/llm";
 import { z } from "zod";
 import { prisma } from "../db/prisma";
 import { llmConnectivityService } from "../llm/connectivity";

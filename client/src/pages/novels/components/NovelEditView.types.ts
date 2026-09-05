@@ -30,7 +30,7 @@ import type {
   VolumeCritiqueReport,
   VolumeCountGuidance,
   VolumeSyncPreview,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import type {
   StoryConstraintEngine,
   StoryMacroFieldValue,
@@ -40,27 +40,27 @@ import type {
   StoryMacroIssue,
   StoryMacroLocks,
   StoryMacroState,
-} from "@ai-novel/shared/types/storyMacro";
-import type { BookAnalysisSectionKey } from "@ai-novel/shared/types/bookAnalysis";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
-import type { NovelExportDownloadFormat, NovelExportFormat } from "@ai-novel/shared/types/novelExport";
-import type { ChapterRuntimePackage } from "@ai-novel/shared/types/chapterRuntime";
+} from "@write-now/shared/types/storyMacro";
+import type { BookAnalysisSectionKey } from "@write-now/shared/types/bookAnalysis";
+import type { LLMProvider } from "@write-now/shared/types/llm";
+import type { NovelExportDownloadFormat, NovelExportFormat } from "@write-now/shared/types/novelExport";
+import type { ChapterRuntimePackage } from "@write-now/shared/types/chapterRuntime";
 import type {
   CharacterResourceContext,
   CharacterResourceLedgerItem,
   CharacterResourceProposalSummary,
-} from "@ai-novel/shared/types/characterResource";
-import type { TimelineCheckReport, TimelineContextForChapter } from "@ai-novel/shared/types/timeline";
-import type { StoryWorldSliceOverrides, StoryWorldSliceView } from "@ai-novel/shared/types/storyWorldSlice";
-import type { UnifiedTaskDetail } from "@ai-novel/shared/types/task";
-import type { AutoDirectorAction, AutoDirectorFollowUpDetail } from "@ai-novel/shared/types/autoDirectorFollowUp";
+} from "@write-now/shared/types/characterResource";
+import type { TimelineCheckReport, TimelineContextForChapter } from "@write-now/shared/types/timeline";
+import type { StoryWorldSliceOverrides, StoryWorldSliceView } from "@write-now/shared/types/storyWorldSlice";
+import type { UnifiedTaskDetail } from "@write-now/shared/types/task";
+import type { AutoDirectorAction, AutoDirectorFollowUpDetail } from "@write-now/shared/types/autoDirectorFollowUp";
 import type {
   DirectorManualEditImpact,
   DirectorBookAutomationAction,
   DirectorBookAutomationProjection,
   DirectorRuntimeSnapshot,
   DirectorTaskSnapshot,
-} from "@ai-novel/shared/types/directorRuntime";
+} from "@write-now/shared/types/directorRuntime";
 import type { ChapterExecutionBackgroundActivity } from "./chapterExecution.shared";
 import type { QuickCharacterCreatePayload } from "./characterPanel.utils";
 import type { ChapterReviewResult } from "../chapterPlanning.shared";
@@ -70,7 +70,7 @@ import type { NovelBasicFormState } from "../novelBasicInfo.shared";
 import type { ExistingOutlineChapter } from "../volumePlan.utils";
 import type { AITakeoverAction } from "@/components/workflow/AITakeoverContainer";
 import type { LLMSelectorValue } from "@/components/common/LLMSelector";
-import type { SSEFrame } from "@ai-novel/shared/types/api";
+import type { SSEFrame } from "@write-now/shared/types/api";
 import type {
   NovelWorldGenerateInput,
   NovelWorldImportInput,
@@ -79,7 +79,7 @@ import type {
   NovelWorldSyncDiff,
   NovelWorldSyncInput,
   NovelWorldView,
-} from "@ai-novel/shared/types/novelWorld";
+} from "@write-now/shared/types/novelWorld";
 import type { ReactNode } from "react";
 
 export interface StructuredChapterListGenerationRequest {

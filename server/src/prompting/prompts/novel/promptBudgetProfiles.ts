@@ -1,4 +1,4 @@
-import type { PromptBudgetProfile } from "@ai-novel/shared/types/chapterRuntime";
+import type { PromptBudgetProfile } from "@write-now/shared/types/chapterRuntime";
 
 export const NOVEL_PROMPT_BUDGETS = {
   directorCandidates: 1200,

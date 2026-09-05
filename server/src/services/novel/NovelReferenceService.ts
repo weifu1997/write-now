@@ -1,9 +1,9 @@
-import type { BookAnalysisSectionKey, BookAnalysisTimelineNode } from "@ai-novel/shared/types/bookAnalysis";
+import type { BookAnalysisSectionKey, BookAnalysisTimelineNode } from "@write-now/shared/types/bookAnalysis";
 import {
   BOOK_ANALYSIS_STRUCTURED_FIELD_LABELS,
   BOOK_ANALYSIS_STRUCTURED_FIELD_SPECS,
-} from "@ai-novel/shared/types/bookAnalysis";
-import { groupBookAnalysisTimelineNodesByPhase } from "@ai-novel/shared/utils/bookAnalysisTimeline";
+} from "@write-now/shared/types/bookAnalysis";
+import { groupBookAnalysisTimelineNodesByPhase } from "@write-now/shared/utils/bookAnalysisTimeline";
 import { prisma } from "../../db/prisma";
 import {
   listActiveKnowledgeDocumentContents,

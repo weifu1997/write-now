@@ -1,6 +1,6 @@
 import { Router } from "express";
-import type { ApiResponse } from "@ai-novel/shared/types/api";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { ApiResponse } from "@write-now/shared/types/api";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { z } from "zod";
 import { validate } from "../../../middleware/validate";
 import { ComicProjectService } from "../../../services/comic/ComicProjectService";

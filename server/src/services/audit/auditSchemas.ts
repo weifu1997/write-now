@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { QualityScore, ReviewIssue, AuditType } from "@ai-novel/shared/types/novel";
+import type { QualityScore, ReviewIssue, AuditType } from "@write-now/shared/types/novel";
 
 const qualityScorePartialSchema = z.object({
   coherence: z.number().min(0).max(100).optional(),

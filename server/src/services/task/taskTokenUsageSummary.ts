@@ -1,4 +1,4 @@
-import type { TaskTokenUsageSummary } from "@ai-novel/shared/types/task";
+import type { TaskTokenUsageSummary } from "@write-now/shared/types/task";
 
 export function toTaskTokenUsageSummary(input: {
   promptTokens: number;

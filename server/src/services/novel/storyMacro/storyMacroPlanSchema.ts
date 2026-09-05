@@ -6,7 +6,7 @@ import type {
   StoryMacroIssue,
   StoryMacroLocks,
   StoryMacroState,
-} from "@ai-novel/shared/types/storyMacro";
+} from "@write-now/shared/types/storyMacro";
 import { z } from "zod";
 
 const STORY_MACRO_FIELD_SET = new Set<string>([

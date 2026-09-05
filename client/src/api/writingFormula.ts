@@ -1,5 +1,5 @@
-import type { ApiResponse } from "@ai-novel/shared/types/api";
-import type { WritingFormula } from "@ai-novel/shared/types/writingFormula";
+import type { ApiResponse } from "@write-now/shared/types/api";
+import type { WritingFormula } from "@write-now/shared/types/writingFormula";
 import { apiClient } from "./client";
 
 export async function getWritingFormulas() {

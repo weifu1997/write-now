@@ -2,8 +2,8 @@ import type {
   DirectorPolicyMode,
   DirectorRuntimeProjection,
   DirectorRuntimeProjectionStatus,
-} from "@ai-novel/shared/types/directorRuntime";
-import { getDirectorNodeDisplayLabel } from "@ai-novel/shared/types/directorRuntime";
+} from "@write-now/shared/types/directorRuntime";
+import { getDirectorNodeDisplayLabel } from "@write-now/shared/types/directorRuntime";
 import {
   Activity,
   AlertTriangle,
@@ -15,7 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
-import type { DirectorIssueAction, DirectorIssueDecision } from "@ai-novel/shared/types/directorIssue";
+import type { DirectorIssueAction, DirectorIssueDecision } from "@write-now/shared/types/directorIssue";
 
 interface DirectorRuntimeProjectionCardProps {
   projection: DirectorRuntimeProjection | null | undefined;

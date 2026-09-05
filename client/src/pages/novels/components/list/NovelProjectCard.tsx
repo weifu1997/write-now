@@ -1,8 +1,8 @@
 import type { KeyboardEvent, MouseEvent } from "react";
 import { Download, Eye, Gauge, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import type { DirectorContinuationMode } from "@ai-novel/shared/types/novelDirector";
-import type { NovelAutoDirectorTaskSummary } from "@ai-novel/shared/types/novel";
+import type { DirectorContinuationMode } from "@write-now/shared/types/novelDirector";
+import type { NovelAutoDirectorTaskSummary } from "@write-now/shared/types/novel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";

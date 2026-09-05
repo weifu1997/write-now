@@ -1,6 +1,6 @@
 # 后端测试基础设施
 
-本仓库的长期业务逻辑主要在 [`server/tests/`](../../server/tests/) 下，使用 **Node 内置 `node:test`** 与 **`node:assert/strict`**。默认测试入口会先构建 `@ai-novel/shared` 与 `@ai-novel/server`，再运行日常快速测试。
+本仓库的长期业务逻辑主要在 [`server/tests/`](../../server/tests/) 下，使用 **Node 内置 `node:test`** 与 **`node:assert/strict`**。默认测试入口会先构建 `@write-now/shared` 与 `@write-now/server`，再运行日常快速测试。
 
 ## 运行方式
 
@@ -9,13 +9,13 @@
 pnpm test
 
 # 仅运行后端快速测试
-pnpm --filter @ai-novel/server test
+pnpm --filter @write-now/server test
 
 # 已经构建过时，只运行后端快速测试文件
-pnpm --filter @ai-novel/server test:node
+pnpm --filter @write-now/server test:node
 
 # 运行真实 Prisma / 迁移 / 兼容性等重型集成测试
-pnpm --filter @ai-novel/server test:integration
+pnpm --filter @write-now/server test:integration
 
 # 完整测试入口：后端快速测试 + 后端集成测试 + 客户端测试
 pnpm test:all

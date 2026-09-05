@@ -6,7 +6,7 @@ import type {
   WorldGenerationBlueprint,
   WorldReferenceContext,
   WorldSkeletonGenerationOptions,
-} from "@ai-novel/shared/types/worldWizard";
+} from "@write-now/shared/types/worldWizard";
 
 const worldDraftFieldSchema = z.string().trim().min(1).optional().nullable();
 

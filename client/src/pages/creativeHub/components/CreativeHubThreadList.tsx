@@ -1,4 +1,4 @@
-import type { CreativeHubThread } from "@ai-novel/shared/types/creativeHub";
+import type { CreativeHubThread } from "@write-now/shared/types/creativeHub";
 import { RefreshCw } from "lucide-react";
 import { WorkspaceStateNotice } from "@/components/workspace";
 import { Badge } from "@/components/ui/badge";

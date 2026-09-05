@@ -1,4 +1,4 @@
-import type { AgentPlan } from "@ai-novel/shared/types/agent";
+import type { AgentPlan } from "@write-now/shared/types/agent";
 import type { AgentName, PlannerInput, StructuredIntent } from "../../agents/types";
 
 export interface WorkflowActionDefinition {

@@ -148,7 +148,7 @@ function buildManagedServerCommand(): {
 
   return {
     command: toPnpmCommand(),
-    args: ["--filter", "@ai-novel/server", "start"],
+    args: ["--filter", "@write-now/server", "start"],
     cwd: resolveWorkspaceRoot(),
   };
 }
@@ -250,7 +250,7 @@ function startPackagedManagedServer(port: number): ManagedDesktopProcess {
       RAG_ENABLED: process.env.RAG_ENABLED?.trim() || "false",
     },
     stdio: "pipe",
-    serviceName: "AI Novel Local Server",
+    serviceName: "Write Now Local Server",
   });
 
   let hasExited = false;

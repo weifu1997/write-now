@@ -1,11 +1,11 @@
 import { createHash } from "node:crypto";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import type {
   StoryWorldSlice,
   StoryWorldSliceBuilderMode,
   StoryWorldSliceOverrides,
   StoryWorldSliceView,
-} from "@ai-novel/shared/types/storyWorldSlice";
+} from "@write-now/shared/types/storyWorldSlice";
 import { prisma } from "../../../db/prisma";
 import { runStructuredPrompt } from "../../../prompting/core/promptRunner";
 import { storyWorldSlicePrompt } from "../../../prompting/prompts/storyWorldSlice/storyWorldSlice.prompts";

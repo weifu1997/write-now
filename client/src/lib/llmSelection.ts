@@ -1,5 +1,5 @@
 import type { APIKeyStatus, LLMSelectionSettings } from "@/api/settings";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 
 export interface LLMSelectionValue {
   provider: LLMProvider;

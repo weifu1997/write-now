@@ -1,4 +1,4 @@
-import type { AntiAiEffectiveRuleItem } from "@ai-novel/shared/types/styleEngine";
+import type { AntiAiEffectiveRuleItem } from "@write-now/shared/types/styleEngine";
 import { Badge } from "@/components/ui/badge";
 import { severityLabels, typeLabels } from "../antiAiRulesPage.shared";
 

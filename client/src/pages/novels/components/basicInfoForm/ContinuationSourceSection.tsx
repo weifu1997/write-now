@@ -1,4 +1,4 @@
-import type { BookAnalysisSectionKey } from "@ai-novel/shared/types/bookAnalysis";
+import type { BookAnalysisSectionKey } from "@write-now/shared/types/bookAnalysis";
 import { Button } from "@/components/ui/button";
 import {
   BASIC_INFO_FIELD_HINTS,

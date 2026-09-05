@@ -1,4 +1,4 @@
-import type { StoryConflictLayers } from "@ai-novel/shared/types/storyMacro";
+import type { StoryConflictLayers } from "@write-now/shared/types/storyMacro";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

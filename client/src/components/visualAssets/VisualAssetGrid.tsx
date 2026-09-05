@@ -1,4 +1,4 @@
-import type { VisualAssetCatalogItem } from "@ai-novel/shared/types/visualAsset";
+import type { VisualAssetCatalogItem } from "@write-now/shared/types/visualAsset";
 import { Check, ImageOff, Info } from "lucide-react";
 import { resolveImageAssetUrl } from "@/api/images";
 import { Button } from "@/components/ui/button";

@@ -1,10 +1,10 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { DEFAULT_NOVEL_COVER_NEGATIVE_PROMPT } = require("@ai-novel/shared/imagePrompt");
+const { DEFAULT_NOVEL_COVER_NEGATIVE_PROMPT } = require("@write-now/shared/imagePrompt");
 const {
   DEFAULT_NOVEL_COVER_IMAGE_COUNT,
   DEFAULT_NOVEL_COVER_IMAGE_SIZE,
-} = require("@ai-novel/shared/types/image");
+} = require("@write-now/shared/types/image");
 const { prisma } = require("../dist/db/prisma.js");
 const { ImageGenerationService } = require("../dist/services/image/ImageGenerationService.js");
 const { WorldContextGateway } = require("../dist/services/novel/worldContext/WorldContextGateway.js");

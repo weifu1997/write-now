@@ -2,9 +2,9 @@ import type {
   BookAnalysisCharacterAppearanceMergeResult,
   BookAnalysisCharacterAppearanceTerm,
   BookAnalysisCharacterAppearanceTermStatus,
-} from "@ai-novel/shared/types/bookAnalysisCharacter";
-import type { CharacterProfile } from "@ai-novel/shared/types/characterProfile";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+} from "@write-now/shared/types/bookAnalysisCharacter";
+import type { CharacterProfile } from "@write-now/shared/types/characterProfile";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { prisma } from "../../../db/prisma";
 import { AppError } from "../../../middleware/errorHandler";
 import { runStructuredPrompt } from "../../../prompting/core/promptRunner";

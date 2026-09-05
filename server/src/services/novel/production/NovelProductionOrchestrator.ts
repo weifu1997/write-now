@@ -1,4 +1,4 @@
-import type { NovelControlPolicy } from "@ai-novel/shared/types/canonicalState";
+import type { NovelControlPolicy } from "@write-now/shared/types/canonicalState";
 
 export type NovelProductionStage =
   | "project_framing"

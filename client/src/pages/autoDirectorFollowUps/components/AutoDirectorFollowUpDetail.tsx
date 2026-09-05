@@ -2,7 +2,7 @@ import type {
   AutoDirectorAction,
   AutoDirectorFollowUpDetail,
   AutoDirectorFollowUpItem,
-} from "@ai-novel/shared/types/autoDirectorFollowUp";
+} from "@write-now/shared/types/autoDirectorFollowUp";
 import { Button } from "@/components/ui/button";
 import {
   TaskQueueActionRow,

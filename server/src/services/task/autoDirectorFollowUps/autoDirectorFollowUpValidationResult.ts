@@ -3,10 +3,10 @@ import type {
   AutoDirectorValidationRequiredAction,
   AutoDirectorValidationRequiredActionCode,
   AutoDirectorValidationResult,
-} from "@ai-novel/shared/types/autoDirectorValidation";
+} from "@write-now/shared/types/autoDirectorValidation";
 import type {
   AutoDirectorFollowUpValidationSummary,
-} from "@ai-novel/shared/types/autoDirectorFollowUp";
+} from "@write-now/shared/types/autoDirectorFollowUp";
 
 const REQUIRED_ACTION_CODES: readonly AutoDirectorValidationRequiredActionCode[] = [
   "clear_checkpoint",

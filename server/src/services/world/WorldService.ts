@@ -1,12 +1,12 @@
 import type { Prisma } from "@prisma/client";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import type {
   WorldConsistencyReport,
   WorldLayerKey,
   WorldStructuredData,
   WorldStructureSectionKey,
   WorldVisualizationPayload,
-} from "@ai-novel/shared/types/world";
+} from "@write-now/shared/types/world";
 import { prisma } from "../../db/prisma";
 import { runStructuredPrompt } from "../../prompting/core/promptRunner";
 import { worldAxiomSuggestionPrompt } from "../../prompting/prompts/world/world.prompts";

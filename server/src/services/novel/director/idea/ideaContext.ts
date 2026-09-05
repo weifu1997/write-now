@@ -1,4 +1,4 @@
-import type { DirectorIdeaContextRequest } from "@ai-novel/shared/types/novelDirector";
+import type { DirectorIdeaContextRequest } from "@write-now/shared/types/novelDirector";
 import { StructuredOutputError } from "../../../../llm/structuredOutput";
 import { buildBookFramingSummary } from "../../bookFraming";
 

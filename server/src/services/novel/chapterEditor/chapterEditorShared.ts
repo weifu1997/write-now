@@ -8,7 +8,7 @@ import type {
   StoryPlan,
   StoryStateSnapshot,
   VolumePlan,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 
 type WorldLike = {
   name?: string | null;

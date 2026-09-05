@@ -3,7 +3,7 @@ import type {
   VisualAssetOrigin,
   VisualAssetScopeKind,
   VisualAssetSourceDomain,
-} from "@ai-novel/shared/types/visualAsset";
+} from "@write-now/shared/types/visualAsset";
 
 const KIND_LABELS: Record<VisualAssetKind, string> = {
   character: "角色形象",

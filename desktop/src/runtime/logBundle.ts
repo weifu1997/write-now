@@ -77,7 +77,7 @@ function collectRecentLogFiles(limit = 5): Array<{ name: string; data: Buffer }>
 }
 
 export function createDesktopLogBundle(summary: string): string {
-  const tempPath = path.join(os.tmpdir(), `ai-novel-logs-${Date.now()}.zip`);
+  const tempPath = path.join(os.tmpdir(), `write-now-logs-${Date.now()}.zip`);
   const entries = [
     ...collectRecentLogFiles(),
     { name: "runtime-summary.txt", data: Buffer.from(summary, "utf8") },

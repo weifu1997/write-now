@@ -1,10 +1,10 @@
 import { Prisma } from "@prisma/client";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import type {
   StyleExtractionDraft,
   StyleExtractionSourceProcessingMode,
   StyleFeatureDecision,
-} from "@ai-novel/shared/types/styleEngine";
+} from "@write-now/shared/types/styleEngine";
 import { prisma } from "../../db/prisma";
 import { runWithLlmUsageTracking } from "../../llm/usageTracking";
 import { AppError } from "../../middleware/errorHandler";

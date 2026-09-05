@@ -1,4 +1,4 @@
-import type { NovelWorldHandbook } from "@ai-novel/shared/types/novelWorld";
+import type { NovelWorldHandbook } from "@write-now/shared/types/novelWorld";
 import { normalizeWorldStructuredData } from "../../world/worldStructure";
 
 export interface NovelWorldHandbookSource {

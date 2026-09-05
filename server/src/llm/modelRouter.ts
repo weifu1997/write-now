@@ -1,9 +1,9 @@
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import type {
   ModelRouteRequestProtocol,
   ModelRouteStructuredResponseFormat,
   ModelRouteTaskType,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import { prisma } from "../db/prisma";
 import { isBuiltInProvider, PROVIDERS } from "./providers";
 import type { StructuredOutputStrategy } from "./structuredOutput";

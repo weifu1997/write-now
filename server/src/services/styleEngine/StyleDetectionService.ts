@@ -1,5 +1,5 @@
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
-import type { StyleDetectionReport } from "@ai-novel/shared/types/styleEngine";
+import type { LLMProvider } from "@write-now/shared/types/llm";
+import type { StyleDetectionReport } from "@write-now/shared/types/styleEngine";
 import { runStructuredPrompt } from "../../prompting/core/promptRunner";
 import { styleDetectionPrompt } from "../../prompting/prompts/style/style.prompts";
 import {

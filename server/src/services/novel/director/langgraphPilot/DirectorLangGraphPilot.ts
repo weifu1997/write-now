@@ -1,5 +1,5 @@
 import { Annotation, END, START, StateGraph } from "@langchain/langgraph";
-import type { DirectorWorkspaceAnalysis } from "@ai-novel/shared/types/directorRuntime";
+import type { DirectorWorkspaceAnalysis } from "@write-now/shared/types/directorRuntime";
 import type { DirectorRuntimeService } from "../runtime/DirectorRuntimeService";
 import type { WorkflowPlan, WorkflowPlanStep } from "../workflowStepRuntime/WorkflowStepModule";
 

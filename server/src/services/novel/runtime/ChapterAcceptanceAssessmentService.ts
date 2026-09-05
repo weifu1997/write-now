@@ -1,9 +1,9 @@
-import type { AuditReport, AuditType, QualityScore, ReviewIssue } from "@ai-novel/shared/types/novel";
+import type { AuditReport, AuditType, QualityScore, ReviewIssue } from "@write-now/shared/types/novel";
 import type {
   ChapterExecutionMissingObligation,
   GenerationContextPackage,
-} from "@ai-novel/shared/types/chapterRuntime";
-import type { LLMProvider } from "@ai-novel/shared/types/llm";
+} from "@write-now/shared/types/chapterRuntime";
+import type { LLMProvider } from "@write-now/shared/types/llm";
 import { prisma } from "../../../db/prisma";
 import { runStructuredPrompt } from "../../../prompting/core/promptRunner";
 import { resolvePromptContextBlocksForAsset } from "../../../prompting/context/promptContextResolution";

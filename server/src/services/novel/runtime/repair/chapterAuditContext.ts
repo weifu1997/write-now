@@ -1,4 +1,4 @@
-import type { GenerationContextPackage } from "@ai-novel/shared/types/chapterRuntime";
+import type { GenerationContextPackage } from "@write-now/shared/types/chapterRuntime";
 import type { ReviewOptions } from "../../novelCoreShared";
 import { logPipelineError } from "../../novelCoreShared";
 import { GenerationContextAssembler } from "../GenerationContextAssembler";

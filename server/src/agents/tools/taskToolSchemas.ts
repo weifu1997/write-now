@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { TaskKind, TaskStatus } from "@ai-novel/shared/types/task";
+import type { TaskKind, TaskStatus } from "@write-now/shared/types/task";
 import {
   toolListLimitSchema,
   toolNullableTextSchema,

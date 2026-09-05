@@ -9,7 +9,7 @@ import {
   type ThreadAssistantMessagePart,
   type ThreadMessage,
 } from "@assistant-ui/react";
-import type { SSEFrame } from "@ai-novel/shared/types/api";
+import type { SSEFrame } from "@write-now/shared/types/api";
 import type { ChatMessage } from "@/store/chatStore";
 import MarkdownViewer from "@/components/common/MarkdownViewer";
 import { API_BASE_URL } from "@/lib/constants";

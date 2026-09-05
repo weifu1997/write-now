@@ -1,8 +1,8 @@
-import type { ApiResponse } from "@ai-novel/shared/types/api";
+import type { ApiResponse } from "@write-now/shared/types/api";
 import type {
   TimelineCheckReport,
   TimelineContextForChapter,
-} from "@ai-novel/shared/types/timeline";
+} from "@write-now/shared/types/timeline";
 import type {
   ChapterEditorAiRevisionRequest,
   ChapterEditorAiRevisionResponse,
@@ -11,7 +11,7 @@ import type {
   ChapterEditorRewritePreviewRequest,
   ChapterEditorRewritePreviewResponse,
   ChapterStatus,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import { apiClient } from "../client";
 
 export async function getNovelChapters(id: string) {
@@ -78,7 +78,7 @@ export async function deleteNovelChapter(id: string, chapterId: string) {
 }
 
 export async function getChapterTraces(novelId: string, chapterId: string) {
-  const { data } = await apiClient.get<ApiResponse<import("@ai-novel/shared/types/agent").AgentRun[]>>(
+  const { data } = await apiClient.get<ApiResponse<import("@write-now/shared/types/agent").AgentRun[]>>(
     `/novels/${novelId}/chapters/${chapterId}/traces`,
   );
   return data;
@@ -127,7 +127,7 @@ export async function generateChapterExecutionContract(
   novelId: string,
   chapterId: string,
   payload: Partial<{
-    provider: import("@ai-novel/shared/types/llm").LLMProvider;
+    provider: import("@write-now/shared/types/llm").LLMProvider;
     model: string;
     temperature: number;
   }> = {},

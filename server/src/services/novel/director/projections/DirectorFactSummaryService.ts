@@ -2,7 +2,7 @@ import type {
   DirectorArtifactRef,
   DirectorChapterExecutionProgressSummary,
   DirectorTaskFactSummary,
-} from "@ai-novel/shared/types/directorRuntime";
+} from "@write-now/shared/types/directorRuntime";
 import {
   getWorkflowStepArtifacts,
   getWorkflowStepDirectorTaskId,

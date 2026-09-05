@@ -5,7 +5,7 @@ import type {
   PayoffLedgerItem,
   PayoffLedgerResponse,
   StoryStateSnapshot,
-} from "@ai-novel/shared/types/novel";
+} from "@write-now/shared/types/novel";
 import CollapsibleSummary from "./CollapsibleSummary";
 
 interface BookPayoffLedgerCardProps {

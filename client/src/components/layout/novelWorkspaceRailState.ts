@@ -1,5 +1,5 @@
-import type { DirectorTakeoverEntryStep } from "@ai-novel/shared/types/novelDirector";
-import { DIRECTOR_TAKEOVER_ENTRY_STEPS } from "@ai-novel/shared/types/novelDirector";
+import type { DirectorTakeoverEntryStep } from "@write-now/shared/types/novelDirector";
+import { DIRECTOR_TAKEOVER_ENTRY_STEPS } from "@write-now/shared/types/novelDirector";
 import type { NovelWorkspaceFlowTab } from "@/pages/novels/novelWorkspaceNavigation";
 
 export type NovelWorkspaceStepReadiness = Record<NovelWorkspaceFlowTab, boolean>;
