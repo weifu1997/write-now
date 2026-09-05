@@ -1,0 +1,26 @@
+# 保持构建上下文最小化：镜像只 COPY 明确列出的源码与配置文件
+**/node_modules
+**/dist
+**/coverage
+**/*.tsbuildinfo
+.git
+.github
+.agents
+.claude
+.codex
+.zcode
+.trellis
+.logs
+.claude
+docs
+images
+server/dev.db
+server/dev.db-shm
+server/dev.db-wal
+server/tmp
+server/tests
+# workspace 安装需要 desktop/site 的 package.json，但不需要其源码
+desktop
+!desktop/package.json
+site
+!site/package.json

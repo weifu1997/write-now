@@ -16,19 +16,21 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json .npmrc .
 COPY client/package.json ./client/package.json
 COPY server/package.json ./server/package.json
 COPY shared/package.json ./shared/package.json
+COPY desktop/package.json ./desktop/package.json
+COPY site/package.json ./site/package.json
 RUN pnpm install --frozen-lockfile
 
 FROM deps AS build
 WORKDIR /app
+# 服务端代码量大，tsc 编译需要更大堆内存
+ENV NODE_OPTIONS=--max-old-space-size=4096
 ENV AI_NOVEL_DATABASE_MODE=postgresql
-COPY shared/package.json shared/tsconfig.json ./shared/
-COPY shared/*.ts ./shared/
-COPY shared/types ./shared/types
+COPY shared ./shared/
 COPY server/package.json server/tsconfig.json server/prisma.config.ts ./server/
 COPY server/src ./server/src
-RUN pnpm --filter @ai-novel/shared build \
-    && pnpm --filter @ai-novel/server prisma:generate \
-    && pnpm --filter @ai-novel/server build
+RUN pnpm --filter @write-now/shared build \
+    && pnpm --filter @write-now/server prisma:generate \
+    && pnpm --filter @write-now/server build
 
 FROM base AS prod-deps
 WORKDIR /app
@@ -37,28 +39,35 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json .npmrc .
 COPY client/package.json ./client/package.json
 COPY server/package.json ./server/package.json
 COPY shared/package.json ./shared/package.json
+COPY desktop/package.json ./desktop/package.json
+COPY site/package.json ./site/package.json
 COPY server/prisma.config.ts ./server/prisma.config.ts
 COPY server/src/config/database.ts ./server/src/config/database.ts
 COPY server/src/prisma ./server/src/prisma
 ENV AI_NOVEL_DATABASE_MODE=postgresql
 RUN pnpm install --frozen-lockfile \
-    && pnpm --filter @ai-novel/server prisma:generate
+    && pnpm --filter @write-now/server prisma:generate
 
 ARG NODE_IMAGE
 FROM ${NODE_IMAGE} AS runtime
 USER root
 WORKDIR /app
 ENV NODE_ENV=production
+# 容器内必须监听全部网卡，否则端口映射/容器网络都不可达
+ENV HOST=0.0.0.0
 RUN rm -rf /app/* /app/.[!.]* /app/..?* || true
 COPY --from=build --chown=node:node /app/package.json ./package.json
 COPY --from=build --chown=node:node /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY --from=prod-deps --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/server ./server
 COPY --from=build --chown=node:node /app/shared ./shared
-RUN mkdir -p /app/storage/generated-images /app/node_modules/.bin \
+COPY infra/docker/api-entrypoint.sh /usr/local/bin/api-entrypoint.sh
+# 预建存储挂载点并归属 node 用户，保证命名卷挂载后仍可写
+RUN mkdir -p /app/server/storage/generated-images /app/node_modules/.bin \
     && printf '%s\n' '#!/bin/sh' 'exec node /app/server/node_modules/prisma/build/index.js --config /app/server/prisma.config.ts "$@"' > /app/node_modules/.bin/prisma \
-    && chmod +x /app/node_modules/.bin/prisma \
-    && chown -R node:node /app/storage /app/node_modules/.bin/prisma
+    && chmod +x /app/node_modules/.bin/prisma /usr/local/bin/api-entrypoint.sh \
+    && chown -R node:node /app/server/storage /app/node_modules/.bin/prisma
 USER node
 EXPOSE 3000
+ENTRYPOINT ["/usr/local/bin/api-entrypoint.sh"]
 CMD ["node", "./server/dist/app.js"]

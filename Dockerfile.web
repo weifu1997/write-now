@@ -13,20 +13,20 @@ RUN rm -rf /app/* /app/.[!.]* /app/..?* || true
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json .npmrc ./
 COPY client/package.json ./client/package.json
 COPY shared/package.json ./shared/package.json
-RUN pnpm install --frozen-lockfile --filter @ai-novel/shared --filter @ai-novel/client
+COPY desktop/package.json ./desktop/package.json
+COPY site/package.json ./site/package.json
+RUN pnpm install --frozen-lockfile --filter @write-now/shared --filter @write-now/client
 
 FROM deps AS build
 WORKDIR /app
 ARG VITE_API_BASE_URL=
 ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
-COPY shared/package.json shared/tsconfig.json ./shared/
-COPY shared/*.ts ./shared/
-COPY shared/types ./shared/types
+COPY shared ./shared/
 COPY client/package.json client/tsconfig.json client/vite.config.ts client/tailwind.config.ts client/postcss.config.js client/components.json client/index.html ./client/
 COPY client/public ./client/public
 COPY client/src ./client/src
-RUN pnpm --filter @ai-novel/shared build \
-    && pnpm --filter @ai-novel/client build
+RUN pnpm --filter @write-now/shared build \
+    && pnpm --filter @write-now/client build
 
 FROM ${NGINX_IMAGE} AS runtime
 USER root

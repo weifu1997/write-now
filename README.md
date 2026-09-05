@@ -152,6 +152,7 @@
 - 产品更名为 Write Now，应用界面、官网介绍站、桌面应用与文档统一采用新名称。
 - 项目仓库迁移至 [weifu1997/write-now](https://github.com/weifu1997/write-now)，项目链接与桌面端更新地址同步更新。
 - 数据库、向量知识库与导出文件格式保持兼容，现有数据可继续使用。
+- Docker 自托管部署开箱即用：数据库、后端与前端一个命令启动，前端网关默认同源代理接口，长耗时生成与流式输出已适配，配套安装指南与常见问题文档。
 
 完整历史更新见 [docs/releases/release-notes.md](./docs/releases/release-notes.md)。
 
