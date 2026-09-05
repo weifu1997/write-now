@@ -43,3 +43,4 @@ server/prisma-diff-migrations-to-schema.sql
 # 迁移对账前的临时备份与 Trellis 运行时票据不进仓库
 .tmp-backup/
 .trellis/.runtime/
+server/.zcode/
