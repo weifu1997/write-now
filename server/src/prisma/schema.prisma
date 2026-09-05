@@ -3247,7 +3247,6 @@ model BookAnalysisCharacterAppearanceSnapshot {
 
   @@unique([characterId, chapterIndex])
   @@index([appearanceId, chapterIndex])
-  @@index([characterId, chapterIndex])
   @@index([chapterIndex])
 }
 

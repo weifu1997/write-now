@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS "CharacterRelation" (
     "intimacyScore" INTEGER,
     "dependencyScore" INTEGER,
     "evidence" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "CharacterRelation_novelId_fkey" FOREIGN KEY ("novelId") REFERENCES "Novel" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "CharacterRelation_sourceCharacterId_fkey" FOREIGN KEY ("sourceCharacterId") REFERENCES "Character" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "CharacterRelation_targetCharacterId_fkey" FOREIGN KEY ("targetCharacterId") REFERENCES "Character" ("id") ON DELETE CASCADE ON UPDATE CASCADE
@@ -30,8 +30,8 @@ CREATE TABLE IF NOT EXISTS "CharacterCastOption" (
     "recommendedReason" TEXT,
     "status" TEXT NOT NULL DEFAULT 'draft',
     "sourceStoryInput" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "CharacterCastOption_novelId_fkey" FOREIGN KEY ("novelId") REFERENCES "Novel" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -53,8 +53,8 @@ CREATE TABLE IF NOT EXISTS "CharacterCastOptionMember" (
     "secret" TEXT,
     "moralLine" TEXT,
     "firstImpression" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "CharacterCastOptionMember_optionId_fkey" FOREIGN KEY ("optionId") REFERENCES "CharacterCastOption" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -70,8 +70,8 @@ CREATE TABLE IF NOT EXISTS "CharacterCastOptionRelation" (
     "secretAsymmetry" TEXT,
     "dynamicLabel" TEXT,
     "nextTurnPoint" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "CharacterCastOptionRelation_optionId_fkey" FOREIGN KEY ("optionId") REFERENCES "CharacterCastOption" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -86,8 +86,8 @@ CREATE TABLE IF NOT EXISTS "CharacterCandidate" (
     "matchedCharacterId" TEXT,
     "status" TEXT NOT NULL DEFAULT 'pending',
     "confidence" REAL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "CharacterCandidate_novelId_fkey" FOREIGN KEY ("novelId") REFERENCES "Novel" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "CharacterCandidate_sourceChapterId_fkey" FOREIGN KEY ("sourceChapterId") REFERENCES "Chapter" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT "CharacterCandidate_matchedCharacterId_fkey" FOREIGN KEY ("matchedCharacterId") REFERENCES "Character" ("id") ON DELETE SET NULL ON UPDATE CASCADE
@@ -105,8 +105,8 @@ CREATE TABLE IF NOT EXISTS "CharacterVolumeAssignment" (
     "isCore" BOOLEAN NOT NULL DEFAULT false,
     "absenceWarningThreshold" INTEGER NOT NULL DEFAULT 3,
     "absenceHighRiskThreshold" INTEGER NOT NULL DEFAULT 5,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "CharacterVolumeAssignment_novelId_fkey" FOREIGN KEY ("novelId") REFERENCES "Novel" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "CharacterVolumeAssignment_characterId_fkey" FOREIGN KEY ("characterId") REFERENCES "Character" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "CharacterVolumeAssignment_volumeId_fkey" FOREIGN KEY ("volumeId") REFERENCES "VolumePlan" ("id") ON DELETE CASCADE ON UPDATE CASCADE
@@ -124,8 +124,8 @@ CREATE TABLE IF NOT EXISTS "CharacterFactionTrack" (
     "summary" TEXT,
     "sourceType" TEXT NOT NULL,
     "confidence" REAL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "CharacterFactionTrack_novelId_fkey" FOREIGN KEY ("novelId") REFERENCES "Novel" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "CharacterFactionTrack_characterId_fkey" FOREIGN KEY ("characterId") REFERENCES "Character" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "CharacterFactionTrack_volumeId_fkey" FOREIGN KEY ("volumeId") REFERENCES "VolumePlan" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
@@ -147,8 +147,8 @@ CREATE TABLE IF NOT EXISTS "CharacterRelationStage" (
     "sourceType" TEXT NOT NULL,
     "confidence" REAL,
     "isCurrent" BOOLEAN NOT NULL DEFAULT true,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "CharacterRelationStage_novelId_fkey" FOREIGN KEY ("novelId") REFERENCES "Novel" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "CharacterRelationStage_relationId_fkey" FOREIGN KEY ("relationId") REFERENCES "CharacterRelation" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT "CharacterRelationStage_sourceCharacterId_fkey" FOREIGN KEY ("sourceCharacterId") REFERENCES "Character" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
@@ -167,8 +167,8 @@ CREATE TABLE IF NOT EXISTS "StoryMacroPlan" (
     "lockedFieldsJson" TEXT,
     "constraintEngineJson" TEXT,
     "stateJson" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "StoryMacroPlan_novelId_fkey" FOREIGN KEY ("novelId") REFERENCES "Novel" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -184,8 +184,8 @@ CREATE TABLE IF NOT EXISTS "BookContract" (
     "escalationLadder" TEXT NOT NULL,
     "relationshipMainline" TEXT NOT NULL,
     "absoluteRedLinesJson" TEXT NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "BookContract_novelId_fkey" FOREIGN KEY ("novelId") REFERENCES "Novel" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -205,15 +205,15 @@ CREATE TABLE IF NOT EXISTS "NovelWorkflowTask" (
     "seedPayloadJson" TEXT,
     "milestonesJson" TEXT,
     "pendingManualRecovery" BOOLEAN NOT NULL DEFAULT false,
-    "heartbeatAt" DATETIME,
-    "startedAt" DATETIME,
-    "finishedAt" DATETIME,
-    "cancelRequestedAt" DATETIME,
+    "heartbeatAt" TIMESTAMP(3),
+    "startedAt" TIMESTAMP(3),
+    "finishedAt" TIMESTAMP(3),
+    "cancelRequestedAt" TIMESTAMP(3),
     "attemptCount" INTEGER NOT NULL DEFAULT 0,
     "maxAttempts" INTEGER NOT NULL DEFAULT 3,
     "lastError" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "NovelWorkflowTask_novelId_fkey" FOREIGN KEY ("novelId") REFERENCES "Novel" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
@@ -223,8 +223,8 @@ CREATE TABLE IF NOT EXISTS "StoryStateSnapshot" (
     "sourceChapterId" TEXT,
     "summary" TEXT,
     "rawStateJson" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "StoryStateSnapshot_novelId_fkey" FOREIGN KEY ("novelId") REFERENCES "Novel" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "StoryStateSnapshot_sourceChapterId_fkey" FOREIGN KEY ("sourceChapterId") REFERENCES "Chapter" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
@@ -240,8 +240,8 @@ CREATE TABLE IF NOT EXISTS "CharacterState" (
     "knownFactsJson" TEXT,
     "misbeliefsJson" TEXT,
     "summary" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "CharacterState_snapshotId_fkey" FOREIGN KEY ("snapshotId") REFERENCES "StoryStateSnapshot" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "CharacterState_characterId_fkey" FOREIGN KEY ("characterId") REFERENCES "Character" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -256,8 +256,8 @@ CREATE TABLE IF NOT EXISTS "RelationState" (
     "conflictScore" INTEGER,
     "dependencyScore" INTEGER,
     "summary" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "RelationState_snapshotId_fkey" FOREIGN KEY ("snapshotId") REFERENCES "StoryStateSnapshot" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "RelationState_sourceCharacterId_fkey" FOREIGN KEY ("sourceCharacterId") REFERENCES "Character" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "RelationState_targetCharacterId_fkey" FOREIGN KEY ("targetCharacterId") REFERENCES "Character" ("id") ON DELETE CASCADE ON UPDATE CASCADE
@@ -271,8 +271,8 @@ CREATE TABLE IF NOT EXISTS "InformationState" (
     "fact" TEXT NOT NULL,
     "status" TEXT NOT NULL,
     "summary" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "InformationState_snapshotId_fkey" FOREIGN KEY ("snapshotId") REFERENCES "StoryStateSnapshot" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -284,8 +284,8 @@ CREATE TABLE IF NOT EXISTS "ForeshadowState" (
     "status" TEXT NOT NULL,
     "setupChapterId" TEXT,
     "payoffChapterId" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "ForeshadowState_snapshotId_fkey" FOREIGN KEY ("snapshotId") REFERENCES "StoryStateSnapshot" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "ForeshadowState_setupChapterId_fkey" FOREIGN KEY ("setupChapterId") REFERENCES "Chapter" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT "ForeshadowState_payoffChapterId_fkey" FOREIGN KEY ("payoffChapterId") REFERENCES "Chapter" ("id") ON DELETE SET NULL ON UPDATE CASCADE
@@ -308,8 +308,8 @@ CREATE TABLE IF NOT EXISTS "OpenConflict" (
     "affectedCharacterIdsJson" TEXT,
     "resolutionHint" TEXT,
     "lastSeenChapterOrder" INTEGER,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "OpenConflict_novelId_fkey" FOREIGN KEY ("novelId") REFERENCES "Novel" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "OpenConflict_chapterId_fkey" FOREIGN KEY ("chapterId") REFERENCES "Chapter" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT "OpenConflict_sourceSnapshotId_fkey" FOREIGN KEY ("sourceSnapshotId") REFERENCES "StoryStateSnapshot" ("id") ON DELETE SET NULL ON UPDATE CASCADE
@@ -337,8 +337,8 @@ CREATE TABLE IF NOT EXISTS "StoryPlan" (
     "status" TEXT NOT NULL DEFAULT 'draft',
     "externalRef" TEXT,
     "rawPlanJson" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "StoryPlan_novelId_fkey" FOREIGN KEY ("novelId") REFERENCES "Novel" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "StoryPlan_chapterId_fkey" FOREIGN KEY ("chapterId") REFERENCES "Chapter" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT "StoryPlan_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "StoryPlan" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
@@ -354,8 +354,8 @@ CREATE TABLE IF NOT EXISTS "ChapterPlanScene" (
     "conflict" TEXT,
     "reveal" TEXT,
     "emotionBeat" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "ChapterPlanScene_planId_fkey" FOREIGN KEY ("planId") REFERENCES "StoryPlan" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -367,7 +367,7 @@ CREATE TABLE IF NOT EXISTS "ReplanRun" (
     "triggerType" TEXT NOT NULL,
     "reason" TEXT NOT NULL,
     "outputSummary" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "ReplanRun_novelId_fkey" FOREIGN KEY ("novelId") REFERENCES "Novel" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "ReplanRun_chapterId_fkey" FOREIGN KEY ("chapterId") REFERENCES "Chapter" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT "ReplanRun_sourcePlanId_fkey" FOREIGN KEY ("sourcePlanId") REFERENCES "StoryPlan" ("id") ON DELETE SET NULL ON UPDATE CASCADE
@@ -381,8 +381,8 @@ CREATE TABLE IF NOT EXISTS "AuditReport" (
     "overallScore" INTEGER,
     "summary" TEXT,
     "legacyScoreJson" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "AuditReport_novelId_fkey" FOREIGN KEY ("novelId") REFERENCES "Novel" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "AuditReport_chapterId_fkey" FOREIGN KEY ("chapterId") REFERENCES "Chapter" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -397,8 +397,8 @@ CREATE TABLE IF NOT EXISTS "AuditIssue" (
     "evidence" TEXT NOT NULL,
     "fixSuggestion" TEXT NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'open',
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
     CONSTRAINT "AuditIssue_reportId_fkey" FOREIGN KEY ("reportId") REFERENCES "AuditReport" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
