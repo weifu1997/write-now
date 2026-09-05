@@ -43,11 +43,22 @@ export class RagWorker {
       maxAttempts: ragConfig.workerMaxAttempts,
       retryBaseMs: ragConfig.workerRetryBaseMs,
     });
-    void this.requeueInterruptedJobs();
     this.timer = setInterval(() => {
       void this.tick();
     }, ragConfig.workerPollMs);
-    void this.tick();
+    // 先完成中断任务重排队，再执行首轮 tick：否则重排队可能与首个租约并发，
+    // 把正在执行的任务重新置为 queued，随后被再次租约执行（重复建索引）。
+    this.requeueInterruptedJobs()
+      .catch((error) => {
+        this.logWarn("Failed to requeue interrupted running jobs after restart.", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      })
+      .then(() => {
+        if (this.timer) {
+          void this.tick();
+        }
+      });
   }
 
   private async requeueInterruptedJobs(): Promise<void> {

@@ -32,6 +32,7 @@ import {
   type ComicPanel,
 } from "@/api/comic";
 import { AppDialogContent, Dialog } from "@/components/ui/dialog";
+import { resolveImageAssetUrl } from "@/api/images";
 import { ImageGenerationConfirmDialog } from "@/components/image/ImageGenerationConfirmDialog";
 import { useImageGenerationFlow } from "@/components/image/useImageGenerationFlow";
 import { Button } from "@/components/ui/button";
@@ -123,12 +124,17 @@ function BatchBar({
 
   useEffect(() => {
     if (!jobId) return;
+    // 轮询回调是异步的：请求慢于间隔时可能重叠，需防止终态被观察到两次后
+    // 重复触发 onComplete（父级会重复刷新）。
+    let settled = false;
     pollRef.current = setInterval(async () => {
+      if (settled) return;
       try {
         const updated = await getBatchJob(jobId);
         setJob(updated);
         if (updated.status !== "running") {
-          clearInterval(pollRef.current!);
+          settled = true;
+          if (pollRef.current) clearInterval(pollRef.current);
           pollRef.current = null;
           onComplete();
         }
@@ -160,7 +166,15 @@ function BatchBar({
     onError: (e) => toast.error(String(e)),
   });
 
-  const progress = job ? (JSON.parse(job.progress) as BatchProgress) : null;
+  const progress = (() => {
+    if (!job) return null;
+    // 与文件内其它 JSON 字段一致做容错解析：损坏/遗留数据不应白屏整个面板
+    try {
+      return JSON.parse(job.progress) as BatchProgress;
+    } catch {
+      return null;
+    }
+  })();
   const isRunning = job?.status === "running" || startMut.isPending;
   const hasFailures = (progress?.failedPanelIds?.length ?? 0) > 0 && job?.status !== "running";
   const pendingCount = estimate?.pendingPanels ?? 0;
@@ -568,7 +582,7 @@ function PanelDetailDialog({
                     return (
                       <a
                         key={`${ref.url}-${i}`}
-                        href={ref.url}
+                        href={resolveImageAssetUrl(ref.url)}
                         target="_blank"
                         rel="noreferrer"
                         title={`${kindLabel} · ${ref.label}（点击查看大图）`}
@@ -576,7 +590,7 @@ function PanelDetailDialog({
                       >
                         <div className="aspect-square bg-muted/30">
                           <img
-                            src={ref.url}
+                            src={resolveImageAssetUrl(ref.url)}
                             alt={ref.label}
                             className="h-full w-full object-cover"
                             loading="lazy"

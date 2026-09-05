@@ -187,12 +187,13 @@ async function ensureNotCancelled(taskId: string): Promise<void> {
   }
 }
 
-async function markCancelled(taskId: string, progress: number): Promise<void> {
+async function markCancelled(taskId: string): Promise<void> {
   await prisma.imageGenerationTask.update({
     where: { id: taskId },
     data: {
       status: "cancelled",
-      progress,
+      // 不回写进度：调用方持有的 task.progress 是执行开始前读取的旧值，
+      // 覆盖会把任务进行期间更新的进度倒退；取消时保留库内最新进度。
       error: null,
       heartbeatAt: null,
       currentStage: null,
@@ -239,7 +240,7 @@ export async function executeImageGenerationTask(
   const currentItemLabel = resolveCurrentItemLabel(task);
 
   if (task.cancelRequestedAt) {
-    await markCancelled(task.id, task.progress);
+    await markCancelled(task.id);
     return;
   }
   if (!currentItemKey || !currentItemLabel) {
@@ -411,7 +412,7 @@ export async function executeImageGenerationTask(
     });
   } catch (error) {
     if (error instanceof AppError && error.message === "IMAGE_TASK_CANCELLED") {
-      await markCancelled(task.id, task.progress);
+      await markCancelled(task.id);
       return;
     }
     const errorMessage = normalizeImageGenerationError(error);

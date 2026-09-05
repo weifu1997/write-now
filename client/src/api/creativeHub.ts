@@ -138,7 +138,12 @@ export async function* streamCreativeHubRun(
       if (!rawData) {
         continue;
       }
-      yield JSON.parse(rawData) as CreativeHubStreamFrame;
+      // 单帧解析失败只跳过该帧，保持流可继续消费
+      try {
+        yield JSON.parse(rawData) as CreativeHubStreamFrame;
+      } catch {
+        continue;
+      }
     }
   }
 }

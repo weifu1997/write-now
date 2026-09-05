@@ -10,6 +10,7 @@ import type {
 } from "@write-now/shared/types/creativeHub";
 import type { FailureDiagnostic } from "@write-now/shared/types/agent";
 import { prisma } from "../db/prisma";
+import { AppError } from "../middleware/errorHandler";
 import { novelSetupStatusService } from "../services/novel/NovelSetupStatusService";
 
 interface CreateThreadInput {
@@ -170,7 +171,7 @@ export class CreativeHubService {
   async updateThread(threadId: string, input: UpdateThreadInput): Promise<CreativeHubThread> {
     const existing = await prisma.creativeHubThread.findUnique({ where: { id: threadId } });
     if (!existing) {
-      throw new Error("线程不存在。");
+      throw new AppError("线程不存在。", 404);
     }
     const nextBindings = input.resourceBindings
       ? JSON.stringify(normalizeBindings(input.resourceBindings))
@@ -206,7 +207,7 @@ export class CreativeHubService {
       },
     });
     if (!record) {
-      throw new Error("线程不存在。");
+      throw new AppError("线程不存在。", 404);
     }
     const latestCheckpoint = record.checkpoints[0];
     const diagnostics = await loadFailureDiagnostic(record.latestRunId);
@@ -263,7 +264,7 @@ export class CreativeHubService {
   async saveCheckpoint(threadId: string, input: SaveCheckpointInput): Promise<CreativeHubCheckpointRef> {
     const existing = await prisma.creativeHubThread.findUnique({ where: { id: threadId } });
     if (!existing) {
-      throw new Error("线程不存在。");
+      throw new AppError("线程不存在。", 404);
     }
     const checkpoint = await prisma.creativeHubCheckpoint.create({
       data: {

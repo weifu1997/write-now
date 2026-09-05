@@ -259,11 +259,13 @@ router.post("/threads/:threadId/runs/stream", validate({
   try {
     const { threadId } = req.params as { threadId: string };
     const body = req.body as z.infer<typeof streamRunSchema>;
-    const disposeHeartbeat = initCreativeHubSSE(res);
+    // 先完成所有可能失败的解析（线程存在性、种子消息），再初始化 SSE：
+    // 一旦发出 SSE 响应头就无法再回 404/500 JSON，未知线程会变成一条"死流"。
     const threadState = await creativeHubService.getThreadState(threadId);
     const parentCheckpointId = body.checkpointId ?? threadState.currentCheckpointId ?? null;
     const resourceBindings = toBindings(body.resourceBindings);
     const seedMessages = await buildSeedMessages(threadId, parentCheckpointId, body.messages);
+    const disposeHeartbeat = initCreativeHubSSE(res);
 
     try {
       await creativeHubLangGraph.runThread({

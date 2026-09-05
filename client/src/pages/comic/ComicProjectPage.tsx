@@ -23,6 +23,7 @@ import {
   type ComicEpisode,
   type ComicProject,
 } from "@/api/comic";
+import { resolveImageAssetUrl } from "@/api/images";
 import { ComicImageGenerationNotice } from "@/pages/comic/ComicImageGenerationNotice";
 import { COMIC_FORMATS } from "@/pages/comic/ComicWorkspacePage";
 import { CharactersPanel } from "@/pages/comic/project/CharactersPanel";
@@ -50,7 +51,8 @@ function ExportPanel({ projectId, episodes }: { projectId: string; episodes: Com
     onSuccess: (result) => {
       const artifact = result.artifacts[0];
       if (artifact?.url) {
-        window.open(artifact.url, "_blank");
+        // 产物地址是根相对 /api 路径，桌面端 file:// 来源下必须先补全 API 来源
+        window.open(resolveImageAssetUrl(artifact.url), "_blank");
       }
       toast.success("导出完成");
     },

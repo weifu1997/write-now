@@ -15,7 +15,14 @@ export function validate(schema: ValidationSchema): RequestHandler {
         req.body = schema.body.parse(req.body);
       }
       if (schema.query) {
-        schema.query.parse(req.query);
+        // 回写校验/强制转换后的结果，使 z.coerce.*/transform 真正生效；
+        // 保留 schema 之外的原始 query 键，避免影响仍直接读取 req.query 的代码。
+        const parsedQuery = schema.query.parse(req.query) as Record<string, unknown>;
+        Object.defineProperty(req, "query", {
+          value: { ...req.query, ...parsedQuery },
+          configurable: true,
+          writable: true,
+        });
       }
       if (schema.params) {
         // 回写校验/强制转换后的结果，使 z.coerce.* 真正生效

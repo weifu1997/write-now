@@ -26,11 +26,20 @@ const listQuerySchema = z.object({
   reason: reasonSchema.optional(),
   status: statusSchema.optional(),
   novelId: z.string().trim().optional(),
-  supportsBatch: z.coerce.boolean().optional(),
+  // 布尔过滤值只能来自显式的 "true"/"false" 字符串或布尔；
+  // z.coerce.boolean() 会把 "false"/"0" 也变成 true，导致"仅不可批量"筛选失效。
+  // 同时接受布尔：validate 中间件会把解析结果写回 req.query，路由内的
+  // 二次 parse 会拿到已转换的布尔值，schema 必须对两种形态幂等。
+  supportsBatch: z
+    .union([z.boolean(), z.enum(["true", "false"])])
+    .transform((value) => value === true || value === "true")
+    .optional(),
   channelType: channelTypeSchema.optional(),
   page: z.coerce.number().int().min(1).optional(),
   pageSize: z.coerce.number().int().min(1).max(100).optional(),
 });
+
+export { listQuerySchema };
 
 const taskParamsSchema = z.object({
   taskId: z.string().trim().min(1),

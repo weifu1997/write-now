@@ -29,6 +29,20 @@ type WorkflowTaskRow = NonNullable<Awaited<ReturnType<NovelWorkflowService["getT
 
 const EXECUTED_ACTION_CACHE = new Map<string, AutoDirectorActionExecutionResult>();
 
+/** 结果缓存按写入顺序淘汰，避免常驻进程内存随历史动作无限增长 */
+const EXECUTED_ACTION_CACHE_LIMIT = 500;
+
+function rememberExecutedAction(cacheKey: string, result: AutoDirectorActionExecutionResult): void {
+  EXECUTED_ACTION_CACHE.set(cacheKey, result);
+  while (EXECUTED_ACTION_CACHE.size > EXECUTED_ACTION_CACHE_LIMIT) {
+    const oldestKey = EXECUTED_ACTION_CACHE.keys().next().value;
+    if (oldestKey === undefined) {
+      return;
+    }
+    EXECUTED_ACTION_CACHE.delete(oldestKey);
+  }
+}
+
 const BATCH_ALLOWED_ACTIONS = new Set<AutoDirectorMutationActionCode>([
   "continue_auto_execution",
   "retry_with_task_model",
@@ -198,7 +212,7 @@ export class AutoDirectorFollowUpActionExecutor {
     if (logged && logged.resultCode === "executed") {
       const task = await this.safeGetTaskDetail(input.taskId);
       const result = buildAlreadyProcessedResult(input, task);
-      EXECUTED_ACTION_CACHE.set(executedCacheKey, {
+      rememberExecutedAction(executedCacheKey, {
         ...result,
         code: "executed",
         message: "执行成功",
@@ -304,7 +318,7 @@ export class AutoDirectorFollowUpActionExecutor {
         message: "执行成功",
         task,
       };
-      EXECUTED_ACTION_CACHE.set(executedCacheKey, result);
+      rememberExecutedAction(executedCacheKey, result);
       await this.recordActionLog(input, result);
       return result;
     } catch (error) {
@@ -453,7 +467,7 @@ export class AutoDirectorFollowUpActionExecutor {
       message: "安全修复已完成",
       task,
     };
-    EXECUTED_ACTION_CACHE.set(executedCacheKey, result);
+    rememberExecutedAction(executedCacheKey, result);
     await this.recordActionLog(mergeActionMetadata(input, {
       safeFix: {
         safeActionCodes: applied.safeActionCodes,
@@ -506,7 +520,7 @@ export class AutoDirectorFollowUpActionExecutor {
       message: "AI 将补齐章节拆分并继续推进。",
       task: await this.safeGetTaskDetail(input.taskId),
     };
-    EXECUTED_ACTION_CACHE.set(executedCacheKey, result);
+    rememberExecutedAction(executedCacheKey, result);
     await this.recordActionLog(mergeActionMetadata(input, {
       structuredBackfill: {
         affectedScope: validationResult.affectedScope,
@@ -631,7 +645,13 @@ export class AutoDirectorFollowUpActionExecutor {
       if (isMissingTableError(error) || isDbUnavailableError(error)) {
         return;
       }
-      throw error;
+      // 执行日志只是记账/幂等辅助：mutation 已经发生后，日志写入失败
+      // （含并发重复记账的唯一约束冲突）不能把已执行的动作翻转为失败，
+      // 否则渠道端会把成功当失败重试，造成重复执行。
+      console.warn(
+        `[auto-director-follow-up] failed to record action log (taskId=${input.taskId}, actionCode=${input.actionCode})`,
+        error,
+      );
     }
   }
 }

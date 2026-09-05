@@ -19,6 +19,7 @@ import {
 import type { ImageGenerationOverrides } from "@/api/comic";
 import { getAPIKeySettings } from "@/api/settings";
 import { ImageGenerationConfirmDialog } from "@/components/image/ImageGenerationConfirmDialog";
+import { resolveImageAssetUrl } from "@/api/images";
 import { useImageGenerationFlow } from "@/components/image/useImageGenerationFlow";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -502,13 +503,14 @@ function BatchJobStatus(props: {
 
 function KeyframePreview({ shot, keyframe }: { shot: DramaShot; keyframe: DramaShotKeyframeData }) {
   const hasImage = keyframe.status === "done" && keyframe.url;
+  const keyframeImageUrl = keyframe.url ? resolveImageAssetUrl(keyframe.url) : undefined;
   return (
     <div className="mt-3 space-y-3">
       <div className="grid gap-3 md:grid-cols-[160px_1fr]">
         {hasImage ? (
-          <a href={keyframe.url} target="_blank" rel="noreferrer" className="block">
+          <a href={keyframeImageUrl} target="_blank" rel="noreferrer" className="block">
             <img
-              src={keyframe.url}
+              src={keyframeImageUrl}
               alt={`镜头 ${shot.order} 首帧图`}
               className="h-56 w-full rounded-md border object-cover md:h-40"
             />

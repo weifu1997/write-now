@@ -161,6 +161,20 @@ function showMainWindowIfReady(): void {
   updateBootstrapProgress();
 }
 
+function isAppOwnUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    const rendererUrl = process.env.AI_NOVEL_DESKTOP_RENDERER_URL?.trim()
+      || (app.isPackaged ? "" : resolveRendererDevUrl());
+    if (!rendererUrl) {
+      return parsed.protocol === "file:";
+    }
+    return parsed.origin === new URL(rendererUrl).origin;
+  } catch {
+    return false;
+  }
+}
+
 function createMainWindow(port: number): BrowserWindow {
   const runtimeConfig = resolveDesktopRuntimeConfig({
     port,
@@ -190,6 +204,20 @@ function createMainWindow(port: number): BrowserWindow {
   window.webContents.on("did-finish-load", () => {
     publishBootstrapSnapshot();
     publishUpdaterSnapshot();
+  });
+
+  // 外部/新窗口请求一律不放行到应用内窗口：http(s) 链接交给系统浏览器，
+  // 其余（含 javascript: 等危险协议）直接拒绝，避免远程内容在应用窗口内执行。
+  window.webContents.setWindowOpenHandler(({ url }) => {
+    if ((url.startsWith("https://") || url.startsWith("http://")) && !isAppOwnUrl(url)) {
+      void shell.openExternal(url);
+    }
+    return { action: "deny" };
+  });
+  window.webContents.on("will-navigate", (event, url) => {
+    if (!isAppOwnUrl(url)) {
+      event.preventDefault();
+    }
   });
 
   if (process.env.AI_NOVEL_DESKTOP_RENDERER_URL?.trim()) {

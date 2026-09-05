@@ -144,12 +144,21 @@ export function useSSE(options?: UseSSEOptions) {
             if (!rawData) {
               continue;
             }
-            const frame = JSON.parse(rawData) as SSEFrame;
+            // 单帧解析失败（如代理注入的非 JSON keep-alive）只跳过该帧，
+            // 不能让整条流进入错误状态，且必须继续消费剩余数据。
+            let frame: SSEFrame;
+            try {
+              frame = JSON.parse(rawData) as SSEFrame;
+            } catch {
+              continue;
+            }
             handleFrame(frame);
           }
         }
       } catch (streamError) {
         if ((streamError as Error).name !== "AbortError") {
+          // 出错时主动中止底层连接，避免响应体在后台继续下载
+          controller.abort();
           setError(streamError instanceof Error ? streamError.message : "流式请求失败。");
           setIsStreaming(false);
         }

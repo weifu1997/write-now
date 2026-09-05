@@ -318,14 +318,37 @@ export class VectorStoreService {
       return;
     }
     const startedAt = Date.now();
-    await this.request(toCollectionUrl("/points/delete?wait=true"), {
-      method: "POST",
-      body: JSON.stringify({
-        points: pointIds,
-      }),
-    });
+    // 与 upsert 一致按字节预算分批：大文档重建时一次提交数万 id 会生成
+    // 数 MB 请求体，单次长请求失败会让向量与库内元数据永久失配。
+    const maxBytes = Math.max(ragConfig.qdrantUpsertMaxBytes, 64 * 1024);
+    const batches: string[][] = [];
+    let currentBatch: string[] = [];
+    let currentBytes = 16; // {"points":[]} 包装的近似字节数
+    for (const pointId of pointIds) {
+      const idBytes = estimateJsonBytes(pointId) + 1;
+      if (currentBatch.length > 0 && currentBytes + idBytes > maxBytes) {
+        batches.push(currentBatch);
+        currentBatch = [];
+        currentBytes = 16;
+      }
+      currentBatch.push(pointId);
+      currentBytes += idBytes;
+    }
+    if (currentBatch.length > 0) {
+      batches.push(currentBatch);
+    }
+
+    for (const batch of batches) {
+      await this.request(toCollectionUrl("/points/delete?wait=true"), {
+        method: "POST",
+        body: JSON.stringify({
+          points: batch,
+        }),
+      });
+    }
     this.logInfo("Delete points finished.", {
       points: pointIds.length,
+      batches: batches.length,
       elapsedMs: Date.now() - startedAt,
     });
   }

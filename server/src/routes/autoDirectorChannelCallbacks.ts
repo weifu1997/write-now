@@ -57,7 +57,7 @@ function verifyChannelToken(expected: string, token: string | undefined, channel
   }
 }
 
-function verifyWeComMarkdownSignature(input: {
+export function verifyWeComMarkdownSignature(input: {
   callbackId: string;
   eventId: string;
   taskId: string;
@@ -65,6 +65,11 @@ function verifyWeComMarkdownSignature(input: {
   signature: string;
   callbackToken: string;
 }): void {
+  // 空 token 时 HMAC 签名任何人都能算出来，等同于不设防；
+  // 与 POST 路由的 verifyChannelToken 保持一致：未配置即拒绝。
+  if (!input.callbackToken.trim()) {
+    throw new AppError("WeCom callback token is not configured.", 403);
+  }
   const expected = signWeComMarkdownCallback({
     callbackId: input.callbackId,
     eventId: input.eventId,

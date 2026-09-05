@@ -94,7 +94,14 @@ export class RecoveryTaskService {
         this.initializationDeps.markPendingAutoDirectorTasksForManualRecovery(),
         this.initializationDeps.markPendingPipelineJobsForManualRecovery(),
         this.initializationDeps.markPendingStyleTasksForManualRecovery(),
-      ]).then(() => undefined);
+      ])
+        .then(() => undefined)
+        .catch((error) => {
+          // 失败不能永久缓存：否则一次瞬时 DB 错误会让后续所有恢复候选
+          // 的 waitUntilReady 一直拒绝，恢复功能在进程重启前不可用。
+          this.initializationPromise = null;
+          throw error;
+        });
     }
     return this.initializationPromise;
   }
