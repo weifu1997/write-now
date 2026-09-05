@@ -2,18 +2,6 @@ name: Project Site Pages
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - "site/**"
-      - "docs/public/**"
-      - "docs/releases/release-notes.md"
-      - "scripts/check-docs-manifest.cjs"
-      - "package.json"
-      - ".github/workflows/site-pages.yml"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
 
 permissions:
   contents: read
