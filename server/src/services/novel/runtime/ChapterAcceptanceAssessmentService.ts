@@ -108,10 +108,10 @@ function isOverLengthIssue(issue: AcceptanceIssue): boolean {
 
 function isLengthDirective(directive: AcceptanceRepairDirective): boolean {
   const instruction = directive.instruction.toLowerCase();
-  return instruction.includes("目标长度")
-    || instruction.includes("硬性字数上限")
+  return instruction.includes("硬性字数上限")
     || instruction.includes("扩写正文到目标长度")
-    || instruction.includes("整章压缩");
+    || instruction.includes("扩写到目标字数")
+    || (instruction.includes("目标长度") && (instruction.includes("扩写") || instruction.includes("压缩")));
 }
 
 function isLengthRiskTag(tag: string): boolean {

@@ -24,7 +24,6 @@ export const chapterWriterPrompt: PromptAsset<ChapterWriterPromptInput, string, 
   contextPolicy: {
     maxTokensBudget: NOVEL_PROMPT_BUDGETS.chapterWriter,
     requiredGroups: [
-      "current_draft_full",
       "chapter_mission",
       "reader_experience",
       "character_hard_facts",

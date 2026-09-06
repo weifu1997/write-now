@@ -149,8 +149,8 @@ test("compatible fallback leaves cost and complication empty instead of inventin
   assert.equal(normalized.readerExperience.complication, "");
 });
 
-test("writer v8 requires visible fulfillment of cost and complication when present", () => {
-  assert.equal(chapterWriterPrompt.version, "v8");
+test("writer v9 requires visible fulfillment of cost and complication when present", () => {
+  assert.equal(chapterWriterPrompt.version, "v9");
   const systemText = renderWriterSystemText();
   assert.ok(systemText.includes("1a-1. reader_experience 给出本章代价（expectedCost）或意外（complication）时"));
   assert.ok(systemText.includes("两者都缺省的缓冲章不强行插入"));

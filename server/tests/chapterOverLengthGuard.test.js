@@ -3,6 +3,8 @@ const assert = require("node:assert/strict");
 
 const promptRunner = require("../dist/prompting/core/promptRunner.js");
 const promptContextResolution = require("../dist/prompting/context/promptContextResolution.js");
+const { createContextBlock } = require("../dist/prompting/core/contextBudget.js");
+const { selectContextBlocks } = require("../dist/prompting/core/contextSelection.js");
 const { prisma } = require("../dist/db/prisma.js");
 const { ChapterWritingGraph } = require("../dist/services/novel/chapterWritingGraph.js");
 
@@ -269,6 +271,29 @@ test("keeps original draft when condense output is not shorter", async () => {
   }
 });
 
+test("condense call keeps the full draft block and disables summarization", async () => {
+  const draft = "长".repeat(4000);
+  const condensed = "短".repeat(2800);
+  const saved = [];
+  const graph = createGraph(saved);
+  const stub = stubPromptRunner({ draft, textOutputs: [condensed] });
+
+  try {
+    await runDraft(graph, buildContextPackage(), draft);
+
+    assert.equal(stub.runTextCalls.length, 1);
+    const draftBlock = stub.runTextCalls[0].contextBlocks.find((block) => block.id === "current_draft_full");
+    assert.ok(draftBlock);
+    assert.equal(draftBlock.allowSummary, false);
+    assert.equal(draftBlock.required, true);
+    assert.match(draftBlock.content, new RegExp(`Full draft \\(condense this\\):\\n${draft}`));
+    assert.equal(stub.runTextCalls[0].asset.contextPolicy.maxTokensBudget, 8000);
+    assert.ok(stub.runTextCalls[0].asset.contextPolicy.requiredGroups.includes("current_draft_full"));
+  } finally {
+    stub.restore();
+  }
+});
+
 test("extends condensed draft when compression cuts below soft min", async () => {
   const draft = "长".repeat(4000);
   const overCondensed = "短".repeat(2000);
@@ -288,4 +313,39 @@ test("extends condensed draft when compression cuts below soft min", async () =>
   } finally {
     stub.restore();
   }
+});
+
+test("condense draft block is not summarized when allowSummary is false", () => {
+  const draft = "长".repeat(4000);
+  const draftBlock = createContextBlock({
+    id: "current_draft_full",
+    group: "current_draft_full",
+    priority: 106,
+    required: true,
+    allowSummary: false,
+    content: ["Full draft (condense this):", draft].join("\n"),
+  });
+  const missionBlock = createContextBlock({
+    id: "chapter_mission",
+    group: "chapter_mission",
+    priority: 100,
+    required: true,
+    content: "本章职责：完成会签。",
+  });
+  const tightBudgetSelection = selectContextBlocks([draftBlock, missionBlock], {
+    maxTokensBudget: 2600,
+    requiredGroups: ["current_draft_full", "chapter_mission"],
+  });
+  const condenseBudgetSelection = selectContextBlocks([draftBlock, missionBlock], {
+    maxTokensBudget: 8000,
+    requiredGroups: ["current_draft_full", "chapter_mission"],
+  });
+
+  assert.equal(tightBudgetSelection.summarizedBlockIds.includes("current_draft_full"), false);
+  const selectedDraft = tightBudgetSelection.selectedBlocks.find((block) => block.id === "current_draft_full");
+  assert.ok(selectedDraft);
+  assert.equal(selectedDraft.content.includes(draft), true);
+  assert.equal(selectedDraft.content.includes("[context summarized]"), false);
+  assert.equal(condenseBudgetSelection.droppedBlockIds.includes("current_draft_full"), false);
+  assert.equal(condenseBudgetSelection.summarizedBlockIds.includes("current_draft_full"), false);
 });

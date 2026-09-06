@@ -223,6 +223,10 @@ export class ChapterWritingGraph {
       contextPolicy: {
         ...chapterWriterPrompt.contextPolicy,
         maxTokensBudget: NOVEL_PROMPT_BUDGETS.chapterWriterCondense,
+        requiredGroups: [
+          "current_draft_full",
+          ...(chapterWriterPrompt.contextPolicy.requiredGroups ?? []),
+        ],
       },
     };
     const resolvedContext = await resolvePromptContextBlocksForAsset({

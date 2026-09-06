@@ -86,8 +86,8 @@ function renderWriterSystemText() {
   return systemMessage.content;
 }
 
-test("writer v8 carries style anchor guidance in system prompt", () => {
-  assert.equal(chapterWriterPrompt.version, "v8");
+test("writer v9 carries style anchor guidance in system prompt", () => {
+  assert.equal(chapterWriterPrompt.version, "v9");
   const systemText = renderWriterSystemText();
   assert.ok(systemText.includes("范文锚点"));
   assert.ok(systemText.includes("禁止照抄其中的具体情节、人物、地名、组织名"));
