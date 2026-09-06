@@ -237,6 +237,7 @@ async function invokeStructuredAttempt<T>(input: {
     model: resolved.model,
     promptText: formatLivePrompt(messages),
   });
+  let collectedFinishReason: string | undefined;
   try {
     liveSession.phase("streaming", "模型正在返回结构化结果");
     const collected = await runWithEnforcedTimeout({
@@ -250,6 +251,7 @@ async function invokeStructuredAttempt<T>(input: {
         );
         let rawContent = "";
         let tokenUsage = null;
+        let finishReason: string | undefined;
         const reasoningCollector = new ReasoningStreamCollector();
         for await (const chunk of stream) {
           const content = toText(chunk.content);
@@ -257,12 +259,18 @@ async function invokeStructuredAttempt<T>(input: {
           rawContent += content;
           liveSession.delta(content);
           tokenUsage = mergeStreamTokenUsage(tokenUsage, extractLlmTokenUsage(chunk));
+          const meta = (chunk as { response_metadata?: Record<string, unknown> }).response_metadata;
+          const reason = meta?.finish_reason ?? meta?.stop_reason;
+          if (typeof reason === "string") {
+            finishReason = reason;
+          }
         }
         liveSession.reasoning(reasoningCollector.flush());
-        return { rawContent, tokenUsage };
+        return { rawContent, tokenUsage, finishReason };
       },
     });
     const rawContent = collected.rawContent;
+    collectedFinishReason = collected.finishReason;
     logStructuredInvokeEvent({
       event: "invoke_done",
       label: input.baseInput.label,
@@ -272,6 +280,7 @@ async function invokeStructuredAttempt<T>(input: {
       latencyMs: Date.now() - startedAt,
       rawChars: rawContent.length,
       strategy: input.strategy,
+      finishReason: collectedFinishReason,
       fallbackUsed: input.fallbackUsed,
       reasoningForcedOff: resolved.reasoningForcedOff,
     });
@@ -327,6 +336,8 @@ async function invokeStructuredAttempt<T>(input: {
       latencyMs: Date.now() - startedAt,
       strategy: input.strategy,
       errorCategory: category,
+      finishReason: collectedFinishReason,
+      truncated: collectedFinishReason === "length" || collectedFinishReason === "max_tokens",
       fallbackUsed: input.fallbackUsed,
       reasoningForcedOff: resolved.reasoningForcedOff,
     });

@@ -6,6 +6,7 @@ const factory = require("../dist/llm/factory.js");
 const structuredFallbackSettings = require("../dist/llm/structuredFallbackSettings.js");
 const { buildStructuredResponseFormat, resolveStructuredOutputProfile } = require("../dist/llm/structuredOutput.js");
 const structuredInvoke = require("../dist/llm/structuredInvoke.js");
+const structuredInvokeParser = require("../dist/llm/structuredInvokeParser.js");
 const { plannerOutputSchema } = require("../dist/services/planner/plannerSchemas.js");
 const { normalizePlannerOutput } = require("../dist/services/planner/PlannerService.js");
 
@@ -672,4 +673,199 @@ test("buildStructuredResponseFormat keeps string length limits in json schema se
   assert.equal(serializedSchema.includes("minLength"), true);
   assert.equal(serializedSchema.includes("maxLength"), true);
   assert.equal(serializedSchema.includes("maxItems"), true);
+});
+
+test("parseStructuredLlmRawContentDetailed heals mid-string truncated JSON locally without invoking repair", async () => {
+  const originalGetLLM = factory.getLLM;
+  let repairInvoked = false;
+
+  factory.getLLM = async () => {
+    repairInvoked = true;
+    throw new Error("repair should not run when local heuristic can close a dangling string");
+  };
+
+  try {
+    const result = await structuredInvoke.parseStructuredLlmRawContentDetailed({
+      // 截断在字符串值内部：缺闭引号与结尾大括号。启发式应补 `"` 再补 `}`。
+      rawContent: '{"value":"unterminated',
+      schema: z.object({
+        value: z.string(),
+      }),
+      provider: "deepseek",
+      model: "deepseek-chat",
+      label: "structured.invoke.dangling.string",
+      maxRepairAttempts: 0,
+      strategy: "prompt_json",
+      profile: resolveStructuredOutputProfile({
+        provider: "deepseek",
+        model: "deepseek-chat",
+        executionMode: "structured",
+      }),
+    });
+
+    assert.deepEqual(result.data, { value: "unterminated" });
+    assert.equal(result.repairUsed, false);
+    assert.equal(result.repairAttempts, 0);
+    assert.equal(repairInvoked, false);
+  } finally {
+    factory.getLLM = originalGetLLM;
+  }
+});
+
+test("resolveRepairMaxTokens raises repair budget to the profile-safe structured ceiling", () => {
+  const customProfile = resolveStructuredOutputProfile({
+    provider: "test-gateway",
+    model: "minimax-m3",
+    executionMode: "structured",
+  });
+  assert.equal(customProfile.safeStructuredMaxTokens, 8192);
+  assert.equal(structuredInvokeParser.resolveRepairMaxTokens({
+    maxTokens: 3200,
+    profile: customProfile,
+  }), 8192);
+  assert.equal(structuredInvokeParser.resolveRepairMaxTokens({
+    maxTokens: 12000,
+    profile: customProfile,
+  }), 12000);
+  assert.equal(structuredInvokeParser.resolveRepairMaxTokens({
+    profile: customProfile,
+  }), 8192);
+
+  const deepseekProfile = resolveStructuredOutputProfile({
+    provider: "deepseek",
+    model: "deepseek-chat",
+    executionMode: "structured",
+  });
+  assert.equal(deepseekProfile.safeStructuredMaxTokens, undefined);
+  assert.equal(structuredInvokeParser.resolveRepairMaxTokens({
+    maxTokens: 3200,
+    profile: deepseekProfile,
+  }), 3200);
+  // profile 缺省（历史调用方未传 profile 也走 repair）时不崩、维持原预算。
+  assert.equal(structuredInvokeParser.resolveRepairMaxTokens({
+    maxTokens: 3200,
+  }), 3200);
+});
+
+test("JSON repair receives an elevated maxTokens derived from the profile safe ceiling", async () => {
+  const originalGetLLM = factory.getLLM;
+  const capturedMaxTokens = [];
+
+  factory.getLLM = async (_provider, options = {}) => {
+    capturedMaxTokens.push(options.maxTokens);
+    return {
+      stream: async function* () {
+        yield { content: '{"value":"fixed"}' };
+      },
+    };
+  };
+
+  try {
+    const profile = resolveStructuredOutputProfile({
+      provider: "test-gateway",
+      model: "minimax-m3",
+      executionMode: "structured",
+    });
+    const result = await structuredInvoke.parseStructuredLlmRawContentDetailed({
+      rawContent: "这不是合法 JSON。",
+      schema: z.object({
+        value: z.string(),
+      }),
+      provider: "test-gateway",
+      model: "minimax-m3",
+      label: "structured.invoke.repair.budget",
+      maxTokens: 3200,
+      maxRepairAttempts: 1,
+      strategy: "prompt_json",
+      profile,
+    });
+
+    assert.deepEqual(result.data, { value: "fixed" });
+    assert.equal(result.repairUsed, true);
+    assert.equal(capturedMaxTokens.length, 1);
+    assert.equal(capturedMaxTokens[0], 8192);
+    assert.ok(capturedMaxTokens[0] >= profile.safeStructuredMaxTokens);
+  } finally {
+    factory.getLLM = originalGetLLM;
+  }
+});
+
+test("invokeStructuredLlmDetailed logs finish_reason length and marks truncated when parsing fails", async () => {
+  const originalResolveOptions = factory.resolveLLMClientOptions;
+  const originalCreateLLM = factory.createLLMFromResolvedOptions;
+  const originalGetFallbackSettings = structuredFallbackSettings.getStructuredFallbackSettings;
+  const originalConsoleInfo = console.info;
+  const logLines = [];
+
+  console.info = (...args) => {
+    logLines.push(args.join(" "));
+  };
+
+  factory.resolveLLMClientOptions = async (provider, options = {}) => {
+    const resolvedProvider = provider ?? "openai";
+    const resolvedModel = options.model ?? "gpt-4o-mini";
+    const baseURL = options.baseURL ?? "https://api.openai.com/v1";
+    const structuredProfile = options.executionMode === "structured"
+      ? resolveStructuredOutputProfile({
+        provider: resolvedProvider,
+        model: resolvedModel,
+        baseURL,
+        executionMode: "structured",
+      })
+      : null;
+    return {
+      provider: resolvedProvider,
+      providerName: resolvedProvider,
+      model: resolvedModel,
+      temperature: options.temperature ?? 0.3,
+      apiKey: "test-key",
+      baseURL,
+      maxTokens: options.maxTokens,
+      requestProtocol: "openai_compatible",
+      reasoningEnabled: true,
+      modelKwargs: undefined,
+      includeRawResponse: false,
+      executionMode: options.executionMode ?? "plain",
+      structuredProfile,
+      structuredStrategy: options.structuredStrategy ?? null,
+      reasoningForcedOff: false,
+      taskType: options.taskType,
+      promptMeta: options.promptMeta,
+    };
+  };
+  factory.createLLMFromResolvedOptions = () => ({
+    stream: async function* () {
+      yield {
+        content: "这不是合法 JSON。",
+        response_metadata: { finish_reason: "length" },
+      };
+    },
+  });
+  structuredFallbackSettings.getStructuredFallbackSettings = async () => null;
+
+  try {
+    await assert.rejects(async () => structuredInvoke.invokeStructuredLlmDetailed({
+      provider: "openai",
+      model: "gpt-4o-mini",
+      label: "structured.invoke.finish-reason.truncated",
+      taskType: "planner",
+      schema: z.object({
+        value: z.string(),
+      }),
+      systemPrompt: "只返回 JSON。",
+      userPrompt: "给我一个 value。",
+      disableFallbackModel: true,
+      maxRepairAttempts: 0,
+    }), /STRUCTURED_OUTPUT:(incomplete_json|schema_mismatch)/i);
+
+    const errorLines = logLines.filter((line) => line.includes("event=invoke_error"));
+    assert.ok(errorLines.length >= 1, "expected at least one invoke_error log line");
+    assert.ok(errorLines.some((line) => line.includes("finishReason=length")), "invoke_error should record finishReason=length");
+    assert.ok(errorLines.some((line) => line.includes("truncated=true")), "invoke_error should flag truncated=true on length stop");
+  } finally {
+    factory.resolveLLMClientOptions = originalResolveOptions;
+    factory.createLLMFromResolvedOptions = originalCreateLLM;
+    structuredFallbackSettings.getStructuredFallbackSettings = originalGetFallbackSettings;
+    console.info = originalConsoleInfo;
+  }
 });

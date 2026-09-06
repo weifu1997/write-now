@@ -24,6 +24,11 @@ import type {
 
 type StoryMacroPlanResult = Awaited<ReturnType<StoryMacroPlanService["getPlan"]>> | null;
 
+// 执行合同 @v4 输出较大（boundary + taskSheet + readerExperience + 3-8 个 sceneCard），
+// 长内容（收官/高信息量）章节的合法 JSON 曾超过旧预算 3200 而在闭合前被截断；
+// 6400 低于 custom/minimax profile 的 safeStructuredMaxTokens(8192)，不会被 factory 再钳低。
+const CHAPTER_EXECUTION_CONTRACT_MAX_TOKENS = 6_400;
+
 export function shouldRetryChapterExecutionContract(error: unknown, attempt: number): boolean {
   if (attempt > 0) {
     return false;
@@ -141,7 +146,7 @@ export async function generateChapterTaskSheetDetail(params: {
           provider: params.options.provider,
           model: params.options.model,
           temperature: params.options.temperature ?? 0.35,
-          maxTokens: 3_200,
+          maxTokens: CHAPTER_EXECUTION_CONTRACT_MAX_TOKENS,
           taskId: params.options.taskId,
           entrypoint: params.options.entrypoint,
           novelId: promptInput.workspace.novelId,
