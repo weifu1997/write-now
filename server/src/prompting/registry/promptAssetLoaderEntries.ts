@@ -414,7 +414,7 @@ export const promptAssetLoaderEntries: PromptAssetLoaderEntry[] = [
     load: () => require("../prompts/novel/review.prompts").chapterSummaryPrompt as UnknownPromptAsset,
   },
   {
-    key: "novel.chapter.writer@v8",
+    key: "novel.chapter.writer@v9",
     load: () => require("../prompts/novel/chapterWriter.prompts").chapterWriterPrompt as UnknownPromptAsset,
   },
   {
