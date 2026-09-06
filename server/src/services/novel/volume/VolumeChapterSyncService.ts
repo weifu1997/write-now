@@ -3,10 +3,10 @@ import type {
   VolumePlanDocument,
   VolumePlan,
   VolumeSyncPreview,
+  VolumeSyncExecutionContractWarning,
 } from "@write-now/shared/types/novel";
 import {
   assessChapterExecutionContractShape,
-  formatChapterTaskSheetQualityFailure,
 } from "@write-now/shared/types/chapterTaskSheetQuality";
 import { prisma } from "../../../db/prisma";
 import type { VolumeUpdateReason } from "../../../events";
@@ -72,8 +72,29 @@ export class VolumeChapterSyncService {
   ): Promise<VolumeSyncPreview> {
     const workspace = await this.deps.ensureVolumeWorkspace(novelId);
     const mergedDocument = mergeVolumeWorkspaceInput(novelId, workspace, { volumes: input.volumes });
+    let incompleteExecutionContractWarnings: VolumeSyncExecutionContractWarning[] = [];
     if (!input.allowIncompleteExecutionContracts) {
-      this.assertSyncableChapterExecutionContracts(mergedDocument, input.executionContractChapterRange);
+      const chapterRows = await prisma.chapter.findMany({
+        where: { novelId },
+        select: {
+          id: true,
+          order: true,
+          content: true,
+          generationState: true,
+          chapterStatus: true,
+        },
+      });
+      incompleteExecutionContractWarnings = collectChapterExecutionContractSyncWarnings({
+        document: mergedDocument,
+        chapterRows,
+        chapterRange: input.executionContractChapterRange,
+      });
+      if (incompleteExecutionContractWarnings.length > 0) {
+        const orders = incompleteExecutionContractWarnings.map((warning) => warning.chapterOrder).join("、");
+        console.warn(
+          `[volume-chapter-sync] 第 ${orders} 章执行合同不完整，已记录为章节级质量债务，不阻断本次同步；正文执行前由 JIT 规划或章节合同服务自动修复。`,
+        );
+      }
     }
     const shouldSyncPayoffLedger = hasPayoffLedgerRelevantPlanChanges(workspace.volumes, mergedDocument.volumes);
     const existingChapters = await prisma.chapter.findMany({
@@ -182,48 +203,96 @@ export class VolumeChapterSyncService {
     if (options.syncPayoffLedger ?? shouldSyncPayoffLedger) {
       this.deps.syncPayoffLedger(novelId);
     }
-    return plan.preview;
+    return incompleteExecutionContractWarnings.length > 0
+      ? { ...plan.preview, incompleteExecutionContractWarnings }
+      : plan.preview;
   }
+}
 
-  private assertSyncableChapterExecutionContracts(
-    document: VolumePlanDocument,
-    chapterRange?: VolumeSyncInput["executionContractChapterRange"],
-  ): void {
-    for (const volume of document.volumes) {
-      for (const chapter of volume.chapters) {
-        if (
-          chapterRange
-          && (chapter.chapterOrder < chapterRange.startOrder || chapter.chapterOrder > chapterRange.endOrder)
-        ) {
-          continue;
-        }
-        const hasExecutionArtifact = Boolean(chapter.taskSheet?.trim() || chapter.sceneCards?.trim());
-        if (!hasExecutionArtifact) {
-          continue;
-        }
-        const result = assessChapterExecutionContractShape({
-          novelId: document.novelId,
+export interface VolumeSyncContractChapterRow {
+  id: string;
+  order: number;
+  content: string | null;
+  generationState: string | null;
+  chapterStatus: string | null;
+}
+
+/**
+ * 章节已有成稿正文且流程状态已定稿时，其执行合同不会再被正文链路重建，
+ * 同步门禁必须放行，避免旧结构合同卡住全书接管。
+ */
+export function hasFinalizedChapterProse(row: {
+  content: string | null;
+  generationState: string | null;
+  chapterStatus: string | null;
+}): boolean {
+  if (typeof row.content !== "string" || !row.content.trim()) {
+    return false;
+  }
+  return row.chapterStatus === "completed" || row.generationState === "approved";
+}
+
+/**
+ * 收集同步范围内待执行章节的执行合同缺口，作为章节级质量债务随同步结果返回。
+ * 已有成稿正文的章节直接跳过；待执行章节的合同缺口不阻断同步，
+ * 由执行链路的 JIT 规划 / 章节合同服务在进入正文生成前修复。
+ */
+export function collectChapterExecutionContractSyncWarnings(input: {
+  document: VolumePlanDocument;
+  chapterRows: VolumeSyncContractChapterRow[];
+  chapterRange?: { startOrder: number; endOrder: number };
+}): VolumeSyncExecutionContractWarning[] {
+  const rowsById = new Map(input.chapterRows.map((row) => [row.id, row] as const));
+  const rowsByOrder = new Map(input.chapterRows.map((row) => [row.order, row] as const));
+  const warnings: VolumeSyncExecutionContractWarning[] = [];
+  for (const volume of input.document.volumes) {
+    for (const chapter of volume.chapters) {
+      if (
+        input.chapterRange
+        && (chapter.chapterOrder < input.chapterRange.startOrder
+          || chapter.chapterOrder > input.chapterRange.endOrder)
+      ) {
+        continue;
+      }
+      const hasExecutionArtifact = Boolean(chapter.taskSheet?.trim() || chapter.sceneCards?.trim());
+      if (!hasExecutionArtifact) {
+        continue;
+      }
+      const chapterRow = (chapter.chapterId ? rowsById.get(chapter.chapterId) : undefined)
+        ?? rowsByOrder.get(chapter.chapterOrder);
+      if (chapterRow && hasFinalizedChapterProse(chapterRow)) {
+        continue;
+      }
+      const result = assessChapterExecutionContractShape({
+        novelId: input.document.novelId,
+        volumeId: volume.id,
+        chapterId: chapter.id,
+        chapterOrder: chapter.chapterOrder,
+        title: chapter.title,
+        summary: chapter.summary,
+        purpose: chapter.purpose,
+        exclusiveEvent: chapter.exclusiveEvent,
+        endingState: chapter.endingState,
+        nextChapterEntryState: chapter.nextChapterEntryState,
+        conflictLevel: chapter.conflictLevel,
+        revealLevel: chapter.revealLevel,
+        targetWordCount: chapter.targetWordCount,
+        mustAvoid: chapter.mustAvoid,
+        payoffRefs: chapter.payoffRefs,
+        taskSheet: chapter.taskSheet,
+        sceneCards: chapter.sceneCards,
+      });
+      if (!result.canEnterExecution) {
+        warnings.push({
           volumeId: volume.id,
           chapterId: chapter.id,
           chapterOrder: chapter.chapterOrder,
           title: chapter.title,
-          summary: chapter.summary,
-          purpose: chapter.purpose,
-          exclusiveEvent: chapter.exclusiveEvent,
-          endingState: chapter.endingState,
-          nextChapterEntryState: chapter.nextChapterEntryState,
-          conflictLevel: chapter.conflictLevel,
-          revealLevel: chapter.revealLevel,
-          targetWordCount: chapter.targetWordCount,
-          mustAvoid: chapter.mustAvoid,
-          payoffRefs: chapter.payoffRefs,
-          taskSheet: chapter.taskSheet,
-          sceneCards: chapter.sceneCards,
+          issues: result.issues.map((issue) => issue.summary),
+          repairGuidance: result.repairGuidance,
         });
-        if (!result.canEnterExecution) {
-          throw new Error(`第 ${chapter.chapterOrder} 章执行合同未通过质量门禁，不能连接到章节执行区。${formatChapterTaskSheetQualityFailure(result)}`);
-        }
       }
     }
   }
+  return warnings;
 }
