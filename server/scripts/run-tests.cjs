@@ -55,9 +55,45 @@ if (files.length === 0) {
 }
 
 if (mode === "fast") {
-  for (const file of files) {
-    require(file);
-  }
+  // 以编程式 API 在同一进程内顺序执行所有测试文件（与原 require 行为一致），
+  // 结束后显式 process.exit：否则个别测试遗留的句柄（keep-alive socket、
+  // 未关闭的 server）会让事件循环无法排空，套件跑完后进程挂住不退出。
+  const { run } = require("node:test");
+
+  (async () => {
+    const runner = run({ files, isolation: "none", concurrency: 1 });
+    let passCount = 0;
+    let failCount = 0;
+    const failureLines = [];
+    runner.on("test:pass", () => {
+      passCount += 1;
+    });
+    runner.on("test:fail", ({ name, details }) => {
+      failCount += 1;
+      failureLines.push(`✖ ${name}`);
+      const message = details?.error?.message ?? details?.error;
+      if (message) {
+        failureLines.push(`    ${String(message).split("\n")[0]}`);
+      }
+    });
+    runner.on("test:stderr", ({ message }) => {
+      process.stderr.write(message);
+    });
+
+    await new Promise((resolve) => {
+      runner.on("close", resolve);
+      runner.on("end", resolve);
+    });
+
+    console.log(`\nℹ tests ${passCount + failCount} ℹ pass ${passCount} ℹ fail ${failCount}`);
+    for (const line of failureLines) {
+      console.error(line);
+    }
+    process.exit(failCount > 0 ? 1 : 0);
+  })().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
   return;
 }
 

@@ -192,7 +192,9 @@ function buildProgressSummary(
   const repairCount = inventory?.needsRepairArtifacts.length
     ?? snapshot.artifacts.filter((artifact) => artifact.artifactType === "repair_ticket" && artifact.status !== "rejected").length;
   const parts = [
-    `${completedSteps}/${snapshot.steps.length} 个步骤完成`,
+    // 分母用 factSummary 的全量步数：持久化快照会截断至最近 120 步，
+    // 混用会导致长任务显示"180/95 个步骤完成"这类漂移。
+    `${completedSteps}/${totalSteps} 个步骤完成`,
     `${snapshot.artifacts.length} 个产物记录`,
   ];
   if (waitingSteps > 0) {
@@ -575,6 +577,15 @@ function readQualityBudgetEntry(value: unknown): DirectorQualityLoopBudgetEntry 
   };
 }
 
+function resolveDebtChapterOrder(event: DirectorEvent): number | null {
+  const order = event.metadata?.chapterOrder;
+  if (typeof order === "number" && Number.isFinite(order)) {
+    return order;
+  }
+  const match = /chapter_order:(\d+)/.exec(event.affectedScope ?? "");
+  return match ? Number(match[1]) : null;
+}
+
 function buildQualityDebtSummary(
   events: DirectorEvent[],
 ): DirectorRuntimeProjection["qualityDebtSummary"] {
@@ -584,19 +595,21 @@ function buildQualityDebtSummary(
   if (debtEvents.length === 0) {
     return null;
   }
-  const deferredChapterOrders = Array.from(new Set(debtEvents
-    .map((event) => {
-      const order = event.metadata?.chapterOrder;
-      if (typeof order === "number" && Number.isFinite(order)) {
-        return order;
-      }
-      const match = /chapter_order:(\d+)/.exec(event.affectedScope ?? "");
-      return match ? Number(match[1]) : null;
-    })
-    .filter((order): order is number => typeof order === "number" && Number.isFinite(order))))
-    .sort((left, right) => left - right);
+  // 同一章的重试/跳过会追加多条事件，章节维度去重后计数；
+  // 无法归属到章节的事件单独计入，避免总数被低估。
+  const attributedOrders = new Set<number>();
+  let unattributedCount = 0;
+  for (const event of debtEvents) {
+    const order = resolveDebtChapterOrder(event);
+    if (order === null) {
+      unattributedCount += 1;
+    } else {
+      attributedOrders.add(order);
+    }
+  }
+  const deferredChapterOrders = Array.from(attributedOrders).sort((left, right) => left - right);
   return {
-    deferredChapterCount: debtEvents.length,
+    deferredChapterCount: deferredChapterOrders.length + unattributedCount,
     deferredChapterOrders,
     latestReason: debtEvents[0]?.summary ?? null,
   };
