@@ -1,4 +1,5 @@
 import { prisma } from "../../db/prisma";
+import { AppError } from "../../middleware/errorHandler";
 import { stringifyStringArray } from "../novel/novelP0Utils";
 import { payoffLedgerSyncService } from "../payoff/PayoffLedgerSyncService";
 import { openConflictService } from "./OpenConflictService";
@@ -269,14 +270,37 @@ export class StateService {
       select: { id: true, content: true, order: true },
       orderBy: { order: "asc" },
     });
-    await prisma.storyStateSnapshot.deleteMany({ where: { novelId } });
     const rebuilt = [];
+    const failedChapters: Array<{ chapterId: string; chapterOrder: number; error: string }> = [];
     for (const chapter of chapters) {
       if (!chapter.content?.trim()) {
         continue;
       }
-      const snapshot = await this.syncChapterState(novelId, chapter.id, chapter.content, options);
-      rebuilt.push(snapshot);
+      // 逐章"先删该章快照、立即重建"：若整库先删后建，任何一章的
+      // LLM 提取/写库失败都会留下残缺状态且无法恢复旧状态。
+      await prisma.storyStateSnapshot.deleteMany({
+        where: { novelId, sourceChapterId: chapter.id },
+      });
+      try {
+        const snapshot = await this.syncChapterState(novelId, chapter.id, chapter.content, options);
+        rebuilt.push(snapshot);
+      } catch (error) {
+        failedChapters.push({
+          chapterId: chapter.id,
+          chapterOrder: chapter.order,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+    if (failedChapters.length > 0) {
+      const orderSummary = failedChapters
+        .map((item) => `第${item.chapterOrder}章`)
+        .join("、");
+      throw new AppError(
+        `状态重建未完成：${orderSummary}重建失败，已完成章节的状态已保留。`,
+        502,
+        failedChapters,
+      );
     }
     return rebuilt;
   }
