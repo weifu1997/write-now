@@ -69,6 +69,16 @@ function tryFixTruncatedJson(raw: string): string {
   if (openBraces > closeBraces) {
     fixed += "}".repeat(openBraces - closeBraces);
   }
+  if (fixed !== text) {
+    // 括号计数包含字符串值内的括号，这里的"修复"可能产生合法但内容
+    // 已被截断损坏的 JSON。记录告警便于统计其触发频率与误修率，
+    // 后续再决定是否收紧该启发式的使用条件。
+    console.warn(
+      `[structured-output] applied truncated-JSON heuristic `
+      + `(braces ${openBraces}/${closeBraces}, brackets ${openBrackets}/${closeBrackets}, `
+      + `length ${text.length} -> ${fixed.length})`,
+    );
+  }
   return fixed;
 }
 

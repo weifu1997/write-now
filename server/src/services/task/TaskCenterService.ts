@@ -244,9 +244,16 @@ export class TaskCenterService {
     const items = filteredByCursor.slice(0, limit);
     const nextCursor = filteredByCursor.length > limit ? toCursor(items[items.length - 1]) : null;
 
+    // 任一来源命中取数窗口上限时，更早的任务在本响应的游标链中不可达；
+    // 显式告知调用方，避免"静默丢数据"。
+    const windowExhausted = [
+      bookTasks, novelTasks, knowledgeTasks, imageTasks, agentTasks, workflowTasks, styleExtractionTasks,
+    ].some((rows) => rows.length >= sourceTake);
+
     return {
       items,
       nextCursor,
+      ...(windowExhausted ? { truncated: true } : {}),
     };
   }
 

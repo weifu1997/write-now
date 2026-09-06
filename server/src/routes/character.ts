@@ -14,6 +14,8 @@ const listQuerySchema = z.object({
   category: z.string().trim().optional(),
   tags: z.string().trim().optional(),
   search: z.string().trim().optional(),
+  // 列表读取加上限，避免角色库膨胀后每次列表都全表扫描
+  limit: z.coerce.number().int().min(1).max(500).optional(),
 });
 
 const idSchema = z.object({
@@ -71,6 +73,7 @@ router.get("/", validate({ query: listQuerySchema }), async (req, res, next) => 
           : undefined,
       },
       orderBy: { updatedAt: "desc" },
+      take: query.limit ?? 500,
     });
     res.status(200).json({
       success: true,

@@ -55,46 +55,21 @@ if (files.length === 0) {
 }
 
 if (mode === "fast") {
-  // 以编程式 API 在同一进程内顺序执行所有测试文件（与原 require 行为一致），
-  // 结束后显式 process.exit：否则个别测试遗留的句柄（keep-alive socket、
-  // 未关闭的 server）会让事件循环无法排空，套件跑完后进程挂住不退出。
-  const { run } = require("node:test");
+  // 每个测试文件在独立子进程中顺序执行：部分测试会遗留 keep-alive socket /
+  // 未关闭的 server 句柄，事件循环因此无法排空，套件跑完后进程挂住；
+  // --test-force-exit 在测试完成后强制退出。
+  // 串行执行（concurrency=1）：这些测试共享同一 SQLite 库与内存态，
+  // 并发跑会互相干扰。
+  const result = spawnSync(
+    process.execPath,
+    ["--test", "--test-force-exit", "--test-concurrency=1", ...files],
+    {
+      cwd: serverRoot,
+      stdio: "inherit",
+    },
+  );
 
-  (async () => {
-    const runner = run({ files, isolation: "none", concurrency: 1 });
-    let passCount = 0;
-    let failCount = 0;
-    const failureLines = [];
-    runner.on("test:pass", () => {
-      passCount += 1;
-    });
-    runner.on("test:fail", ({ name, details }) => {
-      failCount += 1;
-      failureLines.push(`✖ ${name}`);
-      const message = details?.error?.message ?? details?.error;
-      if (message) {
-        failureLines.push(`    ${String(message).split("\n")[0]}`);
-      }
-    });
-    runner.on("test:stderr", ({ message }) => {
-      process.stderr.write(message);
-    });
-
-    await new Promise((resolve) => {
-      runner.on("close", resolve);
-      runner.on("end", resolve);
-    });
-
-    console.log(`\nℹ tests ${passCount + failCount} ℹ pass ${passCount} ℹ fail ${failCount}`);
-    for (const line of failureLines) {
-      console.error(line);
-    }
-    process.exit(failCount > 0 ? 1 : 0);
-  })().catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
-  return;
+  process.exit(result.status ?? 1);
 }
 
 const result = spawnSync(process.execPath, ["--test", ...files], {

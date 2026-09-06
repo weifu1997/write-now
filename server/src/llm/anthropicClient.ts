@@ -193,12 +193,29 @@ export function createAnthropicLLM(options: AnthropicLLMOptions): {
           const reader = body.getReader();
           const decoder = new TextDecoder();
           let buffer = "";
+          // 首包超时只覆盖到响应头；流体阶段由空闲超时兜底：
+          // 超过 idleTimeoutMs 没有任何新数据视为连接挂死。
+          const idleTimeoutMs = options.timeoutMs ?? 0;
+          let idleTimer: ReturnType<typeof setTimeout> | null = null;
+          const resetIdleTimer = () => {
+            if (!idleTimeoutMs) {
+              return;
+            }
+            if (idleTimer) {
+              clearTimeout(idleTimer);
+            }
+            idleTimer = setTimeout(() => {
+              void reader.cancel(new Error("Anthropic stream idle timeout."));
+            }, idleTimeoutMs);
+          };
           try {
+            resetIdleTimer();
             while (true) {
               const { value, done } = await reader.read();
               if (done) {
                 break;
               }
+              resetIdleTimer();
               buffer += decoder.decode(value, { stream: true });
               const lines = buffer.split(/\r?\n/u);
               buffer = lines.pop() ?? "";
@@ -220,7 +237,12 @@ export function createAnthropicLLM(options: AnthropicLLMOptions): {
               }
             }
           } finally {
-            reader.releaseLock();
+            if (idleTimer) {
+              clearTimeout(idleTimer);
+            }
+            // 消费方提前退出（break / 上游 abort）时必须取消读流，
+            // 否则 HTTP 响应体会在后台继续下载并占用连接。
+            await reader.cancel().catch(() => undefined);
           }
         },
       };

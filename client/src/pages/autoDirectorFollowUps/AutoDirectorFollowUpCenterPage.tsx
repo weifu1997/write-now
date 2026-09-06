@@ -161,7 +161,9 @@ export default function AutoDirectorFollowUpCenterPage() {
     }),
     refetchInterval: (query) => {
       const items = query.state.data?.data?.items ?? [];
-      return items.some((item) => item.status === "failed" || item.status === "waiting_approval") ? 4000 : false;
+      // 只有仍在推进的条目需要轮询观察；failed / waiting_approval 是
+      // 停滞态，只会在用户执行操作后变化（操作本身会触发刷新）。
+      return items.some((item) => item.status === "queued" || item.status === "running") ? 4000 : false;
     },
   });
 

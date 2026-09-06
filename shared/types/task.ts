@@ -83,6 +83,8 @@ export interface UnifiedTaskDetail extends UnifiedTaskSummary {
 export interface UnifiedTaskListResponse {
   items: UnifiedTaskSummary[];
   nextCursor?: string | null;
+  /** 任一任务来源达到服务端取数窗口上限时为 true：更深的分页可能取不到更早的任务 */
+  truncated?: boolean;
 }
 
 export interface TaskOverviewSummary {
