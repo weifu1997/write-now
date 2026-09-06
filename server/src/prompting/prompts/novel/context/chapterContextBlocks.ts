@@ -484,7 +484,7 @@ export function buildChapterWriterContextBlocks(
         group: "opening_constraints",
         priority: 80,
         content: [
-          `Opening anti-repeat hint:\n${writeContext.openingAntiRepeatHint}`,
+          writeContext.openingAntiRepeatHint.trim(),
           writeContext.recentScenePatterns.length > 0
             ? toListBlock(
               "Scene pattern blacklist — do NOT repeat these exact time+location+action combinations",

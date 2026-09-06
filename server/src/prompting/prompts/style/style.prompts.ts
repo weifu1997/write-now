@@ -346,7 +346,7 @@ export const styleGenerationPrompt: PromptAsset<StyleGenerationPromptInput, stri
 
 export const styleRewritePrompt: PromptAsset<StyleRewritePromptInput, string, string> = {
   id: "style.rewrite",
-  version: "v2",
+  version: "v3",
   taskType: "repair",
   mode: "text",
   language: "zh",
@@ -378,7 +378,8 @@ export const styleRewritePrompt: PromptAsset<StyleRewritePromptInput, string, st
       "5. 自然化不是口语化，不得只在局部加入“很、太、有点、喉咙发紧、手心出汗”等浅层身体反应来伪装自然感。",
       "6. 必须保留原题材的叙事质感，但降低过度工整、华丽、均匀和总结式表达。",
       "7. 结尾可以从总结宣言改为具体行动、异常反应或阻力，但不得新增事实型设定、硬反转、隐藏身份、地图批注、密信、死人、刺客、失踪者等原文没有的剧情信息。",
-      "8. 对人物情绪，优先用动作、停顿、视线、对白和选择表现；删除替读者总结的判断句。",
+      "8. 对人物情绪，用动作、停顿、视线、对白和选择表现；删除替读者总结的判断句。",
+      "9. 同一篇里多处问题不要用同一种修法：在删而不换、对话化、具体感官细节、决策变化、结构压缩之间轮换；不要把全文都修成「删解释、加小动作」的固定模子，也不要反复使用同一种身体反应或小动作。",
       "",
       "质量要求：",
       "1. 修正后正文必须自然、连贯、可读，不能有明显补丁感。",
@@ -393,7 +394,8 @@ export const styleRewritePrompt: PromptAsset<StyleRewritePromptInput, string, st
       "3. 是否消除了 issuesBlock 中指出的主要问题。",
       "4. 是否没有照抄 suggestion 中的示例句。",
       "5. 是否没有新增事实型线索或编剧式硬钩子。",
-      "6. 是否只输出修正后的正文，没有任何额外说明。",
+      "6. 多处修改是否呈现了不同的替换策略，而不是都收敛到删解释、加小动作。",
+      "7. 是否只输出修正后的正文，没有任何额外说明。",
     ].join("\n\n")),
     new HumanMessage([
       "原文：",

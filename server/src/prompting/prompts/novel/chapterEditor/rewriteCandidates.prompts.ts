@@ -34,7 +34,7 @@ export const chapterEditorRewriteCandidatesPrompt: PromptAsset<
   ChapterEditorRewriteCandidatesParsed
 > = {
   id: "novel.chapter_editor.rewrite_candidates",
-  version: "v2",
+  version: "v3",
   taskType: "writer",
   mode: "structured",
   language: "zh",
@@ -103,6 +103,7 @@ export const chapterEditorRewriteCandidatesPrompt: PromptAsset<
       "6. label 要短，适合在编辑器里做候选切换。",
       "7. summary 用一句话概括主要改动。",
       "8. semanticTags 只保留 2 到 4 个高价值标签，例如“增强情绪”“压缩重复”“补足动作细节”。",
+      "9. 候选之间必须呈现至少两种不同的替换策略（例如删而不换、对话化、补具体感官细节、改变人物决策、结构压缩）；不要让所有候选都收敛成「删解释、加小动作」同一种改法，也不要反复使用同一种身体反应或小动作。",
       "",
       "改写范围：",
       "1. selection 表示只改写选中片段。",

@@ -12,7 +12,7 @@
   "assignee": "huangwf",
   "createdAt": "2026-09-06",
   "completedAt": null,
-  "branch": null,
+  "branch": "feature/review-anti-ai-wiring",
   "base_branch": "main",
   "worktree_path": null,
   "commit": null,
