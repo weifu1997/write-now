@@ -580,7 +580,7 @@ export default function WritingFormulaPage() {
           <DialogHeader className="border-b px-6 py-5 pr-14">
             <DialogTitle>编辑当前写法</DialogTitle>
             <DialogDescription>
-              这里专门整理写法本身的设定说明。应用测试和去 AI 味已经拆到独立入口，避免混在一个窗口里。
+              这里专门整理写法本身的设定说明。应用测试和去 AI 味在独立入口。
             </DialogDescription>
           </DialogHeader>
 
