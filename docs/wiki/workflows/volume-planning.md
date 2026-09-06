@@ -156,6 +156,30 @@ hard 卷锁定前期承诺、卖点、推进秩序和节奏稳定性；soft 卷�
 
 UI 和导演事实摘要可以展示 `affectedBeats`、`staleBeatCount`、`lockedBeatCount`、`defaultImpactAction` 和 `advancedImpactActions`，但这些都是投影 / 决策摘要，不需要数据库迁移。只有结构级角色或全局卖点变化明显影响整卷战略时，才提示高级动作，例如重跑节奏板或卷战略。
 
+## Volume Budget Duality: Planning Weight vs Rolling Planned Scale
+
+### Background
+
+卷级"应有章数"有两个使用场景，语义不同：
+
+- **规划期**：`allocateChapterBudgets` 把全书预算按各卷已有章节数加权分摊，用于初始骨架 / 节奏板的量级分配。
+- **滚动生产期**：拆章（`generateBeatChunkedChapterList`）与节奏板生成（`generateBeatSheet`）需要"本卷按规划应有多少章"的可信尺度，用来校验节奏板 `chapterSpanHint` 跨度、决定重生成目标章数。
+
+### Decision
+
+滚动生产期的可信尺度由 `resolveVolumePlannedChapterBudget` 统一给出：`max(加权分摊, 全书均分)`。全书均分（`全书预算 / 卷数`，与 `buildEvenChapterBudgets` 的 base 口径一致）正是节奏板生成在无完整章节分布时的兜底尺度，校验与生成因此自洽；加权分摊保证已完成卷的口径不被抬高。
+
+### Current Rule
+
+- 拆章与节奏板两个消费方必须使用该函数作为目标卷章数下限，禁止直接用 `chapterBudgets[targetIndex]` 作为唯一口径。
+- 节奏板跨度校验（`resolveTargetChapterCount`）与覆盖率校验（`validateBeatSheetChapterCoverage`）的输入都必须来自该口径。
+
+### Failure Modes
+
+- 若只用加权口径：滚动生产进入收官卷时，在产卷权重塌缩到当前进度（如 117 章中仅 4 章在收官卷 → 分摊 5 章），而其节奏板按均分尺度规划到 37 章，拆章校验会确定性误报"当前卷节奏板的章节跨度异常"并暂停全书；且该卷任何拆章都会再撞同一校验，形成死锁。
+- 若按报错提示重生成节奏板而不修口径：新板会按塌缩尺度（约 5 章）生成，收官卷被静默压缩、全书提前收尾。
+- 防御边界保持不变：模型把整书绝对章号写进 `chapterSpanHint`（跨度远超本卷规划尺度）时，校验仍应拒绝并要求重生成节奏板。
+
 ## Downstream Gap
 
 卷规划的价值最终要进入章节执行。当前已存在 `VolumeWindowContext.keyMilestoneGuards` 字段，但卷规划服务尚未完整填充它。这个缺口会导致章节生成仍可能提前兑现后续里程碑或重复卷级高潮。

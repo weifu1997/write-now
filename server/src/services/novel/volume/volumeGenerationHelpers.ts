@@ -17,6 +17,7 @@ import type {
 export {
   allocateChapterBudgets,
   deriveChapterBudget,
+  resolveVolumePlannedChapterBudget,
 } from "./volumeChapterBudgetAllocation";
 
 export { generateChapterTaskSheetDetail } from "./chapterDetail";
