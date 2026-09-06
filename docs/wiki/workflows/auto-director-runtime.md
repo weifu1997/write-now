@@ -161,6 +161,7 @@ Web API 只接收命令和返回轻量投影；Worker 负责执行重型生产�
 - 角色准备阶段的 `character_setup_required` 是可恢复检查点，不是失败。若角色阵容候选已经生成但质量闸要求用户确认，StepModule 应把它识别为 acceptable pause：任务状态停在 `waiting_approval`，候选保留给用户审核或应用，不能再用“正式角色数为 0”把 `character.cast.prepare` 升级成失败。只有在没有正式角色、没有可用候选、也没有可恢复检查点时，才应视为角色准备失败。
 - 角色阵容“应用”分为核心落库和增强补齐两层。核心落库同步完成主角、主要对手、开篇登场角色及必要关系，足以支持开篇规划与正文。外显资料、心智快照和完整动态投影属于延迟增强；快速启动不得等待它们。首章正文稳定落库后，系统才可为同一本书串行启动一个低优先级增强任务；失败只记录资料待补齐，不得把自动导演标记为失败。
 - 角色阵容质量闸不得用正则、关键词表、固定文本片段或字符比例判断身份承接、隐藏真相、题材理解、语言质量或角色职责。这些创作语义必须交给 AI-first 结构化理解、PromptAsset、semantic retry 或 AI 评估链路。确定性闸门只能检查结构契约，例如是否存在 protagonist、gender、必填字段和可恢复检查点。
+- 结构化大纲阶段的 `chapter_sync` 收尾必须内联重建角色动态投影（`characterDynamicsService.rebuildDynamics`，`sourceType=rebuild_projection`，失败只告警不阻断）。原因：下游重置会删除范围内章节的角色时间线、角色候选、阵营轨迹和关系阶段等派生数据，而 `volume:updated` 事件驱动的重建兜底明确跳过 `chapter_execution_contract_refined` / `chapter_sync` 这两个更新原因；删掉这次内联重建后没有任何路径补上，角色动态会停留在过期状态进入章节执行。移动或重构该阶段时，不得移除这次重建调用；若确需移除，必须先让事件兜底覆盖阶段同步的原因，并同步更新 `novelDirectorStructuredOutlinePersistence` 的守卫测试。
 
 ## 示例
 

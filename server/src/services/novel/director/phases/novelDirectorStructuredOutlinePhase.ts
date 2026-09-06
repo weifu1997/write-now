@@ -497,6 +497,16 @@ export async function runDirectorStructuredOutlinePhase(input: {
     emitEvent: false,
     syncPayoffLedger: false,
   });
+  // 下游重置会清掉范围内的角色时间线 / 阵营轨迹 / 关系阶段等派生数据，
+  // volume:updated 的重建兜底又明确跳过本章同步的更新原因，
+  // 所以这里必须同步重建角色动态投影，失败只降级告警不阻断。
+  await dependencies.characterDynamicsService.rebuildDynamics(novelId, {
+    sourceType: "rebuild_projection",
+  }).catch((error) => {
+    console.warn(
+      `[director.structured_outline] event=character_dynamics_rebuild_failed taskId=${taskId} novelId=${novelId} error=${JSON.stringify(error instanceof Error ? error.message : String(error))}`,
+    );
+  });
   const syncCursor = resolveStructuredOutlineRecoveryCursor({
     workspace: persistedOutlineWorkspace,
     plan: detailPlan,
