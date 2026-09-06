@@ -95,7 +95,7 @@ export const chapterReviewPrompt: PromptAsset<
   z.infer<typeof fullAuditOutputSchema>
 > = {
   id: "novel.review.chapter",
-  version: "v3",
+  version: "v4",
   taskType: "critical_review",
   mode: "structured",
   language: "zh",
@@ -135,6 +135,7 @@ export const chapterReviewPrompt: PromptAsset<
       "4. voice：文风、叙述口吻、人物表达是否稳定且适配当前内容。",
       "5. engagement：是否具有持续阅读动力，结尾钩子、冲突推进与信息揭示是否有效。",
       "6. overall：综合质量判断，应反映本章是否达到可发布或需重点修整的水平。",
+      "7. 代价与意外兑现：reader_experience 给出本章代价（expectedCost）或意外（complication）时，检查正文是否可见兑现且与情节有机衔接；机械模板化的插入（连续章节固定一个代价加一个意外的模式感）同样属于 engagement 类问题；两者缺省的缓冲章不算缺陷。",
       ...(input.antiAiDirectiveText
         ? [
             "",

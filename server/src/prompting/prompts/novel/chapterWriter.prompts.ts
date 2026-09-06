@@ -17,7 +17,7 @@ export interface ChapterWriterPromptInput {
 
 export const chapterWriterPrompt: PromptAsset<ChapterWriterPromptInput, string, string> = {
   id: "novel.chapter.writer",
-  version: "v7",
+  version: "v8",
   taskType: "writer",
   mode: "text",
   language: "zh",
@@ -233,6 +233,7 @@ export const chapterWriterPrompt: PromptAsset<ChapterWriterPromptInput, string, 
         "0. 以本章任务、人物状态、伏笔指令和连续性上下文为准，避免提前揭示未来答案或写到后续章节事件。",
         "1. 必须推进新的剧情动作，本章必须发生实质变化（局面、关系、信息、风险、决策至少一项）。",
         "1a. reader_experience 是本章读者体验硬合同：必须让 promisedReward、keyTurn 与 netChange 在正文中可见，主角必须围绕 protagonistWant 主动行动并面对 primaryResistance。",
+        "1a-1. reader_experience 给出本章代价（expectedCost）或意外（complication）时，正文必须让读者可见其兑现：代价要有具体事件承载（信息、关系、资源、机会的实际损失），不得只写心理活动；意外必须真实改变后续行动条件。两者都缺省的缓冲章不强行插入。",
         "1b. inheritedHookResponsibilities 必须优先得到回应、触达或部分兑现；不得只制造新钩子而不给旧问题任何回报。",
         "2. 必须严格服从 chapter mission、mustAdvance、mustPreserve 与 ending hook。",
         "3. obligation contract 中的 must hit now、required payoff touches、required character appearances、required goal changes 都是本章必达项，必须在正文中让读者可见。",
