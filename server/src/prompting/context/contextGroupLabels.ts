@@ -33,6 +33,7 @@ const CONTEXT_GROUP_LABELS: Record<string, string> = {
   story_macro: "宏观故事架构",
   structure_obligations: "结构义务",
   style_contract: "风格合约",
+  style_anchor_passages: "范文锚点",
   timeline_context: "时间线",
   volume_window: "卷级窗口",
   world_rules: "世界规则",

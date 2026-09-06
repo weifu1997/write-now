@@ -83,6 +83,7 @@ export function normalizeChapterWriteContext(writeContext: ChapterWriteContext):
     ragFacts: writeContext.ragFacts ?? [],
     completedMilestones: writeContext.completedMilestones ?? [],
     recentScenePatterns: writeContext.recentScenePatterns ?? [],
+    styleAnchorPassages: writeContext.styleAnchorPassages ?? [],
     readerExperience: compatibleReaderExperience,
   };
 }
