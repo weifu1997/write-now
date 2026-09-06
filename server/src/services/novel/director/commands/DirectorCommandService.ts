@@ -710,8 +710,22 @@ export class DirectorCommandService {
       const normalizedPayload = Object.fromEntries(
         Object.entries(input.payload).filter(([, value]) => value !== undefined),
       );
-      const idempotencyKey = `${input.commandType}:${row.updatedAt.getTime()}:${hashPayload(normalizedPayload)}`;
+      const payloadFingerprint = `${input.commandType}:${hashPayload(normalizedPayload)}`;
       const payloadJson = stableJson(normalizedPayload);
+      const historicalRows = await prisma.directorRunCommand.findMany({
+        where: {
+          taskId: input.taskId,
+          commandType: input.commandType,
+        },
+        select: { idempotencyKey: true, status: true },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      });
+      const fingerprintPrefix = `${payloadFingerprint}:`;
+      const inactiveGeneration = historicalRows.filter((item) => (
+        item.idempotencyKey.startsWith(fingerprintPrefix)
+        && !ACTIVE_COMMAND_STATUSES.includes(item.status as DirectorRunCommandStatus)
+      )).length;
+      const idempotencyKey = `${fingerprintPrefix}${inactiveGeneration}`;
       const createCommand = () => prisma.directorRunCommand.create({
         data: {
           taskId: input.taskId,
@@ -745,7 +759,25 @@ export class DirectorCommandService {
         if (!existing) {
           throw error;
         }
-        return toAcceptedResponse(existing, null);
+        if (ACTIVE_COMMAND_STATUSES.includes(existing.status as DirectorRunCommandStatus)) {
+          return toAcceptedResponse(existing, null);
+        }
+        const nextKey = `${fingerprintPrefix}${inactiveGeneration + 1}`;
+        const retryCommand = await withSqliteRetry(() => prisma.directorRunCommand.create({
+          data: {
+            taskId: input.taskId,
+            novelId: row.novelId,
+            commandType: input.commandType,
+            idempotencyKey: nextKey,
+            status: "queued",
+            payloadJson,
+          },
+        }), { label: "director.command.create.retry" });
+        await this.markCommandAcceptedOnTask(input.taskId, input.commandType, {
+          preserveLastError: input.preserveLastError,
+        });
+        taskDispatcher.notify({ commandType: input.commandType, taskId: input.taskId });
+        return toAcceptedResponse(retryCommand, null);
       }
     });
   }
