@@ -430,7 +430,7 @@ export const promptAssetLoaderEntries: PromptAssetLoaderEntry[] = [
     load: () => require("../prompts/novel/chapterEditor/userIntent.prompts").chapterEditorUserIntentPrompt as UnknownPromptAsset,
   },
   {
-    key: "novel.chapter_editor.rewrite_candidates@v2",
+    key: "novel.chapter_editor.rewrite_candidates@v3",
     load: () => require("../prompts/novel/chapterEditor/rewriteCandidates.prompts").chapterEditorRewriteCandidatesPrompt as UnknownPromptAsset,
   },
   {
@@ -538,7 +538,7 @@ export const promptAssetLoaderEntries: PromptAssetLoaderEntry[] = [
     load: () => require("../prompts/style/style.prompts").styleGenerationPrompt as UnknownPromptAsset,
   },
   {
-    key: "style.rewrite@v1",
+    key: "style.rewrite@v3",
     load: () => require("../prompts/style/style.prompts").styleRewritePrompt as UnknownPromptAsset,
   },
   {

@@ -57,6 +57,7 @@ import {
 import {
   extractChapterOpening,
   extractChapterTail,
+  formatOpeningAvoidanceSamples,
   runtimeChapterSelect,
 } from "./context/chapterSourceText";
 import { resolveChapterResourceCharacterIds } from "./context/chapterParticipantSelection";
@@ -712,13 +713,6 @@ export class GenerationContextAssembler {
       }))
       .filter((item) => item.opening.length > 0);
 
-    if (openingList.length === 0) {
-      return "Recent openings: none.";
-    }
-
-    return [
-      "Recent openings (do not reuse the same opening structure or sentence starter):",
-      ...openingList.map((item) => `- Chapter ${item.order} ${item.title}: ${item.opening}`),
-    ].join("\n");
+    return formatOpeningAvoidanceSamples(openingList);
   }
 }

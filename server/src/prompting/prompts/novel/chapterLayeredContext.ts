@@ -382,7 +382,7 @@ export function buildChapterWriteContext(input: {
     characterResourceContext: input.contextPackage.characterResourceContext ?? null,
     recentChapterSummaries: takeUnique(input.contextPackage.previousChaptersSummary.slice(0, 3), 3),
     previousChapterTail: compactText(input.contextPackage.previousChapterTail) || null,
-    openingAntiRepeatHint: compactText(input.contextPackage.openingHint, "No recent opening guidance."),
+    openingAntiRepeatHint: compactText(input.contextPackage.openingHint),
     styleContract: input.contextPackage.styleContext?.compiledBlocks?.contract ?? null,
     styleConstraints: summarizeStyleConstraints(input.contextPackage),
     continuationConstraints: summarizeContinuationConstraints(input.contextPackage),

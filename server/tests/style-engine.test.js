@@ -662,6 +662,8 @@ test("style rewrite prompt avoids suggestion copying and factual hook injection"
   assert.match(promptText, /自然化不是口语化/);
   assert.match(promptText, /不得新增事实型设定/);
   assert.match(promptText, /地图批注、密信、死人、刺客、失踪者/);
+  assert.match(promptText, /在删而不换、对话化、具体感官细节、决策变化、结构压缩之间轮换/);
+  assert.match(promptText, /不要把全文都修成「删解释、加小动作」的固定模子/);
 });
 
 test("knowledge document style extraction uses representative sample by default", () => {

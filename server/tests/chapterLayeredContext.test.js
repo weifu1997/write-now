@@ -1049,3 +1049,41 @@ test("chapter context only supplies mind and active dialogue guidance to actual 
   assert.doesNotMatch(guidanceBlock.content, /暂时避开冲突/);
   assert.ok(writeContext.characterHardFacts.some((fact) => fact.characterId === "char-1"));
 });
+
+test("opening constraints render explicit avoidance samples and shrink for new books", () => {
+  const withSamples = createContextPackage();
+  withSamples.openingHint = [
+    "近几章这样开头（上一章在最前）：",
+    "- 第4章 反压前夜：夜色沉沉，外城的灯一盏一盏灭下去。",
+    "规避要求：本章开头不得复用以上样本的开场表达模式；换一个切入位置，从进行中的事件、对话、动作或人物决策直接进入。",
+  ].join("\n");
+  const sampleWriteContext = buildChapterWriteContext({
+    bookContract: withSamples.bookContract,
+    macroConstraints: withSamples.macroConstraints,
+    volumeWindow: withSamples.volumeWindow,
+    contextPackage: withSamples,
+  });
+  const sampleBlocks = buildChapterWriterContextBlocks(sampleWriteContext);
+  const openingBlock = sampleBlocks.find((block) => block.id === "opening_constraints");
+
+  assert.ok(openingBlock, "opening_constraints block should exist when samples are present");
+  assert.match(openingBlock.content, /近几章这样开头（上一章在最前）：/);
+  assert.match(openingBlock.content, /- 第4章 反压前夜：夜色沉沉/);
+  assert.match(openingBlock.content, /规避要求：/);
+  assert.doesNotMatch(openingBlock.content, /Opening anti-repeat hint/);
+
+  const newBook = createContextPackage();
+  newBook.openingHint = "";
+  const newBookWriteContext = buildChapterWriteContext({
+    bookContract: newBook.bookContract,
+    macroConstraints: newBook.macroConstraints,
+    volumeWindow: newBook.volumeWindow,
+    contextPackage: newBook,
+  });
+  assert.equal(newBookWriteContext.openingAntiRepeatHint, "");
+  const newBookBlocks = buildChapterWriterContextBlocks(newBookWriteContext);
+  assert.ok(
+    !newBookBlocks.some((block) => block.id === "opening_constraints"),
+    "opening_constraints block should be dropped when there is nothing to avoid",
+  );
+});
