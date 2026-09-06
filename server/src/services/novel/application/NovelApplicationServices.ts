@@ -22,6 +22,7 @@ import { ChapterRuntimeCoordinator } from "../runtime/ChapterRuntimeCoordinator"
 import { NovelVolumeService } from "../volume/NovelVolumeService";
 import { NovelChapterEditorService } from "../chapterEditor/NovelChapterEditorService";
 import { ChapterEditorWorkspaceService } from "../chapterEditor/ChapterEditorWorkspaceService";
+import { StyleAnchorPassageService } from "../../styleEngine/StyleAnchorPassageService";
 import type { NovelApplicationServices } from "./NovelApplicationContracts";
 import type { NovelSnapshotListItem } from "@write-now/shared/types/novel";
 
@@ -55,6 +56,7 @@ export class DefaultNovelApplicationServices {
   private readonly characterDialogueService = new CharacterDialogueService();
   private readonly volumeService = new NovelVolumeService();
   private readonly chapterEditorWorkspaceService = new ChapterEditorWorkspaceService();
+  private readonly styleAnchorPassageService = new StyleAnchorPassageService();
   private readonly chapterEditorService = new NovelChapterEditorService();
   private readonly chapterRuntimeCoordinator = new ChapterRuntimeCoordinator();
   private readonly qualityRepairCoordinator = new ChapterRuntimeCoordinator({
@@ -457,6 +459,31 @@ export class DefaultNovelApplicationServices {
 
   getChapterEditorWorkspace(...args: Parameters<ChapterEditorWorkspaceService["getWorkspace"]>) {
     return this.chapterEditorWorkspaceService.getWorkspace(...args);
+  }
+
+  async createStyleAnchor(
+    novelId: string,
+    chapterId: string | null,
+    input: { text: string; source: "adopted" | "manual" },
+  ) {
+    const novel = await this.core.getNovelById(novelId);
+    if (!novel) {
+      throw new Error("小说不存在。");
+    }
+    return this.styleAnchorPassageService.create({
+      novelId,
+      text: input.text,
+      source: input.source,
+      ...(chapterId ? { sourceChapterId: chapterId } : {}),
+    });
+  }
+
+  listStyleAnchors(novelId: string) {
+    return this.styleAnchorPassageService.listForManage(novelId);
+  }
+
+  async deleteStyleAnchor(novelId: string, anchorId: string) {
+    return this.styleAnchorPassageService.delete(novelId, anchorId);
   }
 
   getNovelState(...args: Parameters<NovelCoreService["getNovelState"]>) {

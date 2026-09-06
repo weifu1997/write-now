@@ -2,6 +2,7 @@ import type { Router } from "express";
 import { AppError } from "../../../middleware/errorHandler";
 import { registerNovelBaseRoutes } from "../setup/http/novelBaseRoutes";
 import { registerNovelChapterEditorRoutes } from "../production/http/novelChapterEditorRoutes";
+import { registerNovelStyleAnchorRoutes } from "../production/http/novelStyleAnchorRoutes";
 import { registerNovelChapterRoutes } from "../production/http/novelChapterRoutes";
 import { registerNovelChapterGenerationRoutes } from "../production/http/novelChapterGeneration";
 import { registerNovelCharacterDynamicsRoutes } from "../characters/http/novelCharacterDynamicsRoutes";
@@ -110,6 +111,12 @@ export function registerNovelHttpRoutes(router: Router, services: NovelHttpServi
     chapterParamsSchema,
     rewritePreviewSchema,
     aiRevisionPreviewSchema,
+    forwardBusinessError,
+  });
+
+  registerNovelStyleAnchorRoutes({
+    router,
+    novelService,
     forwardBusinessError,
   });
 

@@ -384,6 +384,7 @@ export function buildChapterWriteContext(input: {
     previousChapterTail: compactText(input.contextPackage.previousChapterTail) || null,
     openingAntiRepeatHint: compactText(input.contextPackage.openingHint),
     styleContract: input.contextPackage.styleContext?.compiledBlocks?.contract ?? null,
+    styleAnchorPassages: input.contextPackage.styleAnchorPassages ?? [],
     styleConstraints: summarizeStyleConstraints(input.contextPackage),
     continuationConstraints: summarizeContinuationConstraints(input.contextPackage),
     ragFacts: [],

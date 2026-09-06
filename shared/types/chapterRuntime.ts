@@ -467,6 +467,14 @@ export const chapterCharacterHardFactSchema = z.object({
   pendingReviewFields: z.array(chapterCharacterPendingReviewFieldSchema).default([]),
 });
 
+export const styleAnchorPassageContextSchema = z.object({
+  order: z.number().int().nullable().optional(),
+  title: z.string().nullable().optional(),
+  text: z.string(),
+  source: z.string(),
+  forbiddenEntities: z.array(z.string()).default([]),
+});
+
 export const chapterWriteContextSchema = z.object({
   bookContract: bookContractContextSchema,
   productionFoundationPrompt: z.string().default(""),
@@ -513,6 +521,7 @@ export const chapterWriteContextSchema = z.object({
   ragFacts: z.array(z.string()).default([]),
   completedMilestones: z.array(z.string()).default([]),
   recentScenePatterns: z.array(z.string()).default([]),
+  styleAnchorPassages: z.array(styleAnchorPassageContextSchema).default([]),
 });
 
 export const chapterReviewContextSchema = chapterWriteContextSchema.extend({
@@ -557,6 +566,7 @@ export const generationContextPackageSchema = z.object({
   openingHint: z.string(),
   continuation: runtimeContinuationSchema,
   styleContext: runtimeStyleContextSchema.nullable().optional(),
+  styleAnchorPassages: z.array(styleAnchorPassageContextSchema).default([]),
   characterDynamics: runtimeDynamicCharacterOverviewSchema.nullable().optional(),
   characterMindStates: z.array(runtimeCharacterMindStateSchema).default([]),
   // Optional for older preview / recovery context producers; runtime consumers default to no guidance.

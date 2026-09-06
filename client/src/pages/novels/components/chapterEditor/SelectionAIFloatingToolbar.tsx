@@ -9,12 +9,13 @@ interface SelectionAIFloatingToolbarProps {
   position: SelectionToolbarPosition | null;
   disabled?: boolean;
   onRunOperation: (operation: ChapterEditorOperation, customInstruction?: string) => void;
+  onMarkAnchor?: () => void;
 }
 
 const SECONDARY_OPERATIONS: ChapterEditorOperation[] = ["expand", "compress", "emotion", "conflict"];
 
 export default function SelectionAIFloatingToolbar(props: SelectionAIFloatingToolbarProps) {
-  const { visible, position, disabled = false, onRunOperation } = props;
+  const { visible, position, disabled = false, onRunOperation, onMarkAnchor } = props;
   const [customInstruction, setCustomInstruction] = useState("");
   const [isCustomOpen, setIsCustomOpen] = useState(false);
 
@@ -55,6 +56,17 @@ export default function SelectionAIFloatingToolbar(props: SelectionAIFloatingToo
             {CHAPTER_EDITOR_OPERATION_LABELS[operation]}
           </Button>
         ))}
+        {onMarkAnchor ? (
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={disabled}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={onMarkAnchor}
+          >
+            存为范文
+          </Button>
+        ) : null}
         <Button
           size="sm"
           variant={isCustomOpen ? "default" : "outline"}
