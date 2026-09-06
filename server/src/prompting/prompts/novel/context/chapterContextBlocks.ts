@@ -328,6 +328,12 @@ export function buildChapterWriterContextBlocks(
         `情绪位移：${writeContext.readerExperience.emotionalShift}`,
         `信息交付：${writeContext.readerExperience.informationReveal}`,
         `章末净变化：${writeContext.readerExperience.netChange}`,
+        writeContext.readerExperience.expectedCost
+          ? `本章代价（正文须以具体事件呈现，不得只写心理活动）：${writeContext.readerExperience.expectedCost}`
+          : "",
+        writeContext.readerExperience.complication
+          ? `本章意外（超出角色既有计划、会改变后续行动的变量）：${writeContext.readerExperience.complication}`
+          : "",
         toListBlock(
           "继承的钩子责任（优先回应后再制造新问题）",
           writeContext.readerExperience.inheritedHookResponsibilities,

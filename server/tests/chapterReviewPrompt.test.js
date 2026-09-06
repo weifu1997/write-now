@@ -15,8 +15,8 @@ function renderSystemText(input) {
   return systemMessage.content;
 }
 
-test("chapterReviewPrompt v3 renders anti-ai rule catalog with citation instructions", () => {
-  assert.equal(chapterReviewPrompt.version, "v3");
+test("chapterReviewPrompt v4 renders anti-ai rule catalog with citation instructions", () => {
+  assert.equal(chapterReviewPrompt.version, "v4");
 
   const directiveText = [
     "- [forbid-ending-elevation] 禁止段尾升华 (forbidden/high): 段落结尾不得出现主题升华式总结。",

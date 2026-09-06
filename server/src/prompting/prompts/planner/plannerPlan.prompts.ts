@@ -110,6 +110,9 @@ function buildPlannerPlanAsset(input: {
         input.includeScenes
           ? "10. scenes 必须按顺序组织，且每一项都要能直接给写作阶段使用，不要写成概念标签。"
           : "10. 由于当前层级不要求场景细化，scenes 必须为空数组。",
+        input.planLevel === "chapter"
+          ? "11. 章节层级额外考虑：在 riskNotes 中标注本章需要付出的具体代价（信息暴露、承诺束缚、资源消耗、关系受损、机会放弃）与超出角色计划的意外变量（如有）；是否标注由本章节奏决定，缓冲章可省略，禁止每章机械齐活。"
+          : "",
         "",
         "故事模式规则：",
         "1. 当上下文存在故事模式约束时，primary mode 视为硬约束，secondary mode 只能作为轻量风味层。",
@@ -225,7 +228,7 @@ export const plannerArcPlanPrompt = buildPlannerPlanAsset({
 
 export const plannerChapterPlanPrompt = buildPlannerPlanAsset({
   id: "planner.chapter.plan",
-  version: "v1",
+  version: "v2",
   planLevel: "chapter",
   includeScenes: true,
   maxTokensBudget: 2400,

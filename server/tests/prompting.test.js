@@ -151,7 +151,7 @@ test("prompt registry exposes versioned planning assets", () => {
     "agent.runtime.fallback_answer@v1",
     "agent.runtime.setup_guidance@v1",
     "agent.runtime.setup_ideation@v1",
-    "planner.chapter.plan@v1",
+    "planner.chapter.plan@v2",
     "novel.director.candidates@v2",
     "novel.director.candidate_patch@v1",
     "novel.director.blueprint@v1",
@@ -190,7 +190,7 @@ test("prompt registry exposes versioned planning assets", () => {
     promptKey(styleProfileExtractionPrompt),
     promptKey(styleProfileFromBookAnalysisPrompt),
     "style.recommendation@v1",
-    "novel.review.chapter@v3",
+    "novel.review.chapter@v4",
     promptKey(chapterWriterPrompt),
     promptKey(chapterArtifactDeltaPrompt),
     "world.draft.generate@v1",
@@ -213,7 +213,7 @@ test("prompt registry exposes versioned planning assets", () => {
     assert.ok(getRegisteredPromptAsset(id, version), `missing prompt asset ${key}`);
   }
 
-  const chapterAsset = getRegisteredPromptAsset("planner.chapter.plan", "v1");
+  const chapterAsset = getRegisteredPromptAsset("planner.chapter.plan", "v2");
   assert.ok(chapterAsset);
   assert.equal(chapterAsset.taskType, "planner");
 });
@@ -681,10 +681,10 @@ test("novel main-chain prompt assets declare explicit non-zero context budgets",
     ["novel.volume.chapter_list@v9", NOVEL_PROMPT_BUDGETS.volumeChapterList],
     ["novel.volume.chapter_purpose@v1", NOVEL_PROMPT_BUDGETS.volumeChapterDetail],
     ["novel.volume.chapter_boundary@v1", NOVEL_PROMPT_BUDGETS.volumeChapterDetail],
-    ["novel.volume.chapter_task_sheet@v3", NOVEL_PROMPT_BUDGETS.volumeChapterDetail],
+    ["novel.volume.chapter_task_sheet@v4", NOVEL_PROMPT_BUDGETS.volumeChapterDetail],
     ["novel.volume.rebalance.adjacent@v1", NOVEL_PROMPT_BUDGETS.volumeRebalance],
     [promptKey(chapterWriterPrompt), NOVEL_PROMPT_BUDGETS.chapterWriter],
-    ["novel.review.chapter@v3", NOVEL_PROMPT_BUDGETS.chapterReview],
+    ["novel.review.chapter@v4", NOVEL_PROMPT_BUDGETS.chapterReview],
     ["novel.review.repair@v2", NOVEL_PROMPT_BUDGETS.chapterRepair],
     ["audit.chapter.full@v2", NOVEL_PROMPT_BUDGETS.chapterReview],
   ]);

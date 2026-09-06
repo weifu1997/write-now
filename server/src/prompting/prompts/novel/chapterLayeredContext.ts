@@ -212,6 +212,9 @@ function buildCompatibleReaderExperienceContract(input: {
     emotionalShift: sceneEmotionShifts[0] || input.chapterMission.expectation,
     informationReveal: input.contextPackage.plan?.reveals[0] || "本章只交付任务允许的必要信息。",
     netChange: endingState,
+    // 兜底不造空值：代价与意外由任务单层按节奏产出，缺省留空。
+    expectedCost: "",
+    complication: "",
     inheritedHookResponsibilities: [],
     endingHook: input.chapterMission.hookTarget,
   };

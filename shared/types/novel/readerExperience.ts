@@ -12,6 +12,8 @@ export const readerExperienceContractSchema = z.object({
   emotionalShift: z.string().trim().default(""),
   informationReveal: z.string().trim().default(""),
   netChange: z.string().trim().default(""),
+  expectedCost: z.string().trim().default(""),
+  complication: z.string().trim().default(""),
   inheritedHookResponsibilities: z.array(z.string().trim().min(1)).default([]),
   endingHook: z.string().trim().default(""),
 });
@@ -43,6 +45,8 @@ export const EMPTY_READER_EXPERIENCE_CONTRACT: ReaderExperienceContract = {
   emotionalShift: "",
   informationReveal: "",
   netChange: "",
+  expectedCost: "",
+  complication: "",
   inheritedHookResponsibilities: [],
   endingHook: "",
 };
