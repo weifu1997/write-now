@@ -115,8 +115,42 @@ function compactPolicyPatch(
   ) as Partial<Omit<DirectorRuntimePolicySnapshot, "mode" | "updatedAt">>;
 }
 
+/**
+ * 快照缓存与变更锁按模块共享（历史上存在多个 DirectorRuntimeStore 实例，
+ * 各自持有私有缓存会互相看不到对方的最近写入，导致从陈旧基线做变更）。
+ * 缓存只做读加速：变更一律以新读取的持久化快照为基线。
+ */
+const SNAPSHOT_CACHE_CAPACITY = 200;
+const sharedSnapshotCache = new Map<string, DirectorRuntimeSnapshot>();
+const sharedSnapshotMutationLocks = new Map<string, Promise<void>>();
+
+function setCachedSnapshot(taskId: string, snapshot: DirectorRuntimeSnapshot): void {
+  // 先 delete 再 set 刷新插入顺序，实现 LRU 淘汰
+  sharedSnapshotCache.delete(taskId);
+  sharedSnapshotCache.set(taskId, snapshot);
+  while (sharedSnapshotCache.size > SNAPSHOT_CACHE_CAPACITY) {
+    const oldestKey = sharedSnapshotCache.keys().next().value;
+    if (oldestKey === undefined) {
+      return;
+    }
+    sharedSnapshotCache.delete(oldestKey);
+  }
+}
+
+function withSnapshotMutationLock<T>(taskId: string, task: () => Promise<T>): Promise<T> {
+  const previous = sharedSnapshotMutationLocks.get(taskId) ?? Promise.resolve();
+  const run = previous.catch(() => undefined).then(task);
+  const tail = run.then(() => undefined, () => undefined);
+  sharedSnapshotMutationLocks.set(taskId, tail);
+  void tail.finally(() => {
+    if (sharedSnapshotMutationLocks.get(taskId) === tail) {
+      sharedSnapshotMutationLocks.delete(taskId);
+    }
+  });
+  return run;
+}
+
 export class DirectorRuntimeStore {
-  private readonly snapshotCache = new Map<string, DirectorRuntimeSnapshot>();
 
   async getSnapshot(taskId: string): Promise<DirectorRuntimeSnapshot | null> {
     const row = await prisma.novelWorkflowTask.findUnique({
@@ -143,7 +177,7 @@ export class DirectorRuntimeStore {
         mergeLegacyRuntimeArtifacts(persisted, legacySeedSnapshot ?? emptySnapshot),
         emptySnapshot,
       );
-      this.snapshotCache.set(taskId, snapshot);
+      setCachedSnapshot(taskId, snapshot);
       return snapshot;
     }
     return legacySeedSnapshot
@@ -151,51 +185,54 @@ export class DirectorRuntimeStore {
       : emptySnapshot;
   }
 
-  async mutateSnapshot(
+  mutateSnapshot(
     taskId: string,
     mutator: (snapshot: DirectorRuntimeSnapshot, seedPayload: DirectorWorkflowSeedPayload) => DirectorRuntimeSnapshot,
   ): Promise<DirectorRuntimeSnapshot | null> {
-    const row = await prisma.novelWorkflowTask.findUnique({
-      where: { id: taskId },
-      select: {
-        id: true,
-        novelId: true,
-        seedPayloadJson: true,
-      },
+    // 同一任务的快照变更必须串行：读持久化快照 → 变更 → 持久化 是
+    // 读-改-写，并发变更会基于过期基线合并，丢失事件或回退产物版本。
+    return withSnapshotMutationLock(taskId, async () => {
+      const row = await prisma.novelWorkflowTask.findUnique({
+        where: { id: taskId },
+        select: {
+          id: true,
+          novelId: true,
+          seedPayloadJson: true,
+        },
+      });
+      if (!row) {
+        return null;
+      }
+      const seedPayload = parseSeedPayload<DirectorWorkflowSeedPayload>(row.seedPayloadJson) ?? {};
+      const emptySnapshot = normalizeRuntimeSnapshot({
+        taskId: row.id,
+        novelId: row.novelId,
+        seedPayload,
+      });
+      const legacySeedSnapshot = getLegacySeedRuntimeSnapshot(seedPayload);
+      const persisted = await this.getPersistentSnapshot(taskId);
+      const current = mergeLegacyRuntimeArtifacts(
+        mergeLegacyRuntimeArtifacts(
+          persisted ?? emptySnapshot,
+          legacySeedSnapshot ?? emptySnapshot,
+        ),
+        emptySnapshot,
+      );
+      const nextRuntime = trimRuntimeSnapshot({
+        ...mutator(current, seedPayload),
+        updatedAt: new Date().toISOString(),
+      });
+      const deltaBase = persisted ?? emptySnapshot;
+      const delta = buildDirectorRuntimePersistenceDelta(deltaBase, nextRuntime);
+      await persistDirectorRuntimeSnapshot({
+        taskId,
+        novelId: row.novelId,
+        snapshot: nextRuntime,
+        delta,
+      });
+      setCachedSnapshot(taskId, nextRuntime);
+      return nextRuntime;
     });
-    if (!row) {
-      return null;
-    }
-    const seedPayload = parseSeedPayload<DirectorWorkflowSeedPayload>(row.seedPayloadJson) ?? {};
-    const emptySnapshot = normalizeRuntimeSnapshot({
-      taskId: row.id,
-      novelId: row.novelId,
-      seedPayload,
-    });
-    const legacySeedSnapshot = getLegacySeedRuntimeSnapshot(seedPayload);
-    const cached = this.snapshotCache.get(taskId);
-    const persisted = await this.getPersistentSnapshot(taskId);
-    const current = mergeLegacyRuntimeArtifacts(
-      mergeLegacyRuntimeArtifacts(
-        cached ?? persisted ?? emptySnapshot,
-        legacySeedSnapshot ?? emptySnapshot,
-      ),
-      emptySnapshot,
-    );
-    const nextRuntime = trimRuntimeSnapshot({
-      ...mutator(current, seedPayload),
-      updatedAt: new Date().toISOString(),
-    });
-    const deltaBase = persisted ?? emptySnapshot;
-    const delta = buildDirectorRuntimePersistenceDelta(deltaBase, nextRuntime);
-    await persistDirectorRuntimeSnapshot({
-      taskId,
-      novelId: row.novelId,
-      snapshot: nextRuntime,
-      delta,
-    });
-    this.snapshotCache.set(taskId, nextRuntime);
-    return nextRuntime;
   }
 
   async getPersistentSnapshot(taskId: string): Promise<DirectorRuntimeSnapshot | null> {
