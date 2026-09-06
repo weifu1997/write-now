@@ -18,6 +18,7 @@ export interface ChapterReviewPromptInput {
   chapterTitle: string;
   content: string;
   ragContext: string;
+  antiAiDirectiveText?: string;
 }
 
 export interface ChapterRepairPromptInput {
@@ -94,7 +95,7 @@ export const chapterReviewPrompt: PromptAsset<
   z.infer<typeof fullAuditOutputSchema>
 > = {
   id: "novel.review.chapter",
-  version: "v2",
+  version: "v3",
   taskType: "critical_review",
   mode: "structured",
   language: "zh",
@@ -134,6 +135,17 @@ export const chapterReviewPrompt: PromptAsset<
       "4. voice：文风、叙述口吻、人物表达是否稳定且适配当前内容。",
       "5. engagement：是否具有持续阅读动力，结尾钩子、冲突推进与信息揭示是否有效。",
       "6. overall：综合质量判断，应反映本章是否达到可发布或需重点修整的水平。",
+      ...(input.antiAiDirectiveText
+        ? [
+            "",
+            "【反AI规则目录】",
+            "以下是当前作品生效的反AI写作规则目录，voice 与 repetition 维度必须逐条对照：",
+            "1. 命中目录规则的问题，issue 文本必须引用该规则的 [规则标识] 与规则名，让后续修文可以定向执行。",
+            "2. evidence 必须指向正文中违反该规则的具体句子或表达模式，不得只凭目录推断正文有问题。",
+            "3. 目录只是检测参照，正文没有对应问题时，不得为凑规则引用而虚构问题。",
+            input.antiAiDirectiveText,
+          ]
+        : []),
       "",
       "【issues 要求】",
       "1. issues 必须只抓真正影响阅读与连载质量的问题，避免吹毛求疵式碎问题泛滥。",

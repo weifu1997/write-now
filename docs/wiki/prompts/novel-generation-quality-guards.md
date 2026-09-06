@@ -85,6 +85,14 @@ keyMilestoneGuards: z.array(volumeKeyMilestoneGuardSchema).default([])
 
 **输出**：`repetitionClusters`、`openingPatternClusters`、`hasCriticalIssues` 和修复建议。
 
+### 八、审校与反AI规则目录打通
+
+**数据流**：`NovelCoreReviewService.reviewChapterContent` 在有 novelId 时通过 `AntiAiPolicyResolver.resolveEffectiveRules({ novelId })` 取生效反AI规则（已含 enabled 过滤与默认目录合并），经 `buildAntiAiRuleCatalogText` 生成目录文本，作为 `antiAiDirectiveText` 传入审校提示词 `novel.review.chapter`（v3 起）。
+
+**审校口径**：voice 与 repetition 维度必须逐条对照目录；命中规则的问题必须在 issue 文本中引用 `[规则标识] + 规则名`；evidence 必须指向正文具体句子，不得只凭目录推断正文有问题。规则引用随 issuesJson 进入修文链路，使 `novel.review.repair` 可以定向修复。
+
+**边界**：审校只把目录当检测参照，不替代 `PostGenerationStyleReviewRunner` 的生成后兜底；未绑定写法资产的书目录为空，审校行为与无目录时完全一致。
+
 ## 失效模式
 
 - `completedMilestones` 和 `recentScenePatterns` 依赖上游服务在构建上下文时正确填入，若上游不填，这两个守卫就不生效。本次修改只建立了接口契约，数据填充需要在章节运行时协调器中实现。
@@ -92,6 +100,8 @@ keyMilestoneGuards: z.array(volumeKeyMilestoneGuardSchema).default([])
 - `narrativeProgressHint` 依赖小说预计总章数。没有 `estimatedChapterCount` 时应自然跳过，不应为了显示进度而猜测总章数。
 - `requiredCharacterAppearances` 的缺席提示只附加在已经进入义务契约的角色上；如果角色根本没有进入该列表，应先检查角色动态概览和选角规则，而不是在提示词里硬塞角色名。
 - `characterKnowledgeStates` 只记录明显信息差。若所有角色都自然知晓同一事实，应省略该字段，避免把普通剧情进展误写成长期信息边界。
+
+- 审校侧反AI规则解析失败时静默降级为无目录（审校不因此失败），此时问题清单退回不引用规则名的泛化口径，修文定向性下降属于可接受退化。
 
 - `buildCompressionLog()` 是观测工具。若日志显示 dropped，不代表实际生成已经丢弃同名 block，真实裁剪仍以 prompt runner 的 context selection 为准。
 - `rebuild_story_world_slice` 重建切片后，如果后续又触发了 `ensureStoryWorldSlice` 且 stale 检测显示为最新状态，则已重建的切片会被复用而非再次生成，这是预期行为。
@@ -104,6 +114,8 @@ keyMilestoneGuards: z.array(volumeKeyMilestoneGuardSchema).default([])
 - `server/src/prompting/prompts/novel/chapterLayeredContext.ts`
 - `server/src/prompting/prompts/novel/chapterWriter.prompts.ts`
 - `shared/types/chapterRuntime.ts`（`ChapterWriteContext`、`VolumeWindowContext`）
+- `server/src/services/novel/novelCoreReviewService.ts`（审校入口）
+- `server/src/services/styleEngine/AntiAiPolicyResolver.ts`（反AI规则解析）
 
 ## 源文档
 

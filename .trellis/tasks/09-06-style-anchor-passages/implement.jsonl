@@ -1,0 +1,6 @@
+{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/spec/server/backend/index.md", "reason": "后端规范索引"}
+{"file": ".trellis/spec/client/frontend/index.md", "reason": "客户端规范索引（编辑器回流UI）"}
+{"file": "docs/wiki/architecture/chapter-runtime-boundaries.md", "reason": "生成上下文装配与运行时边界"}
+{"file": "docs/wiki/debugging/postgres-migration-chain.md", "reason": "双迁移链幂等迁移规则"}
+{"file": "docs/wiki/prompts/prompt-registry-and-structured-output.md", "reason": "writer资产版本升级规则"}

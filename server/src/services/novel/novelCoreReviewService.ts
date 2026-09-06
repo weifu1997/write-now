@@ -19,6 +19,8 @@ import {
   ruleScore,
 } from "./novelCoreShared";
 import { GenerationContextAssembler } from "./runtime/GenerationContextAssembler";
+import { AntiAiPolicyResolver } from "../styleEngine/AntiAiPolicyResolver";
+import { buildAntiAiRuleCatalogText } from "../styleEngine/antiAiPreviewRules";
 import { chapterQualityLoopService } from "./quality/ChapterQualityLoopService";
 import { directorAutomationLedgerEventService } from "./director/runtime/DirectorAutomationLedgerEventService";
 import { ChapterRuntimeCoordinator } from "./runtime/ChapterRuntimeCoordinator";
@@ -51,6 +53,7 @@ export async function createQualityReport(
 
 export class NovelCoreReviewService {
   private readonly generationContextAssembler = new GenerationContextAssembler();
+  private readonly antiAiPolicyResolver = new AntiAiPolicyResolver();
   private readonly chapterRuntimeCoordinator = new ChapterRuntimeCoordinator({
     resolveAuditIssues: (novelId, issueIds) => this.resolveAuditIssues(novelId, issueIds),
   });
@@ -250,6 +253,18 @@ export class NovelCoreReviewService {
         }
       }
 
+      let antiAiDirectiveText = "";
+      if (novelId) {
+        try {
+          const antiAiPolicy = await this.antiAiPolicyResolver.resolveEffectiveRules({ novelId });
+          antiAiDirectiveText = buildAntiAiRuleCatalogText(
+            antiAiPolicy.effectiveRules.map((item) => item.rule),
+          );
+        } catch {
+          antiAiDirectiveText = "";
+        }
+      }
+
       const result = await runStructuredPrompt({
         asset: chapterReviewPrompt,
         promptInput: {
@@ -257,6 +272,7 @@ export class NovelCoreReviewService {
           chapterTitle,
           content,
           ragContext: ragContext || "",
+          antiAiDirectiveText,
         },
         options: {
           provider: options.provider,

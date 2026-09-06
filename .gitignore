@@ -44,3 +44,4 @@ server/prisma-diff-migrations-to-schema.sql
 .tmp-backup/
 .trellis/.runtime/
 server/.zcode/
+.trellis/tasks/09-06-de-ai-flavor-prose/seeds/
