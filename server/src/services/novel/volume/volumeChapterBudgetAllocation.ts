@@ -81,3 +81,26 @@ export function allocateChapterBudgets(params: {
 
   return budgets;
 }
+
+/**
+ * 目标卷的"规划尺度"可信章数。
+ *
+ * allocateChapterBudgets 按各卷已有章节数加权分摊全书预算，这只在规划期成立；
+ * 滚动生产期已有章节数是进度而非规划，在产卷（尤其收官卷）的分摊会塌缩到当前
+ * 进度值，进而让同一张按全书均分尺度生成的节奏板在拆章校验中被误判为跨度异常。
+ * 这里取加权分摊与全书均分中的较大者：均分正是节奏板生成时的兜底尺度，校验与
+ * 生成因此自洽；加权分摊保证已完成卷的口径不会被本函数抬高。
+ */
+export function resolveVolumePlannedChapterBudget(input: {
+  chapterBudget: number;
+  chapterBudgets: number[];
+  targetVolumeIndex: number;
+  volumeCount: number;
+}): number {
+  const weightedBudget = input.chapterBudgets[input.targetVolumeIndex];
+  const evenShareBudget = Math.max(
+    3,
+    Math.floor(Math.max(input.chapterBudget, 0) / Math.max(input.volumeCount, 1)),
+  );
+  return Math.max(weightedBudget ?? 0, evenShareBudget);
+}

@@ -6,6 +6,7 @@ import type { StoryMacroPlanService } from "../storyMacro/StoryMacroPlanService"
 import {
   allocateChapterBudgets,
   deriveChapterBudget,
+  resolveVolumePlannedChapterBudget,
 } from "./volumeChapterBudgetAllocation";
 import {
   getTargetVolume,
@@ -27,8 +28,13 @@ export function resolveBeatSheetTargetChapterCount(input: {
   chapterBudget: number;
   chapterBudgets: number[];
 }): number {
-  const fallbackTargetChapterCount = input.chapterBudgets[input.targetVolumeIndex]
-    ?? Math.max(3, Math.round(input.chapterBudget / Math.max(input.volumeCount, 1)));
+  // 与拆章校验共用"规划尺度"口径，滚动生产期重生成节奏板不会把在产卷压缩到当前进度。
+  const fallbackTargetChapterCount = resolveVolumePlannedChapterBudget({
+    chapterBudget: input.chapterBudget,
+    chapterBudgets: input.chapterBudgets,
+    targetVolumeIndex: input.targetVolumeIndex,
+    volumeCount: input.volumeCount,
+  });
   return Math.max(input.targetVolumeChapterCount, fallbackTargetChapterCount);
 }
 
