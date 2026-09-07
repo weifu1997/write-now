@@ -33,8 +33,8 @@ Book Contract 的 `chapter3Payoff / chapter10Payoff / chapter30Payoff` 是 Payof
 
 ## Replan Gate
 
-- Payoff 逾期是章节级警告或质量债，不是全书计划失配的确定性证据。逾期距离、当前章窗口命中和当前章显式引用都不得单独升级为 `stop_for_replan`。
-- `nextAction=replan`、人工强制或章节验收确认 `plan_misalignment` 可以输出 `stop_for_replan`。高优先级章节审计只能输出 `local_patch_plan`。
+- Payoff 逾期是账本风险，不是单章留存失败，也不是全书计划失配的确定性证据。逾期距离、当前章窗口命中和当前章显式引用都不得单独升级为 `stop_for_replan`，不得进入章节 `hasBlockingIssues` / patch / `qualityLoop` 待优化。
+- `nextAction=replan`、人工强制或章节验收确认 `plan_misalignment` 可以输出 `stop_for_replan`。高优先级章节审计只能输出 `local_patch_plan`。生成决策不得仅因 `overduePayoffs` 返回 `replan` 或 `hold_for_review`。
 - 所有全局调用方必须以 `action === "stop_for_replan"` 为最终闸门。`recommended` 可以表达局部处理建议，但不能单独暂停章节批次、写入 `PIPELINE_REPLAN_REQUIRED` 或创建 `replan_required` failure classification。
 
 ## Ownership Boundaries
@@ -43,7 +43,7 @@ Book Contract 的 `chapter3Payoff / chapter10Payoff / chapter30Payoff` 是 Payof
 - Payoff Ledger：追踪这些承诺及其他伏笔的来源、窗口、推进和兑现状态。
 - Reader Experience Contract：把当前章应承担的回报转换为正文可见的欲望、阻力、转折、净变化和钩子责任。
 - Novel Fact Ledger：只记录正文验收或观测确认后已经发生的不可逆事实。
-- Replan：只有结构化 AI/runtime 决策明确要求重排邻近章节时才进入；普通待兑现或局部逾期先作为章节义务或质量债处理。
+- Replan：只有结构化 AI/runtime 决策明确要求重排邻近章节时才进入。窗口内待推进（`payoff_missing_progress`）仍可作为本章义务；已经逾期的 `payoff_overdue` 留在账本，不记到后文章节质量债。
 
 ## Compatibility
 
@@ -57,6 +57,7 @@ Book Contract 的 `chapter3Payoff / chapter10Payoff / chapter30Payoff` 是 Payof
 - **AI 漏掉阶段承诺**：检查 Prompt 版本、Registry 版本和 `postValidate` 的固定来源覆盖校验。
 - **保存 Book Contract 很慢**：同步不应在保存请求中直接调用 LLM；检查是否绕过持久副作用队列。
 - **普通逾期阻断整本写作**：检查是否错误把局部 payoff 风险直接升级成全局 replan。
+- **后文章节因早期窗口显示待优化**：检查 `payoff_overdue` 是否进入章节 blocking 或 `readChapterQualityDebtDetails`；仅逾期债应被读路径隐藏，混杂局部问题仍显示待优化。
 - **局部审计触发全局停止**：检查调用方是否只判断 `recommended`，而没有同时要求 `action === "stop_for_replan"`。
 
 ## Related Modules
