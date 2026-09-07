@@ -232,7 +232,7 @@ export class GenerationContextAssembler {
         },
         orderBy: { order: "desc" },
         take: 1,
-        select: { order: true, title: true, content: true },
+        select: { order: true, title: true, content: true, conflictLevel: true },
       }),
       prisma.creativeDecision.findMany({
         where: {
@@ -541,6 +541,7 @@ export class GenerationContextAssembler {
         chapter.order,
         novel.estimatedChapterCount,
       ),
+      previousConflictLevel: recentChapters[0]?.conflictLevel ?? null,
       canonicalState,
       nextAction: resolvedStateDrivenContext.nextAction,
       chapterStateGoal: resolvedStateDrivenContext.chapterStateGoal,

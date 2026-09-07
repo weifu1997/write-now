@@ -22,6 +22,10 @@ test("compact completion profile uses whole-book promise and five-chapter closin
 test("61 chapters keep serial compatibility and legacy payloads normalize deterministically", () => {
   assert.equal(buildDirectorCompletionProfile(61).mode, "serial_book");
   assert.equal(buildDirectorCompletionProfile(61).promiseScope, "first_30_chapters");
+  assert.equal(buildDirectorCompletionProfile(61).endingRequiredBy, 61);
+  assert.equal(buildDirectorCompletionProfile(150).mode, "serial_book");
+  assert.equal(buildDirectorCompletionProfile(150).endingRequiredBy, 150);
+  assert.equal(buildDirectorCompletionProfile(150).maxChapterCount, 150);
   assert.equal(normalizeDirectorCompletionProfile(null, 40).maxChapterCount, 45);
   assert.equal(normalizeDirectorCompletionProfile({ targetChapterCount: 61, mode: "compact_book" }).mode, "serial_book");
 });

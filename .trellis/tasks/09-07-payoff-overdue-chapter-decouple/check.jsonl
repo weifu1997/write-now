@@ -1,0 +1,3 @@
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "验收时核对账本 → runtime blocking → qualityLoop → 书架投影是否仍把 overdue 当成单章待优化。"}
+{"file": "docs/wiki/workflows/chapter-production-chain.md", "reason": "确认 defer_and_continue 对真单章问题仍在，且 overdue 不再被写成章节质量债。"}
+{"file": "docs/wiki/product/workspace-status-expression.md", "reason": "完成态与质量提醒分层：仅逾期不得把已定稿章节显示成待优化。"}

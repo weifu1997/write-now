@@ -121,17 +121,22 @@ test("chapter list regeneration preserves user anchored conflict levels", () => 
       beatLabel: "开局",
       chapterCount: 3,
       chapters: [
-        { title: "新一", summary: "新摘要一" },
-        { title: "新二", summary: "新摘要二" },
-        { title: "新三", summary: "新摘要三" },
+        { title: "新一", summary: "新摘要一", conflictLevel: 24 },
+        { title: "新二", summary: "新摘要二", conflictLevel: 91 },
+        { title: "新三", summary: "新摘要三", conflictLevel: 58 },
       ],
     }],
   );
 
-  const anchored = merged.volumes[0].chapters[1];
+  const chapters = merged.volumes[0].chapters;
+  const anchored = chapters[1];
+  assert.equal(chapters[0].conflictLevel, 24);
+  assert.equal(chapters[0].conflictLevelSource, "ai");
   assert.equal(anchored.conflictLevel, 80);
   assert.equal(anchored.conflictLevelSource, "user");
   assert.equal(anchored.title, "新二");
+  assert.equal(chapters[2].conflictLevel, 58);
+  assert.equal(chapters[2].conflictLevelSource, "ai");
 });
 
 test("chapter detail merge keeps user anchored conflict level while applying other fields", () => {

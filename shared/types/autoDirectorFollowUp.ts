@@ -33,7 +33,8 @@ export type AutoDirectorMutationActionCode =
   | "auto_backfill_structured_outline"
   | "retry_with_task_model"
   | "retry_with_route_model"
-  | "safe_fix_validation";
+  | "safe_fix_validation"
+  | "dismiss_history";
 
 export type AutoDirectorNavigationActionCode =
   | "go_replan"
@@ -154,8 +155,51 @@ export interface AutoDirectorFollowUpDetail {
   task: UnifiedTaskDetail;
 }
 
+export const ACTIONABLE_FOLLOW_UP_REASONS = [
+  "validation_required",
+  "manual_recovery_required",
+  "runtime_failed",
+  "candidate_selection_required",
+  "replan_required",
+  "chapter_batch_execution_pending",
+] as const satisfies readonly AutoDirectorFollowUpReason[];
+
+export type ActionableFollowUpReason = (typeof ACTIONABLE_FOLLOW_UP_REASONS)[number];
+
+export function isActionableFollowUpReason(reason: AutoDirectorFollowUpReason): boolean {
+  return (ACTIONABLE_FOLLOW_UP_REASONS as readonly AutoDirectorFollowUpReason[]).includes(reason);
+}
+
+export function countActionableFollowUpItems(
+  items: Array<Pick<AutoDirectorFollowUpItem, "reason">>,
+): number {
+  return items.filter((item) => isActionableFollowUpReason(item.reason)).length;
+}
+
+export const DISMISSABLE_FOLLOW_UP_REASONS = [
+  "runtime_cancelled",
+  "runtime_failed",
+  "runtime_replaced",
+] as const satisfies readonly AutoDirectorFollowUpReason[];
+
+export function isDismissableFollowUpReason(reason: AutoDirectorFollowUpReason): boolean {
+  return (DISMISSABLE_FOLLOW_UP_REASONS as readonly AutoDirectorFollowUpReason[]).includes(reason);
+}
+
+export function canDismissFollowUpHistory(input: {
+  status: string;
+  pendingManualRecovery?: boolean | null;
+}): boolean {
+  if (input.pendingManualRecovery) {
+    return false;
+  }
+  return input.status === "succeeded" || input.status === "failed" || input.status === "cancelled";
+}
+
 export interface AutoDirectorFollowUpOverview {
   totalCount: number;
+  /** Current items that still need user action; sidebar badge uses this, not totalCount. */
+  actionableCount: number;
   countersByReason: AutoDirectorCountersByReason;
   countersBySection: AutoDirectorCountersBySection;
 }

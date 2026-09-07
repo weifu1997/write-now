@@ -25,10 +25,6 @@ export class GenerationDecisionEngine {
       return "hold_for_review";
     }
 
-    if (input.snapshot.narrative.overduePayoffs.length > 0) {
-      return "replan";
-    }
-
     if (
       input.snapshot.narrative.urgentPayoffs.length > 0
       && !input.snapshot.narrative.currentChapterGoal?.trim()
@@ -45,10 +41,6 @@ export class GenerationDecisionEngine {
       && !input.snapshot.narrative.currentChapterGoal?.trim()
     ) {
       return "repair_chapter_mission";
-    }
-
-    if (input.policy?.advanceMode === "stage_review" && input.snapshot.narrative.overduePayoffs.length > 0) {
-      return "hold_for_review";
     }
 
     return "write_chapter";

@@ -28,6 +28,7 @@ test("auto director follow-up routes expose overview, list, detail, and action e
   AutoDirectorFollowUpService.prototype.getOverview = async function getOverviewMock() {
     return {
       totalCount: 3,
+      actionableCount: 2,
       countersByReason: {
         manual_recovery_required: 0,
         runtime_failed: 1,
@@ -193,6 +194,7 @@ test("auto director follow-up routes expose overview, list, detail, and action e
     const overviewPayload = await overviewResponse.json();
     assert.equal(overviewPayload.success, true);
     assert.equal(overviewPayload.data.totalCount, 3);
+    assert.equal(overviewPayload.data.actionableCount, 2);
 
     const listResponse = await fetch(
       `http://127.0.0.1:${port}/api/auto-director/follow-ups?section=pending&reason=chapter_batch_execution_pending&supportsBatch=true&page=1&pageSize=20`,

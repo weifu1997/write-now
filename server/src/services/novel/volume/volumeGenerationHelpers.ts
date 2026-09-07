@@ -30,6 +30,7 @@ export interface GeneratedVolumeChapterBlock {
     beatKey: string;
     title: string;
     summary: string;
+    conflictLevel?: number;
   }>;
 }
 
@@ -416,6 +417,10 @@ export function mergeChapterList(
 
       for (const [chapterIndex, chapter] of generatedBlock.chapters.entries()) {
         const existingChapter = existingBeatChapters[chapterIndex];
+        const conflictLevelPatch = resolveMergedConflictLevel(existingChapter ?? {
+          conflictLevel: null,
+          conflictLevelSource: null,
+        }, chapter);
         nextChapters.push({
           id: existingChapter?.id,
           volumeId: volume.id,
@@ -427,8 +432,7 @@ export function mergeChapterList(
           exclusiveEvent: existingChapter?.exclusiveEvent ?? null,
           endingState: existingChapter?.endingState ?? null,
           nextChapterEntryState: existingChapter?.nextChapterEntryState ?? null,
-          conflictLevel: existingChapter?.conflictLevel ?? null,
-          conflictLevelSource: existingChapter?.conflictLevelSource ?? null,
+          ...conflictLevelPatch,
           revealLevel: existingChapter?.revealLevel ?? null,
           targetWordCount: existingChapter?.targetWordCount ?? null,
           mustAvoid: existingChapter?.mustAvoid ?? null,
@@ -480,8 +484,8 @@ export function mergeChapterList(
 }
 
 function resolveMergedConflictLevel(
-  chapter: VolumeChapterPlan,
-  generatedDetail: Record<string, unknown>,
+  chapter: Pick<VolumeChapterPlan, "conflictLevel" | "conflictLevelSource">,
+  generatedDetail: { conflictLevel?: unknown },
 ): Pick<VolumeChapterPlan, "conflictLevel" | "conflictLevelSource"> {
   if (chapter.conflictLevelSource === "user") {
     return {

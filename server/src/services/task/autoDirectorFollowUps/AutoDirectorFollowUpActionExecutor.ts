@@ -560,6 +560,11 @@ export class AutoDirectorFollowUpActionExecutor {
       return this.safeGetTaskDetail(input.taskId);
     }
 
+    if (input.actionCode === "dismiss_history") {
+      await this.workflowTaskAdapter.archive(input.taskId);
+      return this.safeGetTaskDetail(input.taskId);
+    }
+
     if (input.actionCode === "retry_with_task_model") {
       const retryInput: {
         id: string;

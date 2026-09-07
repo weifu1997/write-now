@@ -7,6 +7,8 @@ const {
 } = require("../dist/services/novel/volume/volumeGenerationOrchestrator.js");
 const {
   isCompactBookFinaleBeat,
+  isBookFinaleBeat,
+  isClosingVolume,
 } = require("../dist/services/novel/volume/volumeChapterListGeneration.js");
 const {
   allocateChapterBudgets,
@@ -111,5 +113,83 @@ test("compact-book finale detection uses the whole-book chapter order across vol
     targetVolumeIndex: 2,
     chapterBudgets,
     beatChapterEndOrder: 10,
+  }), true);
+});
+
+test("serial target-span finale uses whole-book order and does not treat a mid-volume local order as finale", () => {
+  const completionProfile = {
+    mode: "serial_book",
+    targetChapterCount: 150,
+    maxChapterCount: 150,
+    promiseScope: "first_30_chapters",
+    structure: "serial_staged",
+    endingRequiredBy: 150,
+  };
+  const chapterBudgets = [40, 40, 40, 30];
+
+  assert.equal(isBookFinaleBeat({
+    completionProfile,
+    targetVolumeIndex: 0,
+    chapterBudgets,
+    beatChapterEndOrder: 40,
+  }), false);
+  assert.equal(isBookFinaleBeat({
+    completionProfile,
+    targetVolumeIndex: 3,
+    chapterBudgets,
+    beatChapterEndOrder: 10,
+  }), false);
+  assert.equal(isBookFinaleBeat({
+    completionProfile,
+    targetVolumeIndex: 3,
+    chapterBudgets,
+    beatChapterEndOrder: 30,
+  }), true);
+  assert.equal(isCompactBookFinaleBeat({
+    completionProfile,
+    targetVolumeIndex: 3,
+    chapterBudgets,
+    beatChapterEndOrder: 30,
+  }), false);
+  assert.equal(isClosingVolume({
+    completionProfile,
+    targetVolumeIndex: 2,
+    volumeCount: 4,
+    chapterBudgets,
+  }), false);
+  assert.equal(isClosingVolume({
+    completionProfile,
+    targetVolumeIndex: 3,
+    volumeCount: 4,
+    chapterBudgets,
+  }), true);
+});
+
+test("61-chapter serial last beat is finale while compact 60 stays compact-only", () => {
+  const serial = {
+    mode: "serial_book",
+    endingRequiredBy: 61,
+  };
+  const compact = {
+    mode: "compact_book",
+    endingRequiredBy: 60,
+  };
+  assert.equal(isBookFinaleBeat({
+    completionProfile: serial,
+    targetVolumeIndex: 1,
+    chapterBudgets: [30, 31],
+    beatChapterEndOrder: 31,
+  }), true);
+  assert.equal(isBookFinaleBeat({
+    completionProfile: serial,
+    targetVolumeIndex: 1,
+    chapterBudgets: [30, 31],
+    beatChapterEndOrder: 20,
+  }), false);
+  assert.equal(isCompactBookFinaleBeat({
+    completionProfile: compact,
+    targetVolumeIndex: 2,
+    chapterBudgets: [20, 20, 20],
+    beatChapterEndOrder: 20,
   }), true);
 });

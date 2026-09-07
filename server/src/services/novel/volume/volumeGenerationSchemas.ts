@@ -217,24 +217,21 @@ function normalizeBeatPayload(raw: unknown): unknown {
 }
 
 function normalizeChapterListItemPayload(raw: unknown, expectedBeatKey?: string): unknown {
-  const normalized = normalizeObjectAlias(raw, {
+  const aliased = normalizeObjectAlias(raw, {
     title: ["chapterTitle", "name"],
     summary: ["description", "content", "outline"],
     beatKey: ["beat", "beat_key", "stageKey", "stage_key"],
+    conflictLevel: ["conflict_level", "conflict", "冲突强度", "紧张度"],
   });
-  if (
-    expectedBeatKey
-    && normalized
-    && typeof normalized === "object"
-    && !Array.isArray(normalized)
-    && (normalized as Record<string, unknown>).beatKey == null
-  ) {
-    return {
-      ...normalized as Record<string, unknown>,
-      beatKey: expectedBeatKey,
-    };
+  if (!aliased || typeof aliased !== "object" || Array.isArray(aliased)) {
+    return aliased;
   }
-  return normalized;
+  const normalized = aliased as Record<string, unknown>;
+  return {
+    ...normalized,
+    beatKey: normalized.beatKey == null && expectedBeatKey ? expectedBeatKey : normalized.beatKey,
+    conflictLevel: normalizeInteger(normalized.conflictLevel),
+  };
 }
 
 function normalizeChapterBeatBlockPayload(
@@ -408,6 +405,7 @@ const generatedChapterBeatBlockItemSchema = z.preprocess((raw) => normalizeChapt
   title: z.string().trim().min(1).max(32),
   summary: z.string().trim().min(1).max(240),
   beatKey: z.string().trim().min(1).max(64),
+  conflictLevel: z.number().int().min(0).max(100),
 }));
 
 const generatedVolumeStrategyVolumeSchema = z.object({

@@ -1016,3 +1016,61 @@ test("auto director follow-up safe fix blocks unsafe validation repairs", async 
   prisma.autoDirectorFollowUpActionLog.create = originals.actionLogCreate;
   prisma.novelWorkflowTask.update = originals.workflowUpdate;
 });
+
+test("auto director follow-up action executor archives dismissable history and rejects running tasks", async () => {
+  const executor = new AutoDirectorFollowUpActionExecutor();
+  const originals = {
+    actionLogFindUnique: prisma.autoDirectorFollowUpActionLog.findUnique,
+    actionLogCreate: prisma.autoDirectorFollowUpActionLog.create,
+  };
+  const actionLogs = new Map();
+  const archived = [];
+
+  prisma.autoDirectorFollowUpActionLog.findUnique = async ({ where }) => actionLogs.get(where.idempotencyKey) ?? null;
+  prisma.autoDirectorFollowUpActionLog.create = async ({ data }) => {
+    actionLogs.set(data.idempotencyKey, {
+      ...data,
+      executedAt: data.executedAt ?? new Date(),
+    });
+    return actionLogs.get(data.idempotencyKey);
+  };
+  executor.workflowService.healAutoDirectorTaskState = async () => false;
+  executor.workflowTaskAdapter.archive = async (taskId) => {
+    archived.push(taskId);
+    return null;
+  };
+  executor.workflowTaskAdapter.detail = async (taskId) => buildTaskDetail(taskId, { status: "cancelled" });
+
+  executor.workflowService.getTaskByIdWithoutHealing = async () => buildWorkflowRow({
+    id: "task_cancelled_history",
+    status: "cancelled",
+    checkpointType: "chapter_batch_ready",
+  });
+  const dismissed = await executor.execute({
+    taskId: "task_cancelled_history",
+    actionCode: "dismiss_history",
+    source: "web",
+    operatorId: "user_dismiss",
+    idempotencyKey: "dismiss-cancelled-k1",
+  });
+  assert.equal(dismissed.code, "executed");
+  assert.deepEqual(archived, ["task_cancelled_history"]);
+
+  executor.workflowService.getTaskByIdWithoutHealing = async () => buildWorkflowRow({
+    id: "task_running_live",
+    status: "running",
+    checkpointType: null,
+  });
+  const blocked = await executor.execute({
+    taskId: "task_running_live",
+    actionCode: "dismiss_history",
+    source: "web",
+    operatorId: "user_dismiss",
+    idempotencyKey: "dismiss-running-k1",
+  });
+  assert.equal(blocked.code, "forbidden");
+  assert.deepEqual(archived, ["task_cancelled_history"]);
+
+  prisma.autoDirectorFollowUpActionLog.findUnique = originals.actionLogFindUnique;
+  prisma.autoDirectorFollowUpActionLog.create = originals.actionLogCreate;
+});

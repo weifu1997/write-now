@@ -82,6 +82,7 @@ test("auto director follow-up service overview counts actionable rows by reason"
     buildWorkflowRow({ id: "task_manual", pendingManualRecovery: true, status: "running", checkpointType: null, seedPayloadJson: null }),
     buildWorkflowRow({ id: "task_failed", status: "failed", checkpointType: "chapter_batch_ready", seedPayloadJson: JSON.stringify({ provider: "openai", model: "gpt-5.4" }) }),
     buildWorkflowRow({ id: "task_candidate", checkpointType: "candidate_selection_required", currentStage: "AI 自动导演", currentItemKey: "auto_director", currentItemLabel: "等待确认书级方向", seedPayloadJson: null }),
+    buildWorkflowRow({ id: "task_cancelled", status: "cancelled", checkpointType: "chapter_batch_ready", seedPayloadJson: null }),
     buildWorkflowRow({ id: "task_excluded", checkpointType: "book_contract_ready", currentItemLabel: "Book Contract 已就绪", seedPayloadJson: null }),
   ]);
   prisma.autoDirectorAutoApprovalRecord.findMany = async () => [];
@@ -112,7 +113,7 @@ test("auto director follow-up service overview counts actionable rows by reason"
       runtime_failed: 1,
       candidate_selection_required: 1,
       replan_required: 0,
-      runtime_cancelled: 0,
+      runtime_cancelled: 1,
       chapter_batch_execution_pending: 0,
       quality_repair_pending: 0,
       auto_progress_running: 0,
@@ -120,13 +121,60 @@ test("auto director follow-up service overview counts actionable rows by reason"
       runtime_replaced: 0,
       validation_required: 0,
     });
-    assert.equal(overview.totalCount, 3);
+    assert.equal(overview.totalCount, 4);
+    assert.equal(overview.actionableCount, 3);
+    const cancelledItem = (await service.list()).items.find((item) => item.directorTaskId === "task_cancelled");
+    assert.ok(cancelledItem);
+    assert.ok(cancelledItem.availableActions.some((action) => action.code === "dismiss_history"));
   } finally {
     taskArchive.getArchivedTaskIds = originals.getArchivedTaskIds;
     prisma.novelWorkflowTask.findMany = originals.findMany;
     prisma.autoDirectorAutoApprovalRecord.findMany = originals.autoApprovalFindMany;
     autoDirectorChannelSettingsService.getAutoDirectorChannelSettings = originals.getAutoDirectorChannelSettings;
     service.workflowService.healAutoDirectorTaskState = originalHeal;
+  }
+});
+
+test("auto director follow-up overview excludes archived history and keeps remaining actionable count", async () => {
+  const originals = {
+    getArchivedTaskIds: taskArchive.getArchivedTaskIds,
+    findMany: prisma.novelWorkflowTask.findMany,
+    autoApprovalFindMany: prisma.autoDirectorAutoApprovalRecord.findMany,
+    getAutoDirectorChannelSettings: autoDirectorChannelSettingsService.getAutoDirectorChannelSettings,
+  };
+
+  taskArchive.getArchivedTaskIds = async () => ["task_cancelled"];
+  prisma.novelWorkflowTask.findMany = async ({ where }) => {
+    const excluded = new Set(where?.id?.notIn ?? []);
+    return [
+      buildWorkflowRow({ id: "task_failed", status: "failed", checkpointType: "chapter_batch_ready", seedPayloadJson: JSON.stringify({ provider: "openai", model: "gpt-5.4" }) }),
+      buildWorkflowRow({ id: "task_cancelled", status: "cancelled", checkpointType: "chapter_batch_ready", seedPayloadJson: null }),
+      buildWorkflowRow({ id: "task_replaced", status: "cancelled", seedPayloadJson: JSON.stringify({ replacementTaskId: "task_failed" }) }),
+    ].filter((row) => !excluded.has(row.id));
+  };
+  prisma.autoDirectorAutoApprovalRecord.findMany = async () => [];
+  autoDirectorChannelSettingsService.getAutoDirectorChannelSettings = async () => ({
+    baseUrl: "https://writer.example.test",
+    dingtalk: { webhookUrl: "", callbackToken: "", operatorMapJson: "", eventTypes: [] },
+    wecom: { webhookUrl: "", callbackToken: "", operatorMapJson: "", eventTypes: [] },
+  });
+
+  const service = new AutoDirectorFollowUpService();
+  service.workflowService.healAutoDirectorTaskState = async () => false;
+
+  try {
+    const overview = await service.getOverview();
+    const listed = await service.list();
+    assert.equal(listed.items.some((item) => item.directorTaskId === "task_cancelled"), false);
+    assert.equal(overview.totalCount, 2);
+    assert.equal(overview.actionableCount, 1);
+    assert.equal(overview.countersByReason.runtime_failed, 1);
+    assert.equal(overview.countersByReason.runtime_replaced, 1);
+  } finally {
+    taskArchive.getArchivedTaskIds = originals.getArchivedTaskIds;
+    prisma.novelWorkflowTask.findMany = originals.findMany;
+    prisma.autoDirectorAutoApprovalRecord.findMany = originals.autoApprovalFindMany;
+    autoDirectorChannelSettingsService.getAutoDirectorChannelSettings = originals.getAutoDirectorChannelSettings;
   }
 });
 

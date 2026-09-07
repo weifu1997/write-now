@@ -33,6 +33,7 @@ import { getTaskOverview } from "@/api/tasks";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { VisualAssetLibraryDialog } from "@/components/visualAssets";
+import { resolveFollowUpBadgeCount } from "@/pages/autoDirectorFollowUps/followUpPresentation";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -124,13 +125,13 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     queryFn: getAutoDirectorFollowUpOverview,
     enabled: badgeQueriesEnabled,
     refetchInterval: (query) => {
-      const totalCount = query.state.data?.data?.totalCount ?? 0;
-      return totalCount > 0 ? 4000 : false;
+      const badgeCount = resolveFollowUpBadgeCount(query.state.data?.data);
+      return badgeCount > 0 ? 4000 : false;
     },
   });
 
   const failedTaskCount = taskQuery.data?.data?.failedCount ?? 0;
-  const autoDirectorFollowUpCount = autoDirectorFollowUpQuery.data?.data?.totalCount ?? 0;
+  const autoDirectorFollowUpCount = resolveFollowUpBadgeCount(autoDirectorFollowUpQuery.data?.data);
   const knowledgeDocuments = knowledgeQuery.data?.data ?? [];
   const failedIndexCount = knowledgeDocuments.filter((item) => item.latestIndexStatus === "failed").length;
 

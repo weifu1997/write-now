@@ -19,9 +19,17 @@
       - 悬挂字符串截断输出经本地启发式直接解析（`maxRepairAttempts:0`，不触发 repair）；
       - repair 收到提升后的 maxTokens（stub `factory.getLLM` 捕获 options.maxTokens，断言 ≥ profile safe）；
       - （可测层）finish_reason 归一函数。运行：`pnpm --filter @write-now/server test`。
-- [ ] 6. 复核：`trellis-check` / 类型检查通过，commit（server 侧改动，单 commit 归并）。
-- [ ] 7. 合入 beta：`git checkout beta && git merge feature/...`（保留 feature 分支合入历史）。
-- [ ] 8. 部署：按 `infra/docker-compose.yml` 重新构建 `ai-novel-api` 镜像并重启容器。
+      - 复核（2026-09-07）：`node --test tests/structuredInvoke.test.js` → 22/22 全绿（含
+        heals mid-string truncated JSON / resolveRepairMaxTokens / elevated maxTokens /
+        finish_reason length truncated 四条）。
+- [x] 6. 复核：commit 已完成 = `10765991 fix(llm): 修复结构化输出截断僵局，提升生成与修复预算并增强截断恢复`。
+      注：整 suite `pnpm --filter @write-now/server test` 有 2 处与本任务无关的既有失败
+      （`tests/tools.test.js` bookAnalysisTools zod 声明位置契约，源 commit 2026-06；
+      `tests/worldContextGateway.test.js` 缺 openingOnly 断言，源 commit 2026-08）。
+      均早于本任务、本任务未触碰相关文件，不在本任务验收范围内。
+- [x] 7. 合入 beta：`6916caf5 Merge branch 'feature/structured-output-budget-fix' into beta`（已完成）。
+- [x] 8. 部署：容器 `ai-novel-api-1` 镜像 2026-09-06 22:05 构建（晚于 22:03 merge），容器内
+      `/app/server/dist` 已含 `resolveRepairMaxTokens` / `CHAPTER_EXECUTION_CONTRACT_MAX_TOKENS` 标记。
 - [ ] 9. 验收（用户参与）：小说页恢复/重跑暂停章节的执行合同生成；日志确认该章 `invoke_done`
       后不再 `pause_for_manual`。若仍截断，查看新日志 `finishReason=length` 判断端点侧上限（退出条件见 prd Non-goals）。
 

@@ -4,6 +4,7 @@ import type {
   ChapterExecutionMissingObligation,
   ChapterFailureClassification,
 } from "./chapterRuntime.js";
+import { isLedgerOverdueIssueCode } from "./chapterCreativeContract.js";
 
 export const CHAPTER_QUALITY_LOOP_ARTIFACT_TYPES = [
   "chapter_retention_contract",
@@ -86,7 +87,7 @@ export function classifyChapterQualityLoopRisk(
   // allowed to continue. The terminal action is the authoritative workflow
   // decision; do not re-promote the stored recommendation to a global block.
   if (qualityLoop.terminalAction === "defer_and_continue") {
-    return "non_blocking_quality_debt";
+    return isLedgerOverdueOnlyQualityLoop(qualityLoop) ? "none" : "non_blocking_quality_debt";
   }
   if (recommendedAction === "manual_gate") {
     return "blocking";
@@ -122,6 +123,31 @@ function readStringList(value: unknown): string[] {
   return value.flatMap((item) => typeof item === "string" && item.trim() ? [item.trim()] : []);
 }
 
+function readQualityLoopUnresolvedIssueCodes(qualityLoop: Record<string, unknown>): string[] {
+  const attribution = isRecord(qualityLoop.qualityDebtAttribution)
+    ? qualityLoop.qualityDebtAttribution
+    : null;
+  const signals = Array.isArray(qualityLoop.signals)
+    ? qualityLoop.signals.filter(isRecord)
+    : [];
+  const failedSignals = signals.filter((signal) => signal.status !== "valid");
+  const secondFailureCodes = readStringList(attribution?.secondFailureIssueCodes);
+  const firstFailureCodes = readStringList(attribution?.firstFailureIssueCodes);
+  const signalIssueCodes = failedSignals.flatMap((signal) => readStringList(signal.issueCodes));
+  return Array.from(new Set([
+    ...(secondFailureCodes.length > 0 ? secondFailureCodes : firstFailureCodes),
+    ...signalIssueCodes,
+  ]));
+}
+
+export function isLedgerOverdueOnlyQualityLoop(qualityLoop: unknown): boolean {
+  if (!isRecord(qualityLoop)) {
+    return false;
+  }
+  const issueCodes = readQualityLoopUnresolvedIssueCodes(qualityLoop);
+  return issueCodes.length > 0 && issueCodes.every((code) => isLedgerOverdueIssueCode(code));
+}
+
 /**
  * 从章节唯一持久化来源 riskFlags.qualityLoop 读取仍待回收的质量债。
  * 历史记录没有归因字段时保留 null，避免用修复日志猜测次数。
@@ -151,13 +177,10 @@ export function readChapterQualityDebtDetails(
     ? qualityLoop.signals.filter(isRecord)
     : [];
   const failedSignals = signals.filter((signal) => signal.status !== "valid");
-  const secondFailureCodes = readStringList(attribution?.secondFailureIssueCodes);
-  const firstFailureCodes = readStringList(attribution?.firstFailureIssueCodes);
-  const signalIssueCodes = failedSignals.flatMap((signal) => readStringList(signal.issueCodes));
-  const issueCodes = Array.from(new Set([
-    ...(secondFailureCodes.length > 0 ? secondFailureCodes : firstFailureCodes),
-    ...signalIssueCodes,
-  ]));
+  const issueCodes = readQualityLoopUnresolvedIssueCodes(qualityLoop);
+  if (isLedgerOverdueOnlyQualityLoop(qualityLoop)) {
+    return null;
+  }
   const signalReason = failedSignals
     .map((signal) => typeof signal.reason === "string" ? signal.reason.trim() : "")
     .find(Boolean);
@@ -229,6 +252,11 @@ function issueCode(issue: ReviewIssue, index: number): string {
   return `${issue.category}:${issue.severity}:${evidence || index + 1}`;
 }
 
+function isLedgerOverdueReviewIssue(issue: ReviewIssue): boolean {
+  const code = (issue as ReviewIssue & { code?: string | null }).code;
+  return isLedgerOverdueIssueCode(code);
+}
+
 function maxSeverity(issues: ReviewIssue[]): number {
   return issues.reduce((max, issue) => Math.max(max, SEVERITY_RANK[issue.severity] ?? 0), 0);
 }
@@ -258,9 +286,8 @@ function worseStatus(
 
 function buildRetentionSignal(input: ChapterQualityLoopAssessmentInput): ChapterQualityLoopSignal {
   const retentionIssues = input.issues.filter((issue) => (
-    issue.category === "pacing"
-    || issue.category === "coherence"
-    || issue.category === "logic"
+    !isLedgerOverdueReviewIssue(issue)
+    && (issue.category === "pacing" || issue.category === "coherence" || issue.category === "logic")
   ));
   const scoreDrivenStatus = worseStatus(
     worseStatus(
@@ -288,7 +315,8 @@ function buildRetentionSignal(input: ChapterQualityLoopAssessmentInput): Chapter
 function buildContinuitySignal(input: ChapterQualityLoopAssessmentInput): ChapterQualityLoopSignal {
   const runtimeIssues = input.runtimePackage?.audit.openIssues ?? [];
   const continuityIssues = input.issues.filter((issue) => (
-    issue.category === "coherence" || issue.category === "logic"
+    !isLedgerOverdueReviewIssue(issue)
+    && (issue.category === "coherence" || issue.category === "logic")
   ));
   const runtimeContinuityIssues = runtimeIssues.filter((issue) => (
     issue.auditType === "continuity" || issue.auditType === "character"
@@ -366,7 +394,8 @@ function buildRollingWindowSignal(input: ChapterQualityLoopAssessmentInput): Cha
   }
   const reportIssues = input.runtimePackage?.audit.reports.flatMap((report) => report.issues) ?? [];
   const blockingReportIssues = reportIssues.filter((issue) => (
-    issue.severity === "high" || issue.severity === "critical"
+    (issue.severity === "high" || issue.severity === "critical")
+    && !isLedgerOverdueIssueCode(issue.code)
   ));
   const status = input.score.overall < 72 || blockingReportIssues.length > 0
     ? "risk"

@@ -293,6 +293,143 @@ test("runPipelineChapterWithRuntime does not approve when timeline check fails",
   assert.equal(result.qualityDebtAttribution.repairAttemptsAllowed, 0);
 });
 
+test("runPipelineChapterWithRuntime passes when the only open issue is ledger overdue", async () => {
+  const result = await runPipelineChapterWithRuntime(
+    {
+      validateRequest(input) {
+        return input;
+      },
+      async ensureNovelCharacters() {},
+      async assemble() {
+        return {
+          novel: { id: "novel-1", title: "测试小说" },
+          chapter: {
+            id: "chapter-74",
+            title: "第74章",
+            order: 74,
+            content: "本章细纲已完成。",
+            expectation: null,
+          },
+          contextPackage: {},
+        };
+      },
+      async generateDraftFromWriter() {
+        throw new Error("existing content should not be regenerated");
+      },
+      async saveDraftAndArtifacts() {},
+      async syncFinalChapterArtifacts() {},
+      async finalizeChapterContent({ content }) {
+        return {
+          finalContent: content,
+          runtimePackage: {
+            ...createRuntimePackage(90),
+            audit: {
+              score: {
+                coherence: 90,
+                pacing: 90,
+                repetition: 90,
+                engagement: 90,
+                voice: 90,
+                overall: 90,
+              },
+              openIssues: [{
+                auditType: "plot",
+                severity: "high",
+                evidence: "已超过第3章合同兑现窗口。",
+                fixSuggestion: "在当前章节兑现或解释延期。",
+                code: "payoff_overdue",
+              }],
+              reports: [],
+              hasBlockingIssues: false,
+            },
+            meta: {
+              acceptanceStatus: "accepted",
+              continuePolicy: "continue",
+            },
+            timelineCheck: {
+              status: "passed",
+            },
+          },
+        };
+      },
+      async markChapterGenerationState() {},
+      async markChapterNeedsRepair() {},
+    },
+    "novel-1",
+    "chapter-74",
+    {
+      autoReview: true,
+      autoRepair: true,
+    },
+  );
+
+  assert.equal(result.pass, true);
+  assert.deepEqual(result.issues, []);
+  assert.equal(result.qualityDebtAttribution, null);
+});
+
+test("runPipelineChapterWithRuntime still fails local high-severity issues beside overdue payoffs", async () => {
+  const result = await runPipelineChapterWithRuntime(
+    {
+      validateRequest(input) {
+        return input;
+      },
+      async ensureNovelCharacters() {},
+      async assemble() {
+        return {
+          novel: { id: "novel-1", title: "测试小说" },
+          chapter: {
+            id: "chapter-74",
+            title: "第74章",
+            order: 74,
+            content: "本章细纲已完成。",
+            expectation: null,
+          },
+          contextPackage: {},
+        };
+      },
+      async generateDraftFromWriter() {
+        throw new Error("existing content should not be regenerated");
+      },
+      async saveDraftAndArtifacts() {},
+      async syncFinalChapterArtifacts() {},
+      async finalizeChapterContent({ content }) {
+        return {
+          finalContent: content,
+          runtimePackage: {
+            ...createProseRiskRuntimePackage(90),
+            audit: {
+              ...createProseRiskRuntimePackage(90).audit,
+              openIssues: [
+                ...createProseRiskRuntimePackage(90).audit.openIssues,
+                {
+                  auditType: "plot",
+                  severity: "high",
+                  evidence: "已超过第3章合同兑现窗口。",
+                  fixSuggestion: "在当前章节兑现或解释延期。",
+                  code: "payoff_overdue",
+                },
+              ],
+            },
+          },
+        };
+      },
+      async markChapterGenerationState() {},
+      async markChapterNeedsRepair() {},
+    },
+    "novel-1",
+    "chapter-74",
+    {
+      autoReview: true,
+      autoRepair: false,
+    },
+  );
+
+  assert.equal(result.pass, false);
+  assert.equal(result.issues.some((issue) => issue.evidence.includes("不是害怕")), true);
+  assert.equal(result.issues.some((issue) => issue.evidence.includes("第3章合同")), false);
+});
+
 test("runPipelineChapterWithRuntime passes confirmed provenance for approved final artifact sync", async () => {
   const finalSyncs = [];
 

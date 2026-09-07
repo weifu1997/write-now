@@ -363,11 +363,13 @@ test("volume chapter beat block schema normalizes beat aliases and enforces beat
         chapterTitle: "第一束异常光",
         description: "主角第一次看见危险信号，把卷内压迫落到眼前。",
         beat: "open_hook",
+        conflict_level: 28,
       },
       {
         name: "封锁线内侧",
         content: "主角被迫进入更危险的区域，让本卷生存承诺正式成立。",
         beat_key: "open_hook",
+        冲突强度: "76",
       },
     ],
   });
@@ -376,6 +378,54 @@ test("volume chapter beat block schema normalizes beat aliases and enforces beat
   assert.equal(parsed.beatLabel, "开卷抓手");
   assert.equal(parsed.chapterCount, 2);
   assert.equal(parsed.chapters[1].beatKey, "open_hook");
+  assert.equal(parsed.chapters[0].conflictLevel, 28);
+  assert.equal(parsed.chapters[1].conflictLevel, 76);
+});
+
+test("volume chapter beat block schema requires conflictLevel on the 0-100 scale", () => {
+  const schema = createVolumeChapterBeatBlockSchema({
+    exactChapterCount: 1,
+    expectedBeatKey: "open_hook",
+    expectedBeatLabel: "开卷抓手",
+  });
+  const missing = schema.safeParse({
+    beatKey: "open_hook",
+    beatLabel: "开卷抓手",
+    chapterCount: 1,
+    chapters: [{
+      title: "第一束异常光",
+      summary: "主角第一次看见危险信号，把卷内压迫落到眼前。",
+      beatKey: "open_hook",
+    }],
+  });
+  assert.equal(missing.success, false);
+
+  const rounded = schema.safeParse({
+    beatKey: "open_hook",
+    beatLabel: "开卷抓手",
+    chapterCount: 1,
+    chapters: [{
+      title: "第一束异常光",
+      summary: "主角第一次看见危险信号，把卷内压迫落到眼前。",
+      beatKey: "open_hook",
+      conflictLevel: 3.2,
+    }],
+  });
+  assert.equal(rounded.success, true);
+  assert.equal(rounded.data.chapters[0].conflictLevel, 3);
+
+  const outOfRange = schema.safeParse({
+    beatKey: "open_hook",
+    beatLabel: "开卷抓手",
+    chapterCount: 1,
+    chapters: [{
+      title: "第一束异常光",
+      summary: "主角第一次看见危险信号，把卷内压迫落到眼前。",
+      beatKey: "open_hook",
+      conflictLevel: 140,
+    }],
+  });
+  assert.equal(outOfRange.success, false);
 });
 
 test("volume chapter beat block schema wraps top-level chapter arrays for the current beat", () => {
@@ -388,10 +438,12 @@ test("volume chapter beat block schema wraps top-level chapter arrays for the cu
     {
       chapterTitle: "第一束异常光",
       description: "主角第一次看见危险信号，把卷内压迫落到眼前。",
+      conflictLevel: 22,
     },
     {
       name: "封锁线内侧",
       outline: "主角被迫进入更危险的区域，让本卷生存承诺正式成立。",
+      conflictLevel: 41,
     },
   ]);
 
@@ -401,6 +453,8 @@ test("volume chapter beat block schema wraps top-level chapter arrays for the cu
   assert.deepEqual(parsed.chapters.map((chapter) => chapter.beatKey), ["open_hook", "open_hook"]);
   assert.equal(parsed.chapters[0].title, "第一束异常光");
   assert.equal(parsed.chapters[1].summary, "主角被迫进入更危险的区域，让本卷生存承诺正式成立。");
+  assert.equal(parsed.chapters[0].conflictLevel, 22);
+  assert.equal(parsed.chapters[1].conflictLevel, 41);
 });
 
 test("chapter boundary schema normalizes structured boundary aliases", () => {

@@ -30,9 +30,43 @@ function buildRetryDirective(reason?: string | null): string {
   return [
     "上一次输出没有通过业务校验，本次必须优先修正：",
     normalizedReason,
-    "先判断失败类型：标题结构、标题基础质量、章节功能、摘要推进、结尾牵引。",
+    "先判断失败类型：标题结构、标题基础质量、章节功能、摘要推进、结尾牵引、冲突强度起伏。",
     "不要只替换被点名的一章；如果问题来自标题同构或章节功能重复，必须重排整组标题骨架和章节功能分配。",
   ].join("\n");
+}
+
+function describeBeatConflictGuidance(beatKey: string, isBookFinale: boolean): string {
+  if (isBookFinale) {
+    return "本拍是目标跨度收官：冲突强度应形成可见高潮后允许回落到余味，终章不得整拍贴底或全章持平。";
+  }
+  const guidanceByBeat: Record<string, string> = {
+    open_hook: "开卷抓手整体偏低到中低，建立压迫即可，不要提前顶满高潮。",
+    first_escalation: "首次升级应明显高于开卷，出现第一次加压。",
+    early_complication: "早期变数保持中位加压，允许一次小回落后再抬升。",
+    midpoint_turn: "中段转向要有一次明显升降，不能整拍持平。",
+    pressure_lock: "高潮前挤压应持续抬升，整体高于开卷和中段。",
+    late_complication: "后段变数可先回落再二次加压，为高潮让路。",
+    climax: "卷高潮应是本卷最高或次高区间，显著高于开卷。",
+    end_hook: "卷尾钩子从高潮回落，留下余压，不要再开一条必须续写的新主线高潮。",
+  };
+  return guidanceByBeat[beatKey] ?? "本拍冲突强度必须有可见起伏，相邻章差值不要长期小于 4。";
+}
+
+function getConflictLevelFlatIssue(
+  chapters: Array<{ conflictLevel?: number }>,
+): string | null {
+  const values = chapters
+    .map((chapter) => chapter.conflictLevel)
+    .filter((value): value is number => typeof value === "number");
+  if (values.length < 3) {
+    return null;
+  }
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  if (max - min <= 3) {
+    return "当前节奏段冲突强度变化过小，相邻章几乎持平；请按开局、加压、高潮或回落拉开 0-100 的起伏，相邻章差值不要都小于 4。";
+  }
+  return null;
 }
 
 function classifyChapterListRetryIssue(reason: string): string {
@@ -50,6 +84,9 @@ function classifyChapterListRetryIssue(reason: string): string {
   }
   if (reason.includes("当前节奏段缺少阶段性兑现") || reason.includes("结尾章缺少当前 beat")) {
     return "结尾牵引：最后一章必须完成当前 beat 的阶段兑现、明确转向或进入下一 beat 的阅读压力。";
+  }
+  if (reason.includes("冲突强度变化过小") || reason.includes("conflictLevel")) {
+    return "冲突强度起伏：每章输出 0-100 的 conflictLevel，本拍必须有加压或回落，禁止整拍贴底或持平。";
   }
   return "综合质量：按失败原因重排标题、章节功能和摘要推进，保证每章都有新增变化。";
 }
@@ -258,6 +295,11 @@ function getChapterFunctionQualityIssue(
   return null;
 }
 
+function isConflictLevelFlatIssue(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes("冲突强度变化过小");
+}
+
 function isChapterFunctionQualityIssue(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
 
@@ -340,7 +382,7 @@ export function createVolumeChapterListPrompt(
               "11. 每章 beatKey 必须保持为当前目标 beatKey。",
               "12. 摘要必须体现本章造成的局面变化，不得空泛复述标题。",
               isBookFinale
-                ? "13. 全书终章必须完成结局合同，不得创建必须续写的新主线或下一 beat 钩子。"
+                ? "13. 目标跨度收官章必须完成可见小结局，不得创建必须续写的新主线或下一 beat 钩子。"
                 : "13. 最后一章必须完成当前 beat 的 mustDeliver，同时留下阅读牵引，但不得提前兑现下一 beat 的核心事件。",
               "",
               "上一次的 JSON 输出：",
@@ -375,14 +417,17 @@ export function createVolumeChapterListPrompt(
           "",
           "二、硬性输出约束",
           "1. 顶层必须输出 beatKey、beatLabel、chapterCount、chapters 四个字段。",
-          "2. 每章只能包含 title、summary、beatKey 三个字段，不得新增字段。",
+          "2. 每章只能包含 title、summary、beatKey、conflictLevel 四个字段，不得再新增其他字段。",
           `3. beatKey 必须严格等于 ${targetBeatKey}。`,
           `4. beatLabel 必须严格等于 ${targetBeatLabel}。`,
           `5. chapterCount 与 chapters.length 必须严格等于 ${targetChapterCount}。`,
           `6. 每章 beatKey 都必须严格等于 ${targetBeatKey}。`,
           "7. 不得输出 Markdown、注释、解释或任何额外文本。",
           "8. 每章 summary 控制在 40-120 个汉字，只写核心行动、阻力和造成的新局面；禁止扩写场景、对白或正文。",
-          "9. 写完指定数量的最后一章后立即结束 JSON，不得追加分析、自检过程或候选版本。",
+          "9. 每章 conflictLevel 必须是 0-100 的整数，表示本章冲突强度；不要输出 1-5 分，也不要用缺省 3 表示未定。",
+          `10. ${describeBeatConflictGuidance(targetBeatKey, isBookFinale)}`,
+          "11. 本拍内必须有可见起伏：相邻章不要长期相差 3 以内，高潮拍整体高于开卷拍。",
+          "12. 写完指定数量的最后一章后立即结束 JSON，不得追加分析、自检过程或候选版本。",
           "",
           "三、章节规划核心原则",
           "1. 章节列表必须严格服从当前卷骨架与当前目标 beat 合同，不能偷跑到相邻 beat。",
@@ -398,7 +443,7 @@ export function createVolumeChapterListPrompt(
           "4. 若目标章数大于等于 5，至少应包含一次局面加压、一次关键发现或判断反转、一次阶段性兑现或明确转向。",
           "5. 关键推进可以占更多章节，过渡章要短促有力，不要为了凑数制造低信息密度章节。",
           isBookFinale
-            ? "6. 全书终章必须完成结局合同中的主冲突、关系变化、核心回报与主题落点，不得留下必须续写的新主线。"
+            ? "6. 目标跨度收官章必须完成可见小结局：本阶段高潮、核心回报和主题余味都要落地，不得留下必须续写的新主线。"
             : "6. 最后一章必须完成当前 beat 的 mustDeliver，同时留下进入下一 beat 的阅读牵引，但不得提前兑现下一 beat 的核心事件。",
           "",
           "五、章节推进质量要求",
@@ -437,7 +482,7 @@ export function createVolumeChapterListPrompt(
           "2. 开头章节要承接前序已生成章节状态，不能把已经发生的推进重新起一遍。",
           "3. 中段章节要围绕当前 beat 的核心矛盾持续加压、试探、转折或兑现。",
           isBookFinale
-            ? "4. 全书终章必须完成结局合同，不再要求下一阶段牵引。"
+            ? "4. 目标跨度收官章必须完成可见小结局，不再要求下一阶段牵引。"
             : "4. 结尾章节要把当前 beat 的 mustDeliver 落到位，但不要提前偷跑下一 beat 的核心兑现。",
           "",
           "九、质量自检要求",
@@ -460,7 +505,8 @@ export function createVolumeChapterListPrompt(
           `- beatKey 必须严格等于 ${targetBeatKey}`,
           `- beatLabel 必须严格等于 ${targetBeatLabel}`,
           `- chapterCount 与 chapters.length 必须严格等于 ${targetChapterCount}`,
-          "- 每章只能包含 title、summary、beatKey",
+          "- 每章只能包含 title、summary、beatKey、conflictLevel",
+          "- conflictLevel 是 0-100 的整数，本拍必须有起伏",
           "- 不得生成任何相邻 beat 的章节",
           "- 先在脑内规划章节功能分配与标题骨架配比，再输出完整章节块",
           "- 优先保证章节推进感、节奏承接、标题结构分散、摘要中的角色主动性与结尾牵引",
@@ -523,6 +569,11 @@ export function createVolumeChapterListPrompt(
         throw new Error(chapterFunctionQualityIssue);
       }
 
+      const conflictLevelFlatIssue = getConflictLevelFlatIssue(output.chapters);
+      if (conflictLevelFlatIssue) {
+        throw new Error(conflictLevelFlatIssue);
+      }
+
       return output;
     },
 
@@ -531,7 +582,11 @@ export function createVolumeChapterListPrompt(
         throw new Error(validationError);
       }
 
-      if (isChapterTitleDiversityIssue(validationError) || isChapterFunctionQualityIssue(validationError)) {
+      if (
+        isChapterTitleDiversityIssue(validationError)
+        || isChapterFunctionQualityIssue(validationError)
+        || isConflictLevelFlatIssue(validationError)
+      ) {
         return rawOutput;
       }
 

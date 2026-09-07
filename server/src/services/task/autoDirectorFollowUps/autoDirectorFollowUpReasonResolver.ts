@@ -6,6 +6,7 @@ import type {
   AutoDirectorMutationActionCode,
   AutoDirectorResolvedFollowUpReason,
 } from "@write-now/shared/types/autoDirectorFollowUp";
+import { canDismissFollowUpHistory } from "@write-now/shared/types/autoDirectorFollowUp";
 import { buildWorkflowResumeAction } from "../novelWorkflowExplainability";
 
 const CHANNEL_ACTION_CODES = new Set<AutoDirectorActionCode>([
@@ -63,20 +64,46 @@ function getContinueLabel(input: AutoDirectorFollowUpResolverInput, fallback: st
   return buildWorkflowResumeAction(input.status, input.checkpointType ?? null, input.executionScopeLabel) ?? fallback;
 }
 
+function dismissHistoryAction(): AutoDirectorAction {
+  return mutationAction({
+    code: "dismiss_history",
+    label: "收起这条记录",
+    riskLevel: "low",
+    requiresConfirm: false,
+  });
+}
+
+function withDismissHistoryAction(
+  input: AutoDirectorFollowUpResolverInput,
+  actions: AutoDirectorAction[],
+): AutoDirectorAction[] {
+  if (!canDismissFollowUpHistory(input)) {
+    return actions;
+  }
+  if (actions.some((action) => action.code === "dismiss_history")) {
+    return actions;
+  }
+  return [...actions, dismissHistoryAction()];
+}
+
 function finalizeResolvedReason(input: {
   reason: AutoDirectorFollowUpReason;
   priority: AutoDirectorResolvedFollowUpReason["priority"];
   availableActions: AutoDirectorAction[];
   batchActionCodes?: AutoDirectorMutationActionCode[];
+  resolverInput?: AutoDirectorFollowUpResolverInput;
 }): AutoDirectorResolvedFollowUpReason {
+  const availableActions = input.resolverInput
+    ? withDismissHistoryAction(input.resolverInput, input.availableActions)
+    : input.availableActions;
   const batchActionCodes = input.batchActionCodes ?? [];
-  const hasChannelAction = input.availableActions.some((item) => CHANNEL_ACTION_CODES.has(item.code));
+  const hasChannelAction = availableActions.some((item) => CHANNEL_ACTION_CODES.has(item.code));
 
   return {
     reason: input.reason,
     reasonLabel: REASON_LABELS[input.reason],
     priority: input.priority,
-    availableActions: input.availableActions,
+    availableActions,
     batchActionCodes,
     supportsBatch: batchActionCodes.length > 0,
     channelCapabilities: {
@@ -89,6 +116,10 @@ function finalizeResolvedReason(input: {
 export function resolveAutoDirectorFollowUpReason(
   input: AutoDirectorFollowUpResolverInput,
 ): AutoDirectorResolvedFollowUpReason | null {
+  const finish = (
+    partial: Omit<Parameters<typeof finalizeResolvedReason>[0], "resolverInput">,
+  ) => finalizeResolvedReason({ ...partial, resolverInput: input });
+
   if (input.validationResult && !input.validationResult.allowed) {
     const hasStructuredBackfill = input.validationResult.requiredActions.some((action) => (
       action.code === "auto_backfill_structured_outline"
@@ -100,7 +131,7 @@ export function resolveAutoDirectorFollowUpReason(
       && action.safeToAutoFix === true
       && action.riskLevel === "low"
     ));
-    return finalizeResolvedReason({
+    return finish({
       reason: "validation_required",
       priority: "P0",
       availableActions: [
@@ -133,7 +164,7 @@ export function resolveAutoDirectorFollowUpReason(
   }
 
   if (input.replacementTaskId?.trim() && input.status !== "failed" && input.status !== "waiting_approval" && input.status !== "running" && input.status !== "queued") {
-    return finalizeResolvedReason({
+    return finish({
       reason: "runtime_replaced",
       priority: "P2",
       availableActions: [
@@ -146,7 +177,7 @@ export function resolveAutoDirectorFollowUpReason(
   }
 
   if (input.pendingManualRecovery) {
-    return finalizeResolvedReason({
+    return finish({
       reason: "manual_recovery_required",
       priority: "P0",
       availableActions: [
@@ -165,7 +196,7 @@ export function resolveAutoDirectorFollowUpReason(
   }
 
   if (input.status === "queued" || input.status === "running") {
-    return finalizeResolvedReason({
+    return finish({
       reason: "auto_progress_running",
       priority: "P2",
       availableActions: [
@@ -178,7 +209,7 @@ export function resolveAutoDirectorFollowUpReason(
   }
 
   if (input.status === "failed") {
-    return finalizeResolvedReason({
+    return finish({
       reason: "runtime_failed",
       priority: "P0",
       availableActions: [
@@ -204,7 +235,7 @@ export function resolveAutoDirectorFollowUpReason(
   }
 
   if (input.status === "cancelled") {
-    return finalizeResolvedReason({
+    return finish({
       reason: "runtime_cancelled",
       priority: "P1",
       availableActions: [
@@ -234,7 +265,7 @@ export function resolveAutoDirectorFollowUpReason(
   }
 
   if (input.checkpointType === "candidate_selection_required") {
-    return finalizeResolvedReason({
+    return finish({
       reason: "candidate_selection_required",
       priority: "P1",
       availableActions: [
@@ -251,7 +282,7 @@ export function resolveAutoDirectorFollowUpReason(
   }
 
   if (input.checkpointType === "replan_required") {
-    return finalizeResolvedReason({
+    return finish({
       reason: "replan_required",
       priority: "P1",
       availableActions: [
@@ -268,7 +299,7 @@ export function resolveAutoDirectorFollowUpReason(
   }
 
   if (input.checkpointType === "chapter_batch_ready" && input.status === "waiting_approval") {
-    return finalizeResolvedReason({
+    return finish({
       reason: "chapter_batch_execution_pending",
       priority: "P2",
       availableActions: [
@@ -288,7 +319,7 @@ export function resolveAutoDirectorFollowUpReason(
   }
 
   if (input.checkpointType === "chapter_batch_ready") {
-    return finalizeResolvedReason({
+    return finish({
       reason: "quality_repair_pending",
       priority: "P2",
       availableActions: [

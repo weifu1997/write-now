@@ -9,6 +9,7 @@ import type {
 import type { TimelineCheckResult, TimelineContextForChapter, TimelineIssue } from "@write-now/shared/types/timeline";
 import type { ChapterAcceptanceAssessmentOutput } from "../../../prompting/prompts/novel/chapterAcceptance.prompts";
 import { withChapterRepairContext } from "../../../prompting/prompts/novel/chapterLayeredContext";
+import { isLedgerOverdueIssueCode } from "@write-now/shared/types/chapterCreativeContract";
 import { buildSyntheticPayoffIssues } from "../../payoff/payoffLedgerShared";
 import type { ChapterRuntimeRequestInput } from "./chapterRuntimeSchema";
 import type { StyleReviewResult } from "./PostGenerationStyleReviewRunner";
@@ -375,28 +376,38 @@ export function buildRuntimePackage(input: BuildRuntimePackageInput): ChapterRun
   }
 
   const blockingIssueIds = openIssues
-    .filter((issue) => issue.severity === "high" || issue.severity === "critical")
+    .filter((issue) => (
+      (issue.severity === "high" || issue.severity === "critical")
+      && !isLedgerOverdueIssueCode(issue.code)
+    ))
     .map((issue) => issue.id);
   const blockingLedgerKeys = Array.from(new Set(
     syntheticPayoffIssues
-      .filter((issue) => issue.severity === "high" || issue.severity === "critical")
+      .filter((issue) => (
+        (issue.severity === "high" || issue.severity === "critical")
+        && !isLedgerOverdueIssueCode(issue.code)
+      ))
       .map((issue) => issue.ledgerKey),
   ));
   const hasBlockingIssues = blockingIssueIds.length > 0 || input.acceptance.status === "needs_manual_review";
   const repairContextPackage = withChapterRepairContext(
     input.contextPackage,
-    openIssues.map((issue) => ({
-      severity: issue.severity,
-      category: issue.auditType === "continuity"
-        ? "coherence"
-        : issue.auditType === "character"
-          ? "logic"
-          : issue.auditType === "plot"
-            ? "pacing"
-            : "coherence",
-      evidence: issue.evidence,
-      fixSuggestion: issue.fixSuggestion,
-    })),
+    openIssues.flatMap((issue) => (
+      isLedgerOverdueIssueCode(issue.code)
+        ? []
+        : [{
+          severity: issue.severity,
+          category: issue.auditType === "continuity"
+            ? "coherence"
+            : issue.auditType === "character"
+              ? "logic"
+              : issue.auditType === "plot"
+                ? "pacing"
+                : "coherence",
+          evidence: issue.evidence,
+          fixSuggestion: issue.fixSuggestion,
+        }]
+    )),
   );
 
   const replanRecommendation = input.plannerService.buildReplanRecommendation

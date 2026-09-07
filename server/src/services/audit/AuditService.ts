@@ -1,5 +1,6 @@
 import type { LLMProvider } from "@write-now/shared/types/llm";
 import type { AuditReport, AuditType, QualityScore, ReviewIssue } from "@write-now/shared/types/novel";
+import { isLedgerOverdueIssueCode } from "@write-now/shared/types/chapterCreativeContract";
 import type { ChapterRuntimePackage, GenerationContextPackage } from "@write-now/shared/types/chapterRuntime";
 import { prisma } from "../../db/prisma";
 import { payoffLedgerSyncService } from "../payoff/PayoffLedgerSyncService";
@@ -480,16 +481,23 @@ export class AuditService {
   }
 
   private buildLegacyIssues(structuredIssues: ReviewIssue[], auditReports: AuditReport[]): ReviewIssue[] {
-    if (structuredIssues.length > 0) {
-      return structuredIssues;
+    const filteredStructuredIssues = structuredIssues.filter((issue) => {
+      const code = (issue as ReviewIssue & { code?: string | null }).code;
+      return !isLedgerOverdueIssueCode(code);
+    });
+    if (filteredStructuredIssues.length > 0) {
+      return filteredStructuredIssues;
     }
     return auditReports
-      .flatMap((report) => report.issues.slice(0, 3).map((issue) => ({
-        severity: issue.severity,
-        category: LEGACY_CATEGORY_MAP[report.auditType],
-        evidence: issue.evidence,
-        fixSuggestion: issue.fixSuggestion,
-      })))
+      .flatMap((report) => report.issues
+        .filter((issue) => !isLedgerOverdueIssueCode(issue.code))
+        .slice(0, 3)
+        .map((issue) => ({
+          severity: issue.severity,
+          category: LEGACY_CATEGORY_MAP[report.auditType],
+          evidence: issue.evidence,
+          fixSuggestion: issue.fixSuggestion,
+        })))
       .slice(0, 8);
   }
 

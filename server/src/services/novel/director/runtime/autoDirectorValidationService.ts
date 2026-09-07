@@ -416,6 +416,14 @@ export function validateAutoDirectorAction(input: AutoDirectorActionValidationIn
   if ((input.actionCode === "retry_with_task_model" || input.actionCode === "retry_with_route_model") && input.task.status !== "failed" && input.task.status !== "cancelled") {
     blockingReasons.push("当前任务没有失败或取消，不需要重试。");
   }
+  if (input.actionCode === "dismiss_history") {
+    const status = String(input.task.status ?? "");
+    const canDismiss = !input.task.pendingManualRecovery
+      && (status === "succeeded" || status === "failed" || status === "cancelled");
+    if (!canDismiss) {
+      blockingReasons.push("当前任务还在处理中，不能收起这条记录。");
+    }
+  }
 
   return buildResult({
     allowed: blockingReasons.length === 0,

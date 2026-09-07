@@ -2,6 +2,7 @@ import type { ChapterRuntimePackage, GenerationContextPackage } from "@write-now
 import type { ContentProvenance } from "@write-now/shared/types/canonicalState";
 import type { LLMProvider } from "@write-now/shared/types/llm";
 import type { QualityScore, ReviewIssue } from "@write-now/shared/types/novel";
+import { isLedgerOverdueIssueCode } from "@write-now/shared/types/chapterCreativeContract";
 import type { ChapterRuntimeRequestInput } from "./chapterRuntimeSchema";
 import { detectForbiddenStyleEntities } from "../../styleEngine/styleGenerationSanitizer";
 import {
@@ -432,20 +433,26 @@ function isQualityPass(score: QualityScore, qualityThreshold: number): boolean {
 }
 
 function toReviewIssues(runtimePackage: ChapterRuntimePackage): ReviewIssue[] {
-  const issues = runtimePackage.audit.openIssues.map((issue) => ({
-    severity: issue.severity,
-    category: AUDIT_CATEGORY_MAP[issue.auditType],
-    evidence: issue.evidence,
-    fixSuggestion: issue.fixSuggestion,
-  }));
-  return issues.length > 0
-    ? issues
-    : runtimePackage.audit.reports.flatMap((report) => report.issues.map((issue) => ({
+  const issues = runtimePackage.audit.openIssues
+    .filter((issue) => !isLedgerOverdueIssueCode(issue.code))
+    .map((issue) => ({
       severity: issue.severity,
-      category: AUDIT_CATEGORY_MAP[report.auditType],
+      category: AUDIT_CATEGORY_MAP[issue.auditType],
       evidence: issue.evidence,
       fixSuggestion: issue.fixSuggestion,
-    })));
+    }));
+  return issues.length > 0
+    ? issues
+    : runtimePackage.audit.reports.flatMap((report) => (
+      report.issues
+        .filter((issue) => !isLedgerOverdueIssueCode(issue.code))
+        .map((issue) => ({
+          severity: issue.severity,
+          category: AUDIT_CATEGORY_MAP[report.auditType],
+          evidence: issue.evidence,
+          fixSuggestion: issue.fixSuggestion,
+        }))
+    ));
 }
 
 function toAcceptanceDirectiveIssues(runtimePackage: ChapterRuntimePackage): ReviewIssue[] {

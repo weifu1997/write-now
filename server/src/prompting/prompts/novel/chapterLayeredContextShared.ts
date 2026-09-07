@@ -11,6 +11,40 @@ export function compactText(value: string | null | undefined, fallback = ""): st
   return value?.replace(/\s+/g, " ").trim() || fallback;
 }
 
+export function describeConflictLevelStep(
+  previous: number | null | undefined,
+  current: number | null | undefined,
+): "rise" | "fall" | "flat" | "unknown" {
+  if (typeof previous !== "number" || typeof current !== "number") {
+    return "unknown";
+  }
+  if (current > previous) {
+    return "rise";
+  }
+  if (current < previous) {
+    return "fall";
+  }
+  return "flat";
+}
+
+export function buildConflictPacingHint(
+  current: number | null | undefined,
+  previous: number | null | undefined,
+): string | null {
+  if (typeof current !== "number") {
+    return null;
+  }
+  const step = describeConflictLevelStep(previous, current);
+  const stepLabel = step === "rise"
+    ? "相对上一章上升"
+    : step === "fall"
+      ? "相对上一章回落"
+      : step === "flat"
+        ? "相对上一章持平"
+        : "尚无上一章对照";
+  return `本章冲突强度 ${Math.round(current)} / 100，${stepLabel}。正文节奏应与该强度匹配：高则加压、对峙或兑现，低则铺垫、喘息或余味，不要把高潮章写成平铺过渡。`;
+}
+
 export function takeUnique(items: Array<string | null | undefined>, limit = items.length): string[] {
   const seen = new Set<string>();
   const results: string[] = [];
@@ -72,7 +106,9 @@ export function renderBookContractText(contract: BookContractContext): string {
     `${contract.promiseScope === "whole_book" ? "全书核心承诺" : "前 30 章承诺"}：${displayPromptValue(contract.first30ChapterPromise)}`,
     contract.completionMode === "compact_book"
       ? `紧凑全书合同：目标 ${contract.targetChapterCount ?? "未定"} 章，结局最迟第 ${contract.endingRequiredBy ?? "目标"} 章完成；终章不得开启必须续写的新主线。`
-      : "",
+      : contract.targetChapterCount
+        ? `连载目标跨度合同：目标 ${contract.targetChapterCount} 章，第 ${contract.endingRequiredBy ?? contract.targetChapterCount} 章必须形成可见小结局（本阶段高潮与兑现，可留余味），不得开启必须续写的新主线。`
+        : "",
     contract.readingPromise ? `阅读承诺：${displayPromptValue(contract.readingPromise)}` : "",
     contract.protagonistFantasy ? `主角幻想：${displayPromptValue(contract.protagonistFantasy)}` : "",
     contract.coreSellingPoint ? `合同核心卖点：${displayPromptValue(contract.coreSellingPoint)}` : "",
