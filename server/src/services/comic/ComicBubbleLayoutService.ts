@@ -13,6 +13,7 @@ import sharp from "sharp";
 import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/errorHandler";
 import { resolveGeneratedImagesRoot } from "../../runtime/appPaths";
+import { resolveComicStoragePath } from "./comicStoragePaths";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -283,7 +284,11 @@ export class ComicBubbleLayoutService {
 
   /** 读取已排版图文件（供 HTTP 路由流式响应） */
   async getLetteredImageFile(panelId: string): Promise<Buffer | null> {
-    const filePath = path.join(letteredPanelDir(panelId), "lettered.png");
+    // panelId 来自路由参数（会被百分号解码），越界 id 一律按 404 处理
+    const filePath = resolveComicStoragePath(COMIC_LETTERED_DIR, panelId, "lettered.png");
+    if (!filePath) {
+      return null;
+    }
     try {
       return await fs.readFile(filePath);
     } catch {

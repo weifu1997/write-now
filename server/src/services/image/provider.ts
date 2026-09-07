@@ -191,6 +191,8 @@ export function buildImageGenerationRequestBody(input: ImageProviderGenerateInpu
   // 参考图注入（OpenAI images/edits 兼容格式）
   // grok 暂不支持参考图，静默跳过；其他 provider 按 input_image_url 格式透传，
   // 若 provider 实际不支持，API 层会返回错误，由上层处理。
+  // 注意：JSON 接口的 input_image_url 只支持单张参考图，多张仅在
+  // /images/edits 的 multipart 路径（generateWithFileRef）中发送。
   if (input.refImages && input.refImages.length > 0 && input.provider !== "grok") {
     requestBody.input_image_url = input.refImages[0];
   }
@@ -225,15 +227,11 @@ function inferMimeType(filePath: string): string {
  */
 async function generateWithFileRef(
   input: ImageProviderGenerateInput,
-  refImagePath: string,
+  refImagePaths: string[],
   apiKey: string | undefined,
   baseURL: string,
   controller: AbortController,
 ): Promise<ImageProviderGenerateResult> {
-  const fileBuffer = await fs.readFile(refImagePath);
-  const mimeType = inferMimeType(refImagePath);
-  const blob = new Blob([fileBuffer], { type: mimeType });
-
   const form = new FormData();
   form.append("model", input.model);
   form.append("prompt", buildPrompt(input.prompt, input.negativePrompt));
@@ -241,8 +239,19 @@ async function generateWithFileRef(
   if (input.provider !== "grok") {
     form.append("size", input.size);
   }
-  // 将文件以 image 字段上传，OpenAI /images/edits 兼容格式
-  form.append("image", blob, path.basename(refImagePath));
+  // 多张参考图按 OpenAI /images/edits 的 image[] 数组格式上传；
+  // 单张时仍用 image 字段，保持与只识别单文件的兼容网关可用。
+  if (refImagePaths.length === 1) {
+    const fileBuffer = await fs.readFile(refImagePaths[0]);
+    const mimeType = inferMimeType(refImagePaths[0]);
+    form.append("image", new Blob([fileBuffer], { type: mimeType }), path.basename(refImagePaths[0]));
+  } else {
+    for (const refImagePath of refImagePaths) {
+      const fileBuffer = await fs.readFile(refImagePath);
+      const mimeType = inferMimeType(refImagePath);
+      form.append("image[]", new Blob([fileBuffer], { type: mimeType }), path.basename(refImagePath));
+    }
+  }
 
   const response = await fetch(`${baseURL}/images/edits`, {
     method: "POST",
@@ -289,9 +298,9 @@ export async function generateImagesByProvider(input: ImageProviderGenerateInput
 
   try {
     // 优先使用本地文件路径（multipart 上传，避免 base64 膨胀）
-    const refImagePath = input.refImagePaths?.[0];
-    if (refImagePath && input.provider !== "grok") {
-      return await generateWithFileRef(input, refImagePath, apiKey, baseURL, controller);
+    const refImagePaths = (input.refImagePaths ?? []).filter((item) => item.trim()).slice(0, 4);
+    if (refImagePaths.length > 0 && input.provider !== "grok") {
+      return await generateWithFileRef(input, refImagePaths, apiKey, baseURL, controller);
     }
 
     const requestBody = buildImageGenerationRequestBody(input);

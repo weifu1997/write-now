@@ -13,6 +13,7 @@ import {
 } from "@write-now/shared/types/chapterQualityLoop";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { createNovelSnapshot, previewChapterAiRevision, reviewNovelChapter, updateNovelChapter } from "@/api/novel";
+import { createStyleAnchor } from "@/api/novel/styleAnchors";
 import { queryKeys } from "@/api/queryKeys";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
@@ -300,6 +301,10 @@ export default function ChapterEditorShell(props: ChapterEditorShellProps) {
       return nextContent;
     },
     onSuccess: async (nextContent) => {
+      const anchorText = activeCandidate?.content?.trim();
+      if (chapter && anchorText) {
+        createStyleAnchor(novelId, chapter.id, { text: anchorText, source: "adopted" }).catch(() => undefined);
+      }
       setContentDraft(nextContent);
       setSavedContent(nextContent);
       setSaveStatus("saved");
@@ -312,6 +317,22 @@ export default function ChapterEditorShell(props: ChapterEditorShellProps) {
       toast.error(error instanceof Error ? error.message : "应用候选版本失败。");
     },
   });
+
+  const handleMarkAnchor = () => {
+    if (!chapter || !selection) {
+      return;
+    }
+    const text = contentDraft.slice(selection.from, selection.to).trim();
+    if (!text) {
+      return;
+    }
+    createStyleAnchor(novelId, chapter.id, { text, source: "manual" })
+      .then((response) => {
+        toast.success(response.message ?? "范文已收录，之后的写作会参考它的写法。");
+      })
+      .catch(() => undefined);
+  };
+
 
   const previewPayload = session.status === "loading" && session.targetRange?.text
     ? {
@@ -531,6 +552,7 @@ export default function ChapterEditorShell(props: ChapterEditorShellProps) {
             position={selectionToolbarPosition}
             disabled={previewMutation.isPending}
             onRunOperation={handleRunOperation}
+            onMarkAnchor={handleMarkAnchor}
           />
         </div>
 

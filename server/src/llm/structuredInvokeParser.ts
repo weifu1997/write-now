@@ -52,22 +52,61 @@ export interface StructuredInvokeRawParseInput<T> {
   reasoningForcedOff?: boolean;
 }
 
+function isEndingInsideUnterminatedString(text: string): boolean {
+  let inString = false;
+  let escaped = false;
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (char === "\\") {
+      escaped = true;
+      continue;
+    }
+    if (char === "\"") {
+      inString = !inString;
+    }
+  }
+  return inString;
+}
+
 function tryFixTruncatedJson(raw: string): string {
   const text = raw.trim();
   if (!text) return text;
 
-  const count = (re: RegExp) => (text.match(re) ?? []).length;
+  let fixed = text.replace(/,\s*$/g, "");
+  // 截断最常见形态是停在某个字符串值内部：补一个闭引号让括号补齐有机会闭合。
+  if (isEndingInsideUnterminatedString(fixed)) {
+    fixed += '"';
+  }
+
+  const count = (re: RegExp) => (fixed.match(re) ?? []).length;
   const openBraces = count(/{/g);
   const closeBraces = count(/}/g);
   const openBrackets = count(/\[/g);
   const closeBrackets = count(/]/g);
 
-  let fixed = text.replace(/,\s*$/g, "");
+  let appended = "";
   if (openBrackets > closeBrackets) {
-    fixed += "]".repeat(openBrackets - closeBrackets);
+    appended += "]".repeat(openBrackets - closeBrackets);
   }
   if (openBraces > closeBraces) {
-    fixed += "}".repeat(openBraces - closeBraces);
+    appended += "}".repeat(openBraces - closeBraces);
+  }
+  if (appended) {
+    fixed += appended;
+  }
+  if (fixed !== text) {
+    // 括号计数包含字符串值内的括号，这里的"修复"可能产生合法但内容
+    // 已被截断损坏的 JSON。记录告警便于统计其触发频率与误修率，
+    // 后续再决定是否收紧该启发式的使用条件。
+    console.warn(
+      `[structured-output] applied truncated-JSON heuristic `
+      + `(braces ${openBraces}/${closeBraces}, brackets ${openBrackets}/${closeBrackets}, `
+      + `length ${text.length} -> ${fixed.length})`,
+    );
   }
   return fixed;
 }
@@ -103,6 +142,22 @@ function tryParseStructuredJsonValue(source: string): { parsed: unknown } | { er
       };
     }
   }
+}
+
+export function resolveRepairMaxTokens(input: {
+  maxTokens?: number;
+  profile?: StructuredOutputProfile | null;
+}): number | undefined {
+  const safe = input.profile?.safeStructuredMaxTokens;
+  if (typeof safe !== "number") {
+    return input.maxTokens;
+  }
+  if (typeof input.maxTokens !== "number") {
+    return safe;
+  }
+  // 修复需要把被截断的 JSON 整份重建，必须比主生成更宽松，否则会沿用同一个过小的
+  // 输出上限而在相同截断点再次失败（截断型 incomplete_json 的主因）。
+  return Math.max(input.maxTokens, safe);
 }
 
 function tryUnwrapSingletonArrayWrapper<T>(
@@ -254,6 +309,8 @@ export function logStructuredInvokeEvent(input: {
   repairAttempt?: number;
   strategy?: StructuredOutputStrategy;
   errorCategory?: StructuredOutputErrorCategory | null;
+  finishReason?: string;
+  truncated?: boolean;
   fallbackUsed?: boolean;
   reasoningForcedOff?: boolean;
 }): void {
@@ -267,6 +324,8 @@ export function logStructuredInvokeEvent(input: {
       `taskType=${input.taskType ?? "planner"}`,
       input.strategy ? `strategy=${input.strategy}` : "",
       input.errorCategory ? `errorCategory=${input.errorCategory}` : "",
+      input.finishReason ? `finishReason=${input.finishReason}` : "",
+      input.truncated ? "truncated=true" : "",
       typeof input.repairAttempt === "number" ? `repairAttempt=${input.repairAttempt}` : "",
       typeof input.latencyMs === "number" ? `latencyMs=${input.latencyMs}` : "",
       typeof input.rawChars === "number" ? `rawChars=${input.rawChars}` : "",
@@ -391,6 +450,7 @@ export async function parseStructuredLlmRawContentDetailed<T>(
           data: await repairWithLlm<T>({
             ...input,
             schema: runtimeSchema,
+            maxTokens: resolveRepairMaxTokens({ maxTokens: input.maxTokens, profile: input.profile }),
           }, input.rawContent, parseErrorMessage, attempt, getRepairHelpers<T>()),
           repairUsed: true,
           repairAttempts: attempt,
@@ -476,6 +536,7 @@ export async function parseStructuredLlmRawContentDetailed<T>(
         data: await repairWithLlm<T>({
           ...input,
           schema: runtimeSchema,
+          maxTokens: resolveRepairMaxTokens({ maxTokens: input.maxTokens, profile: input.profile }),
         }, input.rawContent, `Zod 校验错误：\n${formatZodErrors(zodError)}`, attempt, getRepairHelpers<T>()),
         repairUsed: true,
         repairAttempts: attempt,

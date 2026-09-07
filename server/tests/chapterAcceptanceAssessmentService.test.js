@@ -93,6 +93,30 @@ test("normalizeAssessment keeps under-length issue when actual content is still 
   assert.deepEqual(normalized.blockingIssues.map((issue) => issue.code), ["length_insufficient"]);
 });
 
+test("normalizeAssessment does not drop plot issues just because evidence mentions word count", () => {
+  const normalized = normalizeAssessment(createAssessment({
+    status: "repairable",
+    blockingIssues: [{
+      severity: "high",
+      category: "plot",
+      code: "payoff_missing_progress",
+      evidence: "正文超过半章都在解释字数统计规则，没有兑现截信计划。",
+      fixSuggestion: "补出截信计划的可见行动。",
+    }],
+    repairDirectives: [{
+      mode: "patch",
+      target: "plot",
+      instruction: "补出截信计划的可见行动。",
+    }],
+    riskTags: ["payoff_missing_progress"],
+    continuePolicy: "repair_once",
+  }), "字".repeat(3000), 2800);
+
+  assert.equal(normalized.status, "repairable");
+  assert.deepEqual(normalized.blockingIssues.map((issue) => issue.code), ["payoff_missing_progress"]);
+  assert.deepEqual(normalized.repairDirectives.map((directive) => directive.instruction), ["补出截信计划的可见行动。"]);
+});
+
 test("normalizeAssessment routes missing obligations to repairable draft obligation gaps", () => {
   const normalized = normalizeAssessment(createAssessment({
     status: "accepted",
@@ -108,6 +132,72 @@ test("normalizeAssessment routes missing obligations to repairable draft obligat
   assert.equal(normalized.status, "repairable");
   assert.equal(normalized.continuePolicy, "repair_once");
   assert.equal(normalized.missingObligations[0].kind, "payoff_touch");
+});
+
+test("normalizeAssessment injects deterministic over-hard-max issue and compress directive when content exceeds hard cap", () => {
+  const normalized = normalizeAssessment(createAssessment({
+    status: "accepted",
+  }), "字".repeat(4000), 2800);
+
+  assert.equal(normalized.status, "repairable");
+  assert.equal(normalized.continuePolicy, "repair_once");
+  assert.equal(normalized.blockingIssues[0].code, "LENGTH_OVER_HARD_MAX");
+  assert.match(normalized.blockingIssues[0].evidence, /4000/);
+  assert.match(normalized.blockingIssues[0].evidence, /3500/);
+  assert.equal(normalized.repairDirectives[0].mode, "patch");
+  assert.match(normalized.repairDirectives[0].instruction, /超出/);
+  assert.ok(normalized.riskTags.includes("LENGTH_OVER_HARD_MAX"));
+});
+
+test("normalizeAssessment keeps over-hard-max issue when assessor still reports it after failed repair", () => {
+  const normalized = normalizeAssessment(createAssessment({
+    status: "repairable",
+    blockingIssues: [{
+      severity: "medium",
+      category: "mode_fit",
+      code: "LENGTH_OVER_HARD_MAX",
+      evidence: "正文实际 4000 字，超出硬性上限 3500 字（目标 2800 字）。",
+      fixSuggestion: "整章压缩。",
+    }],
+    repairDirectives: [{
+      mode: "patch",
+      target: "plot",
+      instruction: "正文超出硬性字数上限：整章压缩。",
+    }],
+  }), "字".repeat(4000), 2800);
+
+  assert.deepEqual(normalized.blockingIssues.map((issue) => issue.code), ["LENGTH_OVER_HARD_MAX"]);
+  assert.equal(normalized.repairDirectives.length, 1);
+});
+
+test("normalizeAssessment does not inject length finding within soft range", () => {
+  const normalized = normalizeAssessment(createAssessment({
+    status: "accepted",
+  }), "字".repeat(3000), 2800);
+
+  assert.equal(normalized.status, "accepted");
+  assert.deepEqual(normalized.blockingIssues, []);
+  assert.deepEqual(normalized.repairDirectives, []);
+});
+
+test("normalizeAssessment treats soft-max overflow as prompt-level concern, not repair blocker", () => {
+  const normalized = normalizeAssessment(createAssessment({
+    status: "accepted",
+  }), "字".repeat(3350), 2800);
+
+  assert.equal(normalized.status, "accepted");
+  assert.equal(normalized.blockingIssues.some((issue) => issue.code === "LENGTH_OVER_HARD_MAX"), false);
+});
+
+test("normalizeAssessment preserves manual review decision even when over-hard-max finding is injected", () => {
+  const normalized = normalizeAssessment(createAssessment({
+    status: "needs_manual_review",
+    continuePolicy: "pause",
+  }), "字".repeat(4000), 2800);
+
+  assert.equal(normalized.status, "needs_manual_review");
+  assert.equal(normalized.continuePolicy, "pause");
+  assert.equal(normalized.blockingIssues[0].code, "LENGTH_OVER_HARD_MAX");
 });
 
 test("writer and acceptance prompts share the prose quality boundary", () => {

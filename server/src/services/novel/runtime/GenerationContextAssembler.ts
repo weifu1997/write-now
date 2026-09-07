@@ -7,6 +7,7 @@ import { buildChapterRagQuery } from "../NovelReferenceService";
 import { NovelContinuationService } from "../NovelContinuationService";
 import { parseJsonStringArray } from "../novelP0Utils";
 import { StyleBindingService } from "../../styleEngine/StyleBindingService";
+import { StyleAnchorPassageService } from "../../styleEngine/StyleAnchorPassageService";
 import { WorldContextGateway } from "../worldContext/WorldContextGateway";
 import { characterDynamicsQueryService } from "../dynamics/CharacterDynamicsQueryService";
 import { characterResourceLedgerService } from "../characterResource/CharacterResourceLedgerService";
@@ -57,6 +58,7 @@ import {
 import {
   extractChapterOpening,
   extractChapterTail,
+  formatOpeningAvoidanceSamples,
   runtimeChapterSelect,
 } from "./context/chapterSourceText";
 import { resolveChapterResourceCharacterIds } from "./context/chapterParticipantSelection";
@@ -105,6 +107,7 @@ export class GenerationContextAssembler {
   private readonly continuationService = new NovelContinuationService();
   private readonly worldContextGateway = new WorldContextGateway();
   private readonly styleBindingService = new StyleBindingService();
+  private readonly styleAnchorPassageService = new StyleAnchorPassageService();
   private readonly volumeService = new NovelVolumeService();
   private readonly chapterRouteWindowService = new ChapterRouteWindowService(this.volumeService);
   private readonly chapterPlanJITService = new ChapterPlanJITService({
@@ -325,6 +328,13 @@ export class GenerationContextAssembler {
       || styleContext.matchedBindings[0]?.styleProfile?.id?.trim()
       || request.taskStyleProfileId?.trim()
       || "";
+    // 范文锚点分层降级；任何失败静默为空数组，不阻塞章节生成。
+    const styleAnchorPassages = await this.styleAnchorPassageService.listForGeneration({
+      novelId,
+      styleProfileId: activeStyleProfileId || null,
+      queryHint: chapter.title,
+      forbiddenEntities: styleContext.sanitizedGenerationProfile?.forbiddenEntities ?? [],
+    }).catch(() => []);
     const novelStyleTone = novel.styleTone?.trim() || "";
     const filteredToneGuardrails = canonicalState.bookContract.toneGuardrails.filter((item) => {
       const normalized = item.trim();
@@ -551,6 +561,7 @@ export class GenerationContextAssembler {
       openingHint,
       continuation: runtimeContinuation,
       styleContext,
+      styleAnchorPassages,
       bookContract,
       macroConstraints,
       volumeWindow,
@@ -712,13 +723,6 @@ export class GenerationContextAssembler {
       }))
       .filter((item) => item.opening.length > 0);
 
-    if (openingList.length === 0) {
-      return "Recent openings: none.";
-    }
-
-    return [
-      "Recent openings (do not reuse the same opening structure or sentence starter):",
-      ...openingList.map((item) => `- Chapter ${item.order} ${item.title}: ${item.opening}`),
-    ].join("\n");
+    return formatOpeningAvoidanceSamples(openingList);
   }
 }

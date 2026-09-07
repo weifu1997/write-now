@@ -13,6 +13,7 @@ import sharp from "sharp";
 import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/errorHandler";
 import { resolveGeneratedImagesRoot } from "../../runtime/appPaths";
+import { resolveComicStoragePath } from "./comicStoragePaths";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -55,12 +56,16 @@ function exportArtifactUrl(jobId: string, filename: string): string {
 }
 
 async function findPanelImageBuffer(panelId: string, preferLettered = true): Promise<Buffer | null> {
-  const base = resolveGeneratedImagesRoot();
   if (preferLettered) {
-    const letteredPath = path.join(base, "comic-panels-lettered", panelId, "lettered.png");
-    try { return await fs.readFile(letteredPath); } catch { /* fall through */ }
+    const letteredPath = resolveComicStoragePath("comic-panels-lettered", panelId, "lettered.png");
+    if (letteredPath) {
+      try { return await fs.readFile(letteredPath); } catch { /* fall through */ }
+    }
   }
-  const rawDir = path.join(base, "comic-panels", panelId);
+  const rawDir = resolveComicStoragePath("comic-panels", panelId);
+  if (!rawDir) {
+    return null;
+  }
   try {
     const entries = await fs.readdir(rawDir);
     const file = entries.find((f) => /^panel\.(png|jpg|webp)$/i.test(f));
@@ -213,7 +218,11 @@ export class ComicExportService {
   /** 读取导出产物文件供 HTTP 流式响应 */
   async getArtifactFile(jobId: string, filename: string): Promise<{ buffer: Buffer; ext: string } | null> {
     const safeFilename = path.basename(filename); // 防目录穿越
-    const filePath = path.join(exportJobDir(jobId), safeFilename);
+    // jobId 来自路由参数（会被 Express 百分号解码），必须做包含性校验
+    const filePath = resolveComicStoragePath(EXPORT_DIR, jobId, safeFilename);
+    if (!filePath) {
+      return null;
+    }
     try {
       const buffer = await fs.readFile(filePath);
       const ext = path.extname(safeFilename).replace(".", "").toLowerCase();

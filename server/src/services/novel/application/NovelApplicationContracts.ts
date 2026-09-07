@@ -69,6 +69,9 @@ export interface NovelApplicationServices {
   previewChapterRewrite: NovelApplicationMethod;
   previewChapterAiRevision: NovelApplicationMethod;
   getChapterEditorWorkspace: NovelApplicationMethod;
+  createStyleAnchor: NovelApplicationMethod;
+  listStyleAnchors: NovelApplicationMethod;
+  deleteStyleAnchor: NovelApplicationMethod;
   getNovelState: NovelApplicationMethod;
   getLatestStateSnapshot: NovelApplicationMethod;
   getChapterStateSnapshot: NovelApplicationMethod;
@@ -187,6 +190,9 @@ export const novelApplicationServiceMethodNames = [
   "previewChapterRewrite",
   "previewChapterAiRevision",
   "getChapterEditorWorkspace",
+  "createStyleAnchor",
+  "listStyleAnchors",
+  "deleteStyleAnchor",
   "getNovelState",
   "getLatestStateSnapshot",
   "getChapterStateSnapshot",

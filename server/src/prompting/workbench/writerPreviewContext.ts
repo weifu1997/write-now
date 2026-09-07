@@ -255,6 +255,7 @@ function buildPreviewGenerationContextPackage(input: {
     previousChaptersSummary: [],
     previousChapterTail: null,
     openingHint: "使用章节任务或场景卡直接开场，避免重复解释设定。",
+    styleAnchorPassages: [],
     continuation: {
       enabled: false,
       sourceType: null,

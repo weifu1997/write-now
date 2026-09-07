@@ -181,6 +181,26 @@ function resolveConfirmRequestFromTaskSeed(
 export class DirectorCommandService {
   constructor(private readonly workflowService = new NovelWorkflowService()) {}
 
+  /**
+   * 同一任务的可复用命令检查与创建必须串行：两个并发相同命令若同时通过
+   * "无活跃命令"检查，会因幂等键含 updatedAt 而各自创建成功，产生两个
+   * 活跃命令并被顺序执行两次。
+   */
+  private readonly commandEnqueueLocks = new Map<string, Promise<void>>();
+
+  private withCommandEnqueueLock<T>(taskId: string, task: () => Promise<T>): Promise<T> {
+    const previous = this.commandEnqueueLocks.get(taskId) ?? Promise.resolve();
+    const run = previous.catch(() => undefined).then(task);
+    const tail = run.then(() => undefined, () => undefined);
+    this.commandEnqueueLocks.set(taskId, tail);
+    void tail.finally(() => {
+      if (this.commandEnqueueLocks.get(taskId) === tail) {
+        this.commandEnqueueLocks.delete(taskId);
+      }
+    });
+    return run;
+  }
+
   async enqueueGenerateCandidatesCommand(input: DirectorCandidatesRequest): Promise<DirectorCommandAcceptedResponse> {
     const task = await this.ensureCandidateTask(input, {
       mode: "generate",
@@ -674,58 +694,92 @@ export class DirectorCommandService {
         throw new AppError("Task not found.", 404);
       }
     }
-    const reusableCommand = await prisma.directorRunCommand.findFirst({
-      where: {
-        taskId: input.taskId,
-        commandType: input.commandType === "cancel" ? "cancel" : { in: EXECUTION_COMMAND_TYPES },
-        status: { in: ACTIVE_COMMAND_STATUSES },
-      },
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-    });
-    if (reusableCommand) {
-      return toAcceptedResponse(reusableCommand, null);
-    }
-
-    const normalizedPayload = Object.fromEntries(
-      Object.entries(input.payload).filter(([, value]) => value !== undefined),
-    );
-    const idempotencyKey = `${input.commandType}:${row.updatedAt.getTime()}:${hashPayload(normalizedPayload)}`;
-    const payloadJson = stableJson(normalizedPayload);
-    const createCommand = () => prisma.directorRunCommand.create({
-      data: {
-        taskId: input.taskId,
-        novelId: row.novelId,
-        commandType: input.commandType,
-        idempotencyKey,
-        status: "queued",
-        payloadJson,
-      },
-    });
-
-    try {
-      const command = await withSqliteRetry(createCommand, { label: "director.command.create" });
-      await this.markCommandAcceptedOnTask(input.taskId, input.commandType, {
-        preserveLastError: input.preserveLastError,
-      });
-      taskDispatcher.notify({ commandType: input.commandType, taskId: input.taskId });
-      return toAcceptedResponse(command, null);
-    } catch (error) {
-      if (!isUniqueConstraintError(error) || input.allowTerminalReuse === false) {
-        throw error;
-      }
-      const existing = await prisma.directorRunCommand.findFirst({
+    return this.withCommandEnqueueLock(input.taskId, async () => {
+      const reusableCommand = await prisma.directorRunCommand.findFirst({
         where: {
           taskId: input.taskId,
-          commandType: input.commandType,
-          idempotencyKey,
+          commandType: input.commandType === "cancel" ? "cancel" : { in: EXECUTION_COMMAND_TYPES },
+          status: { in: ACTIVE_COMMAND_STATUSES },
         },
         orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       });
-      if (!existing) {
-        throw error;
+      if (reusableCommand) {
+        return toAcceptedResponse(reusableCommand, null);
       }
-      return toAcceptedResponse(existing, null);
-    }
+
+      const normalizedPayload = Object.fromEntries(
+        Object.entries(input.payload).filter(([, value]) => value !== undefined),
+      );
+      const payloadFingerprint = `${input.commandType}:${hashPayload(normalizedPayload)}`;
+      const payloadJson = stableJson(normalizedPayload);
+      const historicalRows = await prisma.directorRunCommand.findMany({
+        where: {
+          taskId: input.taskId,
+          commandType: input.commandType,
+        },
+        select: { idempotencyKey: true, status: true },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      });
+      const fingerprintPrefix = `${payloadFingerprint}:`;
+      const inactiveGeneration = historicalRows.filter((item) => (
+        item.idempotencyKey.startsWith(fingerprintPrefix)
+        && !ACTIVE_COMMAND_STATUSES.includes(item.status as DirectorRunCommandStatus)
+      )).length;
+      const idempotencyKey = `${fingerprintPrefix}${inactiveGeneration}`;
+      const createCommand = () => prisma.directorRunCommand.create({
+        data: {
+          taskId: input.taskId,
+          novelId: row.novelId,
+          commandType: input.commandType,
+          idempotencyKey,
+          status: "queued",
+          payloadJson,
+        },
+      });
+
+      try {
+        const command = await withSqliteRetry(createCommand, { label: "director.command.create" });
+        await this.markCommandAcceptedOnTask(input.taskId, input.commandType, {
+          preserveLastError: input.preserveLastError,
+        });
+        taskDispatcher.notify({ commandType: input.commandType, taskId: input.taskId });
+        return toAcceptedResponse(command, null);
+      } catch (error) {
+        if (!isUniqueConstraintError(error) || input.allowTerminalReuse === false) {
+          throw error;
+        }
+        const existing = await prisma.directorRunCommand.findFirst({
+          where: {
+            taskId: input.taskId,
+            commandType: input.commandType,
+            idempotencyKey,
+          },
+          orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        });
+        if (!existing) {
+          throw error;
+        }
+        if (ACTIVE_COMMAND_STATUSES.includes(existing.status as DirectorRunCommandStatus)) {
+          return toAcceptedResponse(existing, null);
+        }
+        const nextKey = `${fingerprintPrefix}${inactiveGeneration + 1}`;
+        const retryCommand = await withSqliteRetry(() => prisma.directorRunCommand.create({
+          data: {
+            taskId: input.taskId,
+            novelId: row.novelId,
+            commandType: input.commandType,
+            idempotencyKey: nextKey,
+            status: "queued",
+            payloadJson,
+          },
+        }), { label: "director.command.create.retry" });
+        await this.markCommandAcceptedOnTask(input.taskId, input.commandType, {
+          preserveLastError: input.preserveLastError,
+        });
+        taskDispatcher.notify({ commandType: input.commandType, taskId: input.taskId });
+        return toAcceptedResponse(retryCommand, null);
+      }
+    });
   }
 
   private async markCommandAcceptedOnTask(taskId: string, commandType: DirectorRunCommandType, options: {

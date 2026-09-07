@@ -1,4 +1,6 @@
+import { useState } from "react";
 import type { Chapter, ChapterEditorDiagnosticCard, ChapterEditorWorkspaceResponse } from "@write-now/shared/types/novel";
+import { deleteStyleAnchor, listStyleAnchors, type StyleAnchorPassageView } from "@/api/novel/styleAnchors";
 import { Button } from "@/components/ui/button";
 
 interface ChapterEditorSidebarProps {
@@ -47,6 +49,40 @@ export default function ChapterEditorSidebar(props: ChapterEditorSidebarProps) {
     onFocusDiagnostic,
     onRunDiagnostic,
   } = props;
+  const [anchorOpen, setAnchorOpen] = useState(false);
+  const [anchors, setAnchors] = useState<StyleAnchorPassageView[]>([]);
+  const [anchorLoading, setAnchorLoading] = useState(false);
+  const novelId = chapter.novelId;
+
+  const refreshAnchors = async () => {
+    setAnchorLoading(true);
+    try {
+      const response = await listStyleAnchors(novelId);
+      setAnchors(response.data ?? []);
+    } catch {
+      setAnchors([]);
+    } finally {
+      setAnchorLoading(false);
+    }
+  };
+
+  const toggleAnchors = () => {
+    const next = !anchorOpen;
+    setAnchorOpen(next);
+    if (next) {
+      void refreshAnchors();
+    }
+  };
+
+  const handleDeleteAnchor = async (anchorId: string) => {
+    try {
+      await deleteStyleAnchor(novelId, anchorId);
+      await refreshAnchors();
+    } catch {
+      return;
+    }
+  };
+
 
   const recommendedTask = workspace?.recommendedTask ?? null;
   const macroContext = workspace?.macroContext ?? null;
@@ -102,6 +138,43 @@ export default function ChapterEditorSidebar(props: ChapterEditorSidebarProps) {
                 <Button size="sm" variant="outline" onClick={onOpenVersionHistory} className="w-full">
                   版本入口
                 </Button>
+              ) : null}
+              <Button size="sm" variant="outline" onClick={toggleAnchors} className="w-full">
+                {anchorOpen ? "收起范文" : "范文锚点"}
+              </Button>
+              {anchorOpen ? (
+                <div className="space-y-2 rounded-xl bg-muted/30 p-2">
+                  <p className="text-xs leading-5 text-muted-foreground">
+                    采纳或标记过的段落会作为后续章节的风格参照。
+                  </p>
+                  {anchorLoading ? (
+                    <p className="text-xs text-muted-foreground">加载中……</p>
+                  ) : anchors.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">
+                      还没有范文。选中正文点「存为范文」，或采纳 AI 改写候选后自动收录。
+                    </p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {anchors.map((anchor) => (
+                        <li key={anchor.id} className="rounded-lg bg-background/70 p-2">
+                          <p className="line-clamp-3 text-xs leading-5 text-foreground/90">{anchor.text}</p>
+                          <div className="mt-1 flex items-center justify-between">
+                            <span className="text-[11px] text-muted-foreground">
+                              {anchor.source === "adopted" ? "来自采纳的改写" : "手动标记"}
+                            </span>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => void handleDeleteAnchor(anchor.id)}
+                            >
+                              移除
+                            </Button>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               ) : null}
             </div>
           </div>

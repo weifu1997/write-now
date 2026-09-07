@@ -97,11 +97,27 @@ export interface RagJobSummaryRecord {
 }
 
 export class RagIndexService {
+  /** enqueueOwnerJob 的 check-then-create 需要 per-owner 串行化，否则并发入队会产生重复 queued 任务 */
+  private readonly enqueueLocks = new Map<string, Promise<void>>();
+
   constructor(
     private readonly embeddingService: EmbeddingService,
     private readonly vectorStoreService: VectorStoreService,
     private readonly contextualChunkService: RagContextualChunkService = new RagContextualChunkService(),
   ) {}
+
+  private withEnqueueLock<T>(key: string, task: () => Promise<T>): Promise<T> {
+    const previous = this.enqueueLocks.get(key) ?? Promise.resolve();
+    const run = previous.catch(() => undefined).then(task);
+    const tail = run.then(() => undefined, () => undefined);
+    this.enqueueLocks.set(key, tail);
+    void tail.finally(() => {
+      if (this.enqueueLocks.get(key) === tail) {
+        this.enqueueLocks.delete(key);
+      }
+    });
+    return run;
+  }
 
   private parseJobPayload(payloadJson: string | null): RagJobPayloadRecord {
     if (!payloadJson) {
@@ -940,54 +956,58 @@ export class RagIndexService {
     },
   ) {
     const tenantId = options?.tenantId ?? ragConfig.defaultTenantId;
-    const existing = await prisma.ragIndexJob.findFirst({
-      where: {
-        tenantId,
-        jobType,
-        ownerType,
-        ownerId,
-        status: { in: ["queued", "running"] as RagJobStatus[] },
-      },
-      orderBy: { createdAt: "desc" },
-    });
-    if (existing) {
-      if (options?.payload && existing.status === "queued") {
-        const currentPayload = this.parseJobPayload(existing.payloadJson);
-        await prisma.ragIndexJob.update({
-          where: { id: existing.id },
-          data: {
-            payloadJson: JSON.stringify({
-              ...currentPayload,
-              ...options.payload,
-              progress: currentPayload.progress,
-            } satisfies RagJobPayloadRecord),
-          },
-        });
+    // check-then-create 必须 per-owner 串行：enqueueReindex 会以 Promise.all
+    // 并发触发，两个调用同时通过 findFirst 检查会创建出重复的 queued 任务。
+    return this.withEnqueueLock(`${tenantId}:${jobType}:${ownerType}:${ownerId}`, async () => {
+      const existing = await prisma.ragIndexJob.findFirst({
+        where: {
+          tenantId,
+          jobType,
+          ownerType,
+          ownerId,
+          status: { in: ["queued", "running"] as RagJobStatus[] },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+      if (existing) {
+        if (options?.payload && existing.status === "queued") {
+          const currentPayload = this.parseJobPayload(existing.payloadJson);
+          await prisma.ragIndexJob.update({
+            where: { id: existing.id },
+            data: {
+              payloadJson: JSON.stringify({
+                ...currentPayload,
+                ...options.payload,
+                progress: currentPayload.progress,
+              } satisfies RagJobPayloadRecord),
+            },
+          });
+        }
+        return existing;
       }
-      return existing;
-    }
-    const created = await prisma.ragIndexJob.create({
-      data: {
-        tenantId,
-        jobType,
-        ownerType,
-        ownerId,
-        status: "queued",
-        attempts: 0,
-        maxAttempts: options?.maxAttempts ?? ragConfig.workerMaxAttempts,
-        runAfter: options?.runAfter ?? new Date(),
-        payloadJson: JSON.stringify({
-          ...(options?.payload ?? {}),
-          progress: this.createProgressSnapshot({
-            stage: "queued",
-            label: "等待执行",
-            detail: "索引任务已进入队列。",
-            percent: 0,
-          }),
-        } satisfies RagJobPayloadRecord),
-      },
+      const created = await prisma.ragIndexJob.create({
+        data: {
+          tenantId,
+          jobType,
+          ownerType,
+          ownerId,
+          status: "queued",
+          attempts: 0,
+          maxAttempts: options?.maxAttempts ?? ragConfig.workerMaxAttempts,
+          runAfter: options?.runAfter ?? new Date(),
+          payloadJson: JSON.stringify({
+            ...(options?.payload ?? {}),
+            progress: this.createProgressSnapshot({
+              stage: "queued",
+              label: "等待执行",
+              detail: "索引任务已进入队列。",
+              percent: 0,
+            }),
+          } satisfies RagJobPayloadRecord),
+        },
+      });
+      return created;
     });
-    return created;
   }
 
   async enqueueUpsert(ownerType: RagOwnerType, ownerId: string, tenantId?: string) {

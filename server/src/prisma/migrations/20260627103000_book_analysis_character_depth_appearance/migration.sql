@@ -67,8 +67,6 @@ CREATE UNIQUE INDEX "BookAnalysisCharacterAppearanceSnapshot_characterId_chapter
   ON "BookAnalysisCharacterAppearanceSnapshot"("characterId", "chapterIndex");
 CREATE INDEX "BookAnalysisCharacterAppearanceSnapshot_appearanceId_chapterIndex_idx"
   ON "BookAnalysisCharacterAppearanceSnapshot"("appearanceId", "chapterIndex");
-CREATE INDEX "BookAnalysisCharacterAppearanceSnapshot_characterId_chapterIndex_idx"
-  ON "BookAnalysisCharacterAppearanceSnapshot"("characterId", "chapterIndex");
 CREATE INDEX "BookAnalysisCharacterAppearanceSnapshot_chapterIndex_idx"
   ON "BookAnalysisCharacterAppearanceSnapshot"("chapterIndex");
 CREATE UNIQUE INDEX "BookAnalysisCharacterAppearanceImage_imageAssetId_key"

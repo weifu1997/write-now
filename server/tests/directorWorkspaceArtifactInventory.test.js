@@ -186,6 +186,33 @@ test("workspace artifact inventory does not protect AI generated chapter drafts"
   );
 });
 
+test("workspace artifact inventory treats failed payoff promises as superseded instead of stale", () => {
+  const result = buildDirectorWorkspaceArtifactInventory(emptyInventoryInput({
+    bookContract: row("contract-1"),
+    payoffLedgerItems: [{
+      id: "payoff-failed",
+      currentStatus: "failed",
+      updatedAt: "2026-04-28T02:40:00.000Z",
+    }, {
+      id: "payoff-open",
+      currentStatus: "pending_payoff",
+      updatedAt: "2026-04-28T02:41:00.000Z",
+    }],
+  }));
+
+  const failedPromise = result.artifacts.find((artifact) => (
+    artifact.artifactType === "reader_promise" && artifact.contentRef.id === "payoff-failed"
+  ));
+  const openPromise = result.artifacts.find((artifact) => (
+    artifact.artifactType === "reader_promise" && artifact.contentRef.id === "payoff-open"
+  ));
+
+  assert.equal(failedPromise.status, "superseded");
+  assert.equal(openPromise.status, "active");
+  assert.equal(result.ledgerSummary.staleArtifacts.length, 0);
+  assert.equal(result.ledgerSummary.missingArtifactTypes.includes("reader_promise"), false);
+});
+
 test("workspace artifact inventory skips repair tickets when the latest quality loop can continue", () => {
   const riskFlags = JSON.stringify({
     qualityLoop: {

@@ -1981,12 +1981,17 @@ export default function NovelEdit() {
     if (!workspace) {
       return;
     }
+    // 草稿有未保存改动时跳过水合：生成分卷/章节列表期间工作区查询每 2 秒
+    // 轮询刷新，直接回灌会把用户正在编辑的内容清回已保存状态。
+    if (hasUnsavedVolumeDraft) {
+      return;
+    }
     setVolumeDraft(workspace.volumes ?? []);
     setVolumeStrategyPlan(workspace.strategyPlan ?? null);
     setVolumeCritiqueReport(workspace.critiqueReport ?? null);
     setVolumeBeatSheets(workspace.beatSheets ?? []);
     setVolumeRebalanceDecisions(workspace.rebalanceDecisions ?? []);
-  }, [volumeWorkspaceQuery.data?.data]);
+  }, [volumeWorkspaceQuery.data?.data, hasUnsavedVolumeDraft]);
 
   useEffect(() => {
     if (!id) {

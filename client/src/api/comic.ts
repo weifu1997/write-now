@@ -1,5 +1,6 @@
 import type { ApiResponse } from "@write-now/shared/types/api";
 import { apiClient } from "./client";
+import { resolveImageAssetUrl } from "./images";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -238,15 +239,17 @@ export interface GenerateCharacterSheetOptions {
 }
 
 export function characterSheetImageUrl(charId: string): string {
-  return `/api/comic/character-images/${charId}/sheet`;
+  // 桌面端以 file:// 加载页面，根相对 /api 地址会解析到 file 协议下，
+  // 媒体地址统一经 resolveImageAssetUrl 补全 API 来源。
+  return resolveImageAssetUrl(`/api/comic/character-images/${charId}/sheet`);
 }
 
 export function characterExpressionImageUrl(charId: string): string {
-  return `/api/comic/character-images/${charId}/expressions`;
+  return resolveImageAssetUrl(`/api/comic/character-images/${charId}/expressions`);
 }
 
 export function characterFaceImageUrl(charId: string): string {
-  return `/api/comic/character-images/${charId}/face`;
+  return resolveImageAssetUrl(`/api/comic/character-images/${charId}/face`);
 }
 
 export async function generateCharacterSheet(
@@ -389,11 +392,11 @@ export async function generatePanelImage(
 }
 
 export function panelImageUrl(panelId: string): string {
-  return `/api/comic/panel-images/${panelId}/panel`;
+  return resolveImageAssetUrl(`/api/comic/panel-images/${panelId}/panel`);
 }
 
 export function panelLetteredImageUrl(panelId: string): string {
-  return `/api/comic/panel-images/${panelId}/lettered`;
+  return resolveImageAssetUrl(`/api/comic/panel-images/${panelId}/lettered`);
 }
 
 // ─── Bubble lettering ─────────────────────────────────────────────────────────
@@ -626,7 +629,7 @@ export async function uploadCharacterAssetImage(assetId: string, file: File): Pr
 }
 
 export function characterAssetImageUrl(assetId: string): string {
-  return `/api/comic/character-assets/${assetId}/image`;
+  return resolveImageAssetUrl(`/api/comic/character-assets/${assetId}/image`);
 }
 
 /** 更新角色性别（所有生图链路的 GENDER LOCK 来源） */
@@ -779,5 +782,5 @@ export async function uploadComicSceneImage(sceneId: string, file: File): Promis
 }
 
 export function comicSceneImageUrl(sceneId: string): string {
-  return `/api/comic/scenes/${sceneId}/image`;
+  return resolveImageAssetUrl(`/api/comic/scenes/${sceneId}/image`);
 }

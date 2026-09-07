@@ -1,3 +1,5 @@
+import path from "node:path";
+
 import { Router } from "express";
 import type { ApiResponse } from "@write-now/shared/types/api";
 import type { LLMProvider } from "@write-now/shared/types/llm";
@@ -741,7 +743,8 @@ router.get(
       }
       const mimeMap: Record<string, string> = { png: "image/png", jpg: "image/jpeg", webp: "image/webp" };
       res.setHeader("Content-Type", mimeMap[file.ext] ?? "application/octet-stream");
-      res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+      // 用 basename 后的文件名回填响应头，避免请求侧文件名携带 header 特殊字符
+      res.setHeader("Content-Disposition", `attachment; filename="${path.basename(filename)}"`);
       res.send(file.buffer);
     } catch (err) { next(err); }
   },

@@ -3,6 +3,8 @@ import type {
   ChapterRuntimePackage,
   GenerationContextPackage,
 } from "@write-now/shared/types/chapterRuntime";
+import type { LengthBudgetContract } from "@write-now/shared/types/chapterLengthControl";
+import { resolveLengthBudgetContract } from "@write-now/shared/types/chapterLengthControl";
 import type { LLMProvider } from "@write-now/shared/types/llm";
 import type { TaskType } from "../../llm/modelRouter";
 import { createContextBlock } from "../../prompting/core/contextBudget";
@@ -14,6 +16,7 @@ import {
   sanitizeWriterContextBlocks,
 } from "../../prompting/prompts/novel/chapterLayeredContext";
 import { chapterWriterPrompt } from "../../prompting/prompts/novel/chapterWriter.prompts";
+import { NOVEL_PROMPT_BUDGETS } from "../../prompting/prompts/novel/promptBudgetProfiles";
 import { NovelContinuationService } from "./NovelContinuationService";
 import { assertChapterContentNotEmpty } from "./runtime/chapterEmptyContentError";
 import { prisma } from "../../db/prisma";
@@ -121,6 +124,16 @@ function buildDraftContinuationBlock(content: string, targetWordCount: number, m
   ].join("\n");
 }
 
+function buildDraftCondenseBlock(content: string, budget: LengthBudgetContract): string {
+  return [
+    `Current draft length: ${countChapterCharacters(content)} Chinese characters.`,
+    `Target length: about ${budget.targetWordCount} Chinese characters. Hard maximum: ${budget.hardMaxWordCount}.`,
+    "Condense the full chapter draft below into a complete chapter within the acceptable range.",
+    "Full draft (condense this):",
+    content.trim(),
+  ].join("\n");
+}
+
 export class ChapterWritingGraph {
   constructor(private readonly deps: ChapterGraphDeps) {}
 
@@ -160,6 +173,142 @@ export class ChapterWritingGraph {
       });
     }
     return continuationGuard.content;
+  }
+
+  private async condenseOverLength(input: {
+    novelId: string;
+    novelTitle: string;
+    chapter: ChapterRef;
+    content: string;
+    contextPackage: GenerationContextPackage;
+    options: ChapterGraphLLMOptions;
+  }): Promise<string> {
+    const writeContext = input.contextPackage.chapterWriteContext;
+    const lengthGoal = buildLengthInstruction(
+      writeContext?.chapterMission.targetWordCount
+      ?? input.contextPackage.chapter.targetWordCount
+      ?? input.chapter.targetWordCount
+      ?? null,
+    );
+    const budget = resolveLengthBudgetContract(lengthGoal.targetWordCount);
+    if (!writeContext || !budget || lengthGoal.minWordCount == null) {
+      return input.content;
+    }
+
+    const currentLength = countChapterCharacters(input.content);
+    if (currentLength <= budget.hardMaxWordCount) {
+      return input.content;
+    }
+
+    const builtBlocks = [await loadWritingPlatformBlock(input.novelId), ...buildChapterWriterContextBlocks(writeContext)];
+    const sanitized = sanitizeWriterContextBlocks([
+      createContextBlock({
+        id: "current_draft_full",
+        group: "current_draft_full",
+        priority: 106,
+        required: true,
+        allowSummary: false,
+        content: buildDraftCondenseBlock(input.content, budget),
+      }),
+      ...builtBlocks,
+    ]);
+    if (sanitized.removedBlockIds.length > 0) {
+      this.deps.logWarn("Writer condense blocks removed by guard", {
+        chapterOrder: input.chapter.order,
+        removedBlockIds: sanitized.removedBlockIds,
+      });
+    }
+    const condenseAsset = {
+      ...chapterWriterPrompt,
+      contextPolicy: {
+        ...chapterWriterPrompt.contextPolicy,
+        maxTokensBudget: NOVEL_PROMPT_BUDGETS.chapterWriterCondense,
+        requiredGroups: [
+          "current_draft_full",
+          ...(chapterWriterPrompt.contextPolicy.requiredGroups ?? []),
+        ],
+      },
+    };
+    const resolvedContext = await resolvePromptContextBlocksForAsset({
+      asset: condenseAsset,
+      executionContext: {
+        entrypoint: "chapter_pipeline",
+        novelId: input.novelId,
+        chapterId: input.chapter.id,
+        metadata: {
+          chapterWriteContext: writeContext,
+          chapterBlockMode: "full",
+          ragContext: input.contextPackage.ragContext,
+          extraContextBlocks: sanitized.allowedBlocks.filter((block) => block.group === "current_draft_full"),
+        },
+      },
+      fallbackBlocks: sanitized.allowedBlocks,
+    });
+
+    const completion = await runTextPrompt({
+      asset: condenseAsset,
+      promptInput: {
+        novelTitle: input.novelTitle,
+        chapterOrder: input.chapter.order,
+        chapterTitle: input.chapter.title,
+        mode: "condense",
+        targetWordCount: budget.targetWordCount,
+        minWordCount: lengthGoal.minWordCount,
+        maxWordCount: lengthGoal.maxWordCount,
+      },
+      contextBlocks: resolvedContext.blocks,
+      options: {
+        provider: input.options.provider,
+        model: input.options.model,
+        temperature: input.options.temperature ?? 0.8,
+        reasoningEnabled: false,
+        maxTokens: 6000,
+        novelId: input.novelId,
+        chapterId: input.chapter.id,
+        stage: "writer_condense",
+        triggerReason: "length_condense",
+      },
+    });
+    const condensed = completion.output.trim();
+    if (!condensed) {
+      return input.content;
+    }
+    const condensedLength = countChapterCharacters(condensed);
+    if (condensedLength >= currentLength) {
+      return input.content;
+    }
+    const stillOverHardMax = condensedLength > budget.hardMaxWordCount;
+    this.deps.logInfo("Chapter draft auto-condensed for hard max length", {
+      chapterOrder: input.chapter.order,
+      beforeLength: currentLength,
+      afterLength: condensedLength,
+      targetWordCount: budget.targetWordCount,
+      hardMaxWordCount: budget.hardMaxWordCount,
+      stillOverHardMax,
+    });
+    if (stillOverHardMax) {
+      this.deps.logWarn("Writer condense still exceeds hard max; acceptance repair will continue from the shorter draft", {
+        chapterOrder: input.chapter.order,
+        afterLength: condensedLength,
+        hardMaxWordCount: budget.hardMaxWordCount,
+      });
+    }
+    return condensed;
+  }
+
+  private async enforceTargetLengthRange(input: {
+    novelId: string;
+    novelTitle: string;
+    chapter: ChapterRef;
+    content: string;
+    contextPackage: GenerationContextPackage;
+    options: ChapterGraphLLMOptions;
+  }): Promise<string> {
+    const condensed = await this.condenseOverLength(input);
+    return this.enforceTargetLength({
+      ...input,
+      content: condensed,
+    });
   }
 
   private async enforceTargetLength(input: {
@@ -345,7 +494,7 @@ export class ChapterWritingGraph {
           input.options,
           continuationPack,
         );
-        const lengthAdjusted = await this.enforceTargetLength({
+        const lengthAdjusted = await this.enforceTargetLengthRange({
           novelId: input.novelId,
           novelTitle: input.novelTitle,
           chapter: input.chapter,

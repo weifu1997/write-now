@@ -6,6 +6,7 @@ const serverRoot = path.resolve(__dirname, "..");
 const testsRoot = path.join(serverRoot, "tests");
 
 const integrationTests = new Set([
+  "codeReviewCreativeHubStream.test.js",
   "directorTaskFactInspection.test.js",
   "directorWorkflowStepModules.test.js",
   "novelDirectorPipelineRuntime.test.js",
@@ -54,10 +55,21 @@ if (files.length === 0) {
 }
 
 if (mode === "fast") {
-  for (const file of files) {
-    require(file);
-  }
-  return;
+  // 每个测试文件在独立子进程中顺序执行：部分测试会遗留 keep-alive socket /
+  // 未关闭的 server 句柄，事件循环因此无法排空，套件跑完后进程挂住；
+  // --test-force-exit 在测试完成后强制退出。
+  // 串行执行（concurrency=1）：这些测试共享同一 SQLite 库与内存态，
+  // 并发跑会互相干扰。
+  const result = spawnSync(
+    process.execPath,
+    ["--test", "--test-force-exit", "--test-concurrency=1", ...files],
+    {
+      cwd: serverRoot,
+      stdio: "inherit",
+    },
+  );
+
+  process.exit(result.status ?? 1);
 }
 
 const result = spawnSync(process.execPath, ["--test", ...files], {

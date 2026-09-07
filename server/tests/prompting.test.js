@@ -151,7 +151,7 @@ test("prompt registry exposes versioned planning assets", () => {
     "agent.runtime.fallback_answer@v1",
     "agent.runtime.setup_guidance@v1",
     "agent.runtime.setup_ideation@v1",
-    "planner.chapter.plan@v1",
+    "planner.chapter.plan@v2",
     "novel.director.candidates@v2",
     "novel.director.candidate_patch@v1",
     "novel.director.blueprint@v1",
@@ -190,7 +190,7 @@ test("prompt registry exposes versioned planning assets", () => {
     promptKey(styleProfileExtractionPrompt),
     promptKey(styleProfileFromBookAnalysisPrompt),
     "style.recommendation@v1",
-    "novel.review.chapter@v2",
+    "novel.review.chapter@v4",
     promptKey(chapterWriterPrompt),
     promptKey(chapterArtifactDeltaPrompt),
     "world.draft.generate@v1",
@@ -213,7 +213,7 @@ test("prompt registry exposes versioned planning assets", () => {
     assert.ok(getRegisteredPromptAsset(id, version), `missing prompt asset ${key}`);
   }
 
-  const chapterAsset = getRegisteredPromptAsset("planner.chapter.plan", "v1");
+  const chapterAsset = getRegisteredPromptAsset("planner.chapter.plan", "v2");
   assert.ok(chapterAsset);
   assert.equal(chapterAsset.taskType, "planner");
 });
@@ -681,10 +681,10 @@ test("novel main-chain prompt assets declare explicit non-zero context budgets",
     ["novel.volume.chapter_list@v9", NOVEL_PROMPT_BUDGETS.volumeChapterList],
     ["novel.volume.chapter_purpose@v1", NOVEL_PROMPT_BUDGETS.volumeChapterDetail],
     ["novel.volume.chapter_boundary@v1", NOVEL_PROMPT_BUDGETS.volumeChapterDetail],
-    ["novel.volume.chapter_task_sheet@v3", NOVEL_PROMPT_BUDGETS.volumeChapterDetail],
+    ["novel.volume.chapter_task_sheet@v4", NOVEL_PROMPT_BUDGETS.volumeChapterDetail],
     ["novel.volume.rebalance.adjacent@v1", NOVEL_PROMPT_BUDGETS.volumeRebalance],
     [promptKey(chapterWriterPrompt), NOVEL_PROMPT_BUDGETS.chapterWriter],
-    ["novel.review.chapter@v2", NOVEL_PROMPT_BUDGETS.chapterReview],
+    ["novel.review.chapter@v4", NOVEL_PROMPT_BUDGETS.chapterReview],
     ["novel.review.repair@v2", NOVEL_PROMPT_BUDGETS.chapterRepair],
     ["audit.chapter.full@v2", NOVEL_PROMPT_BUDGETS.chapterReview],
   ]);
@@ -2269,4 +2269,41 @@ test("streamStructuredPrompt can recover with semantic retry after streamed outp
     setPromptRunnerLLMFactoryForTests();
     setPromptRunnerStructuredInvokerForTests();
   }
+});
+
+test("chapter writer prompt condense mode carries compression contract without draft-mode directives", () => {
+  const messages = chapterWriterPrompt.render({
+    novelTitle: "测试小说",
+    chapterOrder: 1,
+    chapterTitle: "收束",
+    mode: "condense",
+    targetWordCount: 2800,
+    minWordCount: 2380,
+    maxWordCount: 3220,
+  }, {
+    blocks: [
+      createContextBlock({
+        id: "chapter-mission",
+        group: "chapter_mission",
+        priority: 100,
+        required: true,
+        content: "本章职责：完成三方会签并保留结尾钩子。",
+      }),
+    ],
+    selectedBlockIds: ["chapter-mission"],
+    droppedBlockIds: [],
+    summarizedBlockIds: [],
+    estimatedInputTokens: 0,
+  });
+
+  const systemContent = String(messages[0].content);
+  const humanContent = String(messages[1].content);
+  assert.match(systemContent, /把上下文给出的完整章节正文压缩到目标长度/);
+  assert.match(systemContent, /不新增情节/);
+  assert.match(systemContent, /输出压缩后的完整正文/);
+  assert.match(systemContent, /当前正文超出硬性上限/);
+  assert.match(systemContent, /本章目标长度：约 2800 字/);
+  assert.match(humanContent, /任务模式：把当前章节正文压缩到目标长度/);
+  assert.doesNotMatch(systemContent, /必须推进新的剧情动作/);
+  assert.doesNotMatch(humanContent, /完整生成本章正文/);
 });

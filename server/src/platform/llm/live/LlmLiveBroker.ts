@@ -9,6 +9,9 @@ import type {
 
 const COMPLETED_SESSION_RETENTION_MS = 10 * 60 * 1000;
 const MAX_PREVIEW_CHARS = 16_000;
+const MAX_REASONING_CHARS = 16_000;
+/** 非终态会话（请求/流式中断且无人收尾）保留的最长时间 */
+const ACTIVE_SESSION_RETENTION_MS = 6 * 60 * 60 * 1000;
 
 interface SessionRecord {
   snapshot: LlmLiveSessionSnapshot;
@@ -153,7 +156,11 @@ export class LlmLiveBroker {
       seq,
       phase: record.snapshot.phase === "requesting" ? "streaming" : record.snapshot.phase,
       phaseMessage: record.snapshot.phase === "requesting" ? "模型正在思考" : record.snapshot.phaseMessage,
-      reasoning: record.snapshot.reasoning + content,
+      // reasoning 只用于实时预览，保留末尾窗口即可；全量累计值由
+      // totalReasoningChars 承载，避免推理型模型长输出导致会话快照无限膨胀。
+      reasoning: (record.snapshot.reasoning + content).length > MAX_REASONING_CHARS
+        ? (record.snapshot.reasoning + content).slice(-MAX_REASONING_CHARS)
+        : record.snapshot.reasoning + content,
       totalReasoningChars: record.snapshot.totalReasoningChars + content.length,
       firstResponseAt: record.snapshot.firstResponseAt ?? now,
       updatedAt: now,
@@ -278,11 +285,18 @@ export class LlmLiveBroker {
 
   private pruneCompletedSessions(): void {
     const cutoff = Date.now() - COMPLETED_SESSION_RETENTION_MS;
+    const activeCutoff = Date.now() - ACTIVE_SESSION_RETENTION_MS;
     for (const [interactionId, record] of this.sessions) {
-      if (
-        (record.snapshot.phase === "completed" || record.snapshot.phase === "failed" || record.snapshot.phase === "cancelled")
-        && Date.parse(record.snapshot.updatedAt) < cutoff
-      ) {
+      const isTerminal = record.snapshot.phase === "completed"
+        || record.snapshot.phase === "failed"
+        || record.snapshot.phase === "cancelled";
+      if (isTerminal && Date.parse(record.snapshot.updatedAt) < cutoff) {
+        this.sessions.delete(interactionId);
+        continue;
+      }
+      // 异常路径可能让会话停留在 requesting/streaming 无人收尾
+      // （例如管线中途崩溃），超时后一并淘汰，避免映射无限增长。
+      if (!isTerminal && Date.parse(record.snapshot.updatedAt) < activeCutoff) {
         this.sessions.delete(interactionId);
       }
     }

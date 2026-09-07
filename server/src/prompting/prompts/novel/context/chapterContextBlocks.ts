@@ -19,6 +19,30 @@ import {
 } from "../chapterLayeredContextShared";
 import { normalizeChapterWriteContext } from "./chapterContextPolicies";
 
+function buildStyleAnchorPassagesText(
+  passages: NonNullable<ChapterWriteContext["styleAnchorPassages"]>,
+): string {
+  const lines = passages.map((passage, index) => {
+    const origin = passage.order
+      ? `第${passage.order}章${passage.title ? ` ${passage.title}` : ""}`
+      : passage.source === "source_book"
+        ? "拆书源文本样本"
+        : "已确认范文";
+    return `- 范文${index + 1}（${origin}）：${passage.text.trim()}`;
+  });
+  const forbiddenEntities = takeUnique(passages.flatMap((passage) => passage.forbiddenEntities ?? []));
+  const entityGuard = passages.some((passage) => passage.source === "source_book") && forbiddenEntities.length > 0
+    ? ["", `以下实体来自源作品样本，正文中禁止出现：${forbiddenEntities.join("、")}。`]
+    : [];
+  return [
+    "范文锚点（只仿写法，不仿内容）：以下段落的句式节奏、细节密度与对话留白方式，作为本章正文的风格参照；",
+    "禁止照抄范文中的具体情节、人物、地名、组织名等任何实体；范文与本章任务冲突时，以本章任务为准。",
+    "",
+    ...lines,
+    ...entityGuard,
+  ].join("\n");
+}
+
 export const WRITER_FORBIDDEN_GROUPS = [
   "full_outline",
   "full_bible",
@@ -304,6 +328,12 @@ export function buildChapterWriterContextBlocks(
         `情绪位移：${writeContext.readerExperience.emotionalShift}`,
         `信息交付：${writeContext.readerExperience.informationReveal}`,
         `章末净变化：${writeContext.readerExperience.netChange}`,
+        writeContext.readerExperience.expectedCost
+          ? `本章代价（正文须以具体事件呈现，不得只写心理活动）：${writeContext.readerExperience.expectedCost}`
+          : "",
+        writeContext.readerExperience.complication
+          ? `本章意外（超出角色既有计划、会改变后续行动的变量）：${writeContext.readerExperience.complication}`
+          : "",
         toListBlock(
           "继承的钩子责任（优先回应后再制造新问题）",
           writeContext.readerExperience.inheritedHookResponsibilities,
@@ -484,7 +514,7 @@ export function buildChapterWriterContextBlocks(
         group: "opening_constraints",
         priority: 80,
         content: [
-          `Opening anti-repeat hint:\n${writeContext.openingAntiRepeatHint}`,
+          writeContext.openingAntiRepeatHint.trim(),
           writeContext.recentScenePatterns.length > 0
             ? toListBlock(
               "Scene pattern blacklist — do NOT repeat these exact time+location+action combinations",
@@ -501,6 +531,14 @@ export function buildChapterWriterContextBlocks(
         priority: 74,
         required: mode === "full",
         content: buildWriterStyleContractText(writeContext.styleContract),
+      })
+      : null,
+    writeContext.styleAnchorPassages.length > 0
+      ? createContextBlock({
+        id: "style_anchor_passages",
+        group: "style_anchor_passages",
+        priority: 60,
+        content: buildStyleAnchorPassagesText(writeContext.styleAnchorPassages),
       })
       : null,
     includeContinuationConstraints

@@ -59,6 +59,7 @@ const CHAPTER_CONTEXT_GROUPS = [
   "rag_context",
   "scene_contract",
   "current_draft_excerpt",
+  "current_draft_full",
 ] as const;
 
 const WORKSPACE_CONTEXT_GROUPS = [

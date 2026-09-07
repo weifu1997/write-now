@@ -21,6 +21,33 @@ function normalizeNonNegativeInteger(value: number | null | undefined): number {
   return Math.floor(value);
 }
 
+/**
+ * 包装上游流：消费完成、消费出错或提前终止（break 触发生成器 return）时释放限流槽位。
+ */
+function wrapAsyncIterableWithRelease<TStream extends AsyncIterable<unknown>>(
+  stream: TStream,
+  release: () => void,
+): TStream {
+  let released = false;
+  const releaseOnce = () => {
+    if (released) {
+      return;
+    }
+    released = true;
+    release();
+  };
+  async function* consume(): AsyncGenerator<unknown> {
+    try {
+      for await (const chunk of stream) {
+        yield chunk;
+      }
+    } finally {
+      releaseOnce();
+    }
+  }
+  return consume() as unknown as TStream;
+}
+
 class ProviderModelRequestLimiter {
   private readonly concurrencyLimit: number;
   private readonly requestIntervalMs: number;
@@ -50,6 +77,46 @@ class ProviderModelRequestLimiter {
           .finally(() => {
             this.activeCount = Math.max(0, this.activeCount - 1);
             this.processQueue();
+          });
+      });
+      this.processQueue();
+    });
+  }
+
+  /**
+   * 流式专用：并发槽位必须持有到"整个流被消费完毕"，而不是流对象创建成功时。
+   * 否则长输出的结构化调用会在建立连接的瞬间释放槽位，并发与间隔限制对
+   * 流式请求完全失效。
+   * 注意：若调用方拿到流后既不迭代也不 return()，槽位会等到进程结束；
+   * 现有调用方（structuredInvoke / repair）都会完整消费或提前 break
+   * （break 会触发生成器 finally），该权衡优于当前"创建即释放"的行为。
+   */
+  runStream<TStream extends AsyncIterable<unknown>>(open: () => Promise<TStream>): Promise<TStream> {
+    if (this.concurrencyLimit === 0 && this.requestIntervalMs === 0) {
+      return open();
+    }
+
+    return new Promise<TStream>((resolve, reject) => {
+      this.queue.push(() => {
+        this.activeCount += 1;
+        if (this.requestIntervalMs > 0) {
+          this.nextStartAt = Date.now() + this.requestIntervalMs;
+        }
+        let released = false;
+        const release = () => {
+          if (released) {
+            return;
+          }
+          released = true;
+          this.activeCount = Math.max(0, this.activeCount - 1);
+          this.processQueue();
+        };
+        open()
+          .then((stream) => {
+            resolve(wrapAsyncIterableWithRelease(stream, release));
+          }, (error) => {
+            release();
+            reject(error);
           });
       });
       this.processQueue();
@@ -148,7 +215,7 @@ export function attachLLMRequestLimiter(llm: ChatOpenAI, options: ProviderModelL
     limiter.run(() => originalInvoke(...args))) as ChatOpenAI["invoke"];
 
   patchable.stream = (async (...args: Parameters<ChatOpenAI["stream"]>) =>
-    limiter.run(() => originalStream(...args))) as ChatOpenAI["stream"];
+    limiter.runStream(() => originalStream(...args))) as ChatOpenAI["stream"];
 
   patchable.batch = (async (...args: Parameters<ChatOpenAI["batch"]>) =>
     limiter.run(() => originalBatch(...args))) as ChatOpenAI["batch"];

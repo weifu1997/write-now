@@ -302,7 +302,7 @@ function recordAppliedMigration(database: Database.Database, migrationName: stri
   );
 }
 
-function applyMigration(database: Database.Database, migrationsDir: string, migrationName: string): void {
+export function applyMigration(database: Database.Database, migrationsDir: string, migrationName: string): void {
   const migrationFilePath = path.join(migrationsDir, migrationName, "migration.sql");
   const migrationSql = fs.readFileSync(migrationFilePath, "utf8");
   const checksum = crypto.createHash("sha256").update(migrationSql).digest("hex");
@@ -319,7 +319,20 @@ function applyMigration(database: Database.Database, migrationsDir: string, migr
     ) VALUES (?, ?, ?, ?, 0)`,
   ).run(migrationId, checksum, migrationName, startedAt);
 
+  // SQLite 规定 `PRAGMA foreign_keys` 在事务内是空操作，而本函数把迁移包在
+  // BEGIN/COMMIT 里。若迁移依赖 foreign_keys=OFF 保护重建表（DROP TABLE 的
+  // 隐式 DELETE 会级联清空子表数据），必须把该 PRAGMA 提升到事务外执行，
+  // 结束后恢复连接原本的外键开关。
+  const foreignKeysDisabledInSql = /(^|\s)PRAGMA\s+foreign_keys\s*=\s*OFF\s*;/i.test(migrationSql);
+  let previousForeignKeys: boolean | null = null;
+
   try {
+    if (foreignKeysDisabledInSql) {
+      previousForeignKeys = database.pragma("foreign_keys", { simple: true }) === 1;
+      if (previousForeignKeys) {
+        database.exec("PRAGMA foreign_keys=OFF;");
+      }
+    }
     database.exec("BEGIN");
     database.exec(migrationSql);
     database.prepare(
@@ -336,6 +349,10 @@ function applyMigration(database: Database.Database, migrationsDir: string, migr
        WHERE id = ?`,
     ).run(error instanceof Error ? error.stack || error.message : String(error), migrationId);
     throw error;
+  } finally {
+    if (previousForeignKeys) {
+      database.exec("PRAGMA foreign_keys=ON;");
+    }
   }
 }
 

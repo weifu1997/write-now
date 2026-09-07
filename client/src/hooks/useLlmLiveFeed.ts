@@ -218,7 +218,12 @@ export function useLlmLiveFeed(input: {
               if (!dataLine) {
                 continue;
               }
-              enqueue(JSON.parse(dataLine.slice(6)) as LlmLiveStreamFrame);
+              // 非 JSON 帧（代理 keep-alive 等）跳过即可，避免反复断连重试
+              try {
+                enqueue(JSON.parse(dataLine.slice(6)) as LlmLiveStreamFrame);
+              } catch {
+                continue;
+              }
             }
           }
         } catch {

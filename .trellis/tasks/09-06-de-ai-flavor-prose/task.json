@@ -1,0 +1,31 @@
+{
+  "id": "de-ai-flavor-prose",
+  "name": "de-ai-flavor-prose",
+  "title": "生成小说去AI味：正样本锚定与审查打通",
+  "description": "",
+  "status": "planning",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P2",
+  "creator": "huangwf",
+  "assignee": "huangwf",
+  "createdAt": "2026-09-06",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "09-06-review-anti-ai-wiring",
+    "09-06-style-vocab-curation",
+    "09-06-style-anchor-passages",
+    "09-06-chapter-plan-cost-complication"
+  ],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {}
+}

@@ -574,6 +574,7 @@ export class ImageGenerationService {
     }
     this.queue.push(taskId);
     this.queueSet.add(taskId);
+    // processQueue 内部对单个任务的失败做了隔离，此处的 void 不会泄漏未处理拒绝
     void this.processQueue();
   }
 
@@ -589,7 +590,14 @@ export class ImageGenerationService {
           continue;
         }
         this.queueSet.delete(taskId);
-        await this.executeTask(taskId);
+        try {
+          await this.executeTask(taskId);
+        } catch (error) {
+          // 单个任务的启动失败（如 SQLite 忙碌、瞬时 DB 错误）不能中断队列，
+          // 否则后续任务被搁浅，且 rejection 会沿 void 调用链变成未处理拒绝
+          // （Node 默认行为是退出进程）。
+          console.error(`[image] task ${taskId} failed before execution:`, error);
+        }
       }
     } finally {
       this.processing = false;

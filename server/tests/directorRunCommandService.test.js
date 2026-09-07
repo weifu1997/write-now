@@ -163,6 +163,13 @@ function createHarness(task = createTask()) {
         rows = rows.filter((row) => where.commandType.in.includes(row.commandType));
       }
     }
+    if (where?.idempotencyKey) {
+      if (typeof where.idempotencyKey === "string") {
+        rows = rows.filter((row) => row.idempotencyKey === where.idempotencyKey);
+      } else if (typeof where.idempotencyKey.startsWith === "string") {
+        rows = rows.filter((row) => row.idempotencyKey.startsWith(where.idempotencyKey.startsWith));
+      }
+    }
     if (where?.status) {
       if (typeof where.status === "string") {
         rows = rows.filter((row) => row.status === where.status);
@@ -176,6 +183,16 @@ function createHarness(task = createTask()) {
     return rows[0] ?? null;
   };
   prisma.directorRunCommand.create = async ({ data }) => {
+    const duplicate = commands.find((row) => (
+      row.taskId === data.taskId
+      && row.commandType === data.commandType
+      && row.idempotencyKey === data.idempotencyKey
+    ));
+    if (duplicate) {
+      const error = new Error("Unique constraint failed on the fields: (`taskId`,`commandType`,`idempotencyKey`)");
+      error.code = "P2002";
+      throw error;
+    }
     const row = {
       id: `command-${commands.length + 1}`,
       novelId: data.novelId ?? null,
@@ -197,24 +214,41 @@ function createHarness(task = createTask()) {
   prisma.directorRunCommand.findUnique = async ({ where }) => (
     commands.find((row) => row.id === where.id) ?? null
   );
-  prisma.directorRunCommand.findMany = async ({ where }) => {
+  prisma.directorRunCommand.findMany = async ({ where, select }) => {
     let rows = commands;
     if (where?.taskId) {
       rows = rows.filter((row) => row.taskId === where.taskId);
     }
+    if (typeof where?.commandType === "string") {
+      rows = rows.filter((row) => row.commandType === where.commandType);
+    }
     if (where?.status?.in) {
       rows = rows.filter((row) => where.status.in.includes(row.status));
+    }
+    if (Array.isArray(where?.status?.notIn)) {
+      rows = rows.filter((row) => !where.status.notIn.includes(row.status));
     }
     if (where?.leaseExpiresAt?.lt) {
       rows = rows.filter((row) => row.leaseExpiresAt && row.leaseExpiresAt < where.leaseExpiresAt.lt);
     }
-    return rows.map((row) => ({
-      id: row.id,
-      taskId: row.taskId,
-      commandType: row.commandType,
-      attempt: row.attempt,
-      payloadJson: row.payloadJson,
-    }));
+    return rows.map((row) => {
+      if (!select) {
+        return {
+          id: row.id,
+          taskId: row.taskId,
+          commandType: row.commandType,
+          attempt: row.attempt,
+          payloadJson: row.payloadJson,
+        };
+      }
+      const picked = {};
+      for (const key of Object.keys(select)) {
+        if (select[key]) {
+          picked[key] = row[key];
+        }
+      }
+      return picked;
+    });
   };
   prisma.directorRunCommand.updateMany = async ({ where, data }) => {
     let count = 0;
@@ -326,6 +360,46 @@ test("director command service reuses active continue commands", async () => {
     assert.equal(first.commandId, second.commandId);
     assert.equal(harness.commands.length, 1);
     assert.equal(first.status, "queued");
+  } finally {
+    harness.restore();
+  }
+});
+
+test("director command service reuses active continue after task updatedAt drifts", async () => {
+  const harness = createHarness();
+  try {
+    const first = await harness.service.enqueueContinueCommand("task-1", {
+      continuationMode: "auto_execute_range",
+    });
+    harness.task.updatedAt = new Date(harness.task.updatedAt.getTime() + 60_000);
+    const second = await harness.service.enqueueContinueCommand("task-1", {
+      continuationMode: "auto_execute_range",
+    });
+    assert.equal(first.commandId, second.commandId);
+    assert.equal(harness.commands.length, 1);
+    assert.match(harness.commands[0].idempotencyKey, /^continue:[0-9a-f]{12}:0$/);
+    assert.equal(harness.commands[0].idempotencyKey.includes(String(harness.task.updatedAt.getTime())), false);
+  } finally {
+    harness.restore();
+  }
+});
+
+test("director command service enqueues a new continue after the previous command is stale", async () => {
+  const harness = createHarness();
+  try {
+    const first = await harness.service.enqueueContinueCommand("task-1", {
+      continuationMode: "auto_execute_range",
+    });
+    harness.commands[0].status = "stale";
+    harness.commands[0].finishedAt = new Date();
+    const second = await harness.service.enqueueContinueCommand("task-1", {
+      continuationMode: "auto_execute_range",
+    });
+    assert.equal(harness.commands.length, 2);
+    assert.notEqual(first.commandId, second.commandId);
+    assert.equal(second.status, "queued");
+    assert.notEqual(harness.commands[0].idempotencyKey, harness.commands[1].idempotencyKey);
+    assert.match(harness.commands[1].idempotencyKey, /^continue:[0-9a-f]{12}:1$/);
   } finally {
     harness.restore();
   }
@@ -525,17 +599,19 @@ test("director command service applies the full-book autopilot contract before q
     const payload = JSON.parse(harness.commands[0].payloadJson);
     assert.equal(payload.confirmRequest.runMode, "full_book_autopilot");
     assert.deepEqual(payload.confirmRequest.autoExecutionPlan, {
-      mode: "book",
-      autoReview: true,
-      autoRepair: true,
+      mode: "chapter_range",
+      endOrder: 10,
+      autoReview: false,
+      autoRepair: false,
     });
     assert.equal(payload.confirmRequest.autoApproval.enabled, true);
     assert.ok(payload.confirmRequest.autoApproval.approvalPointCodes.includes("chapter_execution_continue"));
     assert.ok(payload.confirmRequest.autoApproval.approvalPointCodes.includes("replan_continue"));
     assert.deepEqual(harness.bootstraps[0].seedPayload.autoExecutionPlan, {
-      mode: "book",
-      autoReview: true,
-      autoRepair: true,
+      mode: "chapter_range",
+      endOrder: 10,
+      autoReview: false,
+      autoRepair: false,
     });
     assert.equal(harness.bootstraps[0].seedPayload.autoApproval.enabled, true);
   } finally {

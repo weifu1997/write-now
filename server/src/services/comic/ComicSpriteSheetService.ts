@@ -68,11 +68,17 @@ function buildLabelBuffer(label: string, width: number): Buffer {
 
 /** 将图片缩放到目标高度，返回 sharp 实例和宽度 */
 async function resizeToHeight(filePath: string, height: number): Promise<{ buf: Buffer; width: number }> {
-  const resized = sharp(filePath).resize({ height, withoutEnlargement: false });
-  const meta = await resized.metadata();
-  const width = meta.width ?? height; // fallback
-  const buf = await resized.png().toBuffer();
-  return { buf, width };
+  // sharp 的 metadata() 只描述输入图，resize 后的宽度需按原图比例推算，
+  // 否则拼列画布宽度与实际图宽不一致：过小时合成直接失败，过大时出现空白带。
+  const sourceMeta = await sharp(filePath).metadata();
+  const sourceWidth = sourceMeta.width ?? height;
+  const sourceHeight = sourceMeta.height ?? height;
+  const resizedWidth = Math.max(1, Math.round((sourceWidth / sourceHeight) * height));
+  const buf = await sharp(filePath)
+    .resize({ height, withoutEnlargement: false })
+    .png()
+    .toBuffer();
+  return { buf, width: resizedWidth };
 }
 
 /** 拼合单列（图片 + 标签）成 TARGET_HEIGHT + LABEL_HEIGHT 高的 Buffer */

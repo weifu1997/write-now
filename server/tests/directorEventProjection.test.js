@@ -407,7 +407,45 @@ test("director event projection summarizes workspace progress and next action", 
   assert.equal(projection.progressBreakdown.continuableChapters, 3);
   assert.deepEqual(
     projection.visibleRiskBadges.map((badge) => badge.label),
-    ["受保护正文", "1 章待修复", "1 项需复核", "缺少规划资源"],
+    ["受保护正文", "1 章待修复", "1 项需复核"],
+  );
+});
+
+test("director event projection flags missing planning resources only for planning artifact types", () => {
+  const service = new DirectorEventProjectionService();
+  const buildInventory = (missingArtifactTypes) => ({
+    lastWorkspaceAnalysis: {
+      novelId: "novel-1",
+      inventory: {
+        novelId: "novel-1",
+        novelTitle: "测试小说",
+        missingArtifactTypes,
+        staleArtifacts: [],
+        protectedUserContentArtifacts: [],
+        needsRepairArtifacts: [],
+        chapterCount: 0,
+        draftedChapterCount: 0,
+        approvedChapterCount: 0,
+        pendingRepairChapterCount: 0,
+      },
+      interpretation: null,
+      manualEditImpact: null,
+      recommendation: null,
+      confidence: 0.8,
+      evidenceRefs: ["workspace_inventory"],
+      generatedAt: "2026-04-28T00:00:02.000Z",
+      prompt: null,
+    },
+  });
+  const planningGap = service.buildSnapshotProjection(buildSnapshot(buildInventory(["chapter_task_sheet"])));
+  assert.ok(
+    planningGap.visibleRiskBadges.some((badge) => badge.label === "缺少规划资源"),
+    "缺失规划类产物时应出现「缺少规划资源」徽标",
+  );
+  const bodyArtifactGap = service.buildSnapshotProjection(buildSnapshot(buildInventory(["chapter_draft", "rolling_window_review"])));
+  assert.ok(
+    !bodyArtifactGap.visibleRiskBadges.some((badge) => badge.label === "缺少规划资源"),
+    "仅缺失正文/执行类产物时不应出现「缺少规划资源」徽标",
   );
 });
 

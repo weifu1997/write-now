@@ -206,6 +206,14 @@ export function errorHandler(
   res: Response<ApiResponse<null>>,
   _next: NextFunction,
 ): void {
+  // 响应头已发出（SSE/流式响应中途出错）时无法再返回 JSON 错误体；
+  // 继续走 res.status().json() 会抛 ERR_HTTP_HEADERS_SENT。
+  if (res.headersSent) {
+    logServerError(req, error);
+    res.end();
+    return;
+  }
+
   if (
     error
     && typeof error === "object"
@@ -216,6 +224,36 @@ export function errorHandler(
     res.status(413).json({
       success: false,
       error: "请求体过大，请缩短文本或分段上传。",
+    });
+    return;
+  }
+
+  // body-parser 的解析类错误带有明确的 4xx 语义，按类型映射状态码，
+  // 避免格式错误的请求体被当成服务器内部错误（500）返回。
+  const parserErrorType = error && typeof error === "object" && "type" in error
+    ? (error as { type?: string }).type
+    : undefined;
+  if (parserErrorType === "entity.parse.failed") {
+    setRequestErrorMessage(res, "请求体格式错误，请检查内容编码是否正确。");
+    res.status(400).json({
+      success: false,
+      error: "请求体格式错误，请检查内容编码是否正确。",
+    });
+    return;
+  }
+  if (parserErrorType === "encoding.unsupported" || parserErrorType === "charset.unsupported") {
+    setRequestErrorMessage(res, "请求体使用了不支持的字符编码。");
+    res.status(415).json({
+      success: false,
+      error: "请求体使用了不支持的字符编码。",
+    });
+    return;
+  }
+  if (parserErrorType === "entity.verify.failed") {
+    setRequestErrorMessage(res, "请求体校验失败，请检查内容后重试。");
+    res.status(400).json({
+      success: false,
+      error: "请求体校验失败，请检查内容后重试。",
     });
     return;
   }

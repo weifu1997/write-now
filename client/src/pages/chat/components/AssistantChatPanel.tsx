@@ -276,7 +276,13 @@ export default function AssistantChatPanel({
               if (!rawData) {
                 continue;
               }
-              const frame = JSON.parse(rawData) as SSEFrame;
+              // 单帧解析失败只跳过，避免丢掉后续帧并跳过会话持久化
+              let frame: SSEFrame;
+              try {
+                frame = JSON.parse(rawData) as SSEFrame;
+              } catch {
+                continue;
+              }
               if (frame.type === "ping") {
                 continue;
               }

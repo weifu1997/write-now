@@ -41,6 +41,8 @@ export function normalizeChapterWriteContext(writeContext: ChapterWriteContext):
       emotionalShift: writeContext.chapterMission.expectation,
       informationReveal: "本章只交付任务允许的必要信息。",
       netChange: writeContext.chapterBoundary?.endingState || writeContext.chapterMission.expectation,
+      expectedCost: "",
+      complication: "",
       inheritedHookResponsibilities: [],
       endingHook: writeContext.chapterMission.hookTarget,
     };
@@ -83,6 +85,7 @@ export function normalizeChapterWriteContext(writeContext: ChapterWriteContext):
     ragFacts: writeContext.ragFacts ?? [],
     completedMilestones: writeContext.completedMilestones ?? [],
     recentScenePatterns: writeContext.recentScenePatterns ?? [],
+    styleAnchorPassages: writeContext.styleAnchorPassages ?? [],
     readerExperience: compatibleReaderExperience,
   };
 }

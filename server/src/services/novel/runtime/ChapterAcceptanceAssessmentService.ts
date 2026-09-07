@@ -8,6 +8,7 @@ import { prisma } from "../../../db/prisma";
 import { runStructuredPrompt } from "../../../prompting/core/promptRunner";
 import { resolvePromptContextBlocksForAsset } from "../../../prompting/context/promptContextResolution";
 import { buildChapterReviewContextBlocks } from "../../../prompting/prompts/novel/chapterLayeredContext";
+import { resolveLengthBudgetContract } from "@write-now/shared/types/chapterLengthControl";
 import { resolveTargetWordRange } from "../../../prompting/prompts/novel/chapterLayeredContextShared";
 import {
   chapterAcceptanceAssessmentPrompt,
@@ -41,33 +42,25 @@ export interface ChapterAcceptanceAssessmentResult {
 type AcceptanceIssue = ChapterAcceptanceAssessmentOutput["blockingIssues"][number];
 type AcceptanceRepairDirective = ChapterAcceptanceAssessmentOutput["repairDirectives"][number];
 
-const UNDER_LENGTH_MARKERS = [
+const UNDER_LENGTH_CODES = [
   "length_insufficient",
   "length_under",
   "under_soft",
-  "too short",
-  "insufficient length",
-  "word count",
-  "正文估算",
-  "目标长度",
-  "字数",
-  "低于",
-  "不足",
-  "过短",
-  "未达",
+  "length_under_soft_min",
+  "length_under_hard_min",
 ];
 
-const OVER_LENGTH_MARKERS = [
+const OVER_LENGTH_CODES = [
   "length_over",
   "over_soft",
   "over_hard",
-  "too long",
-  "exceeds",
-  "超出",
-  "超过",
-  "过长",
-  "冗长",
+  "length_over_soft_max",
+  "length_over_hard_max",
 ];
+
+function normalizeIssueCode(code: string | null | undefined): string {
+  return (code ?? "").trim().toLowerCase();
+}
 
 function categoryToAuditType(category: AcceptanceIssue["category"]): AuditType {
   if (category === "continuity") return "continuity";
@@ -103,23 +96,29 @@ function countChapterCharacters(content: string): number {
   return content.replace(/\s+/g, "").trim().length;
 }
 
-function includesAnyMarker(text: string, markers: string[]): boolean {
-  const normalized = text.toLowerCase();
-  return markers.some((marker) => normalized.includes(marker));
-}
-
 function isUnderLengthIssue(issue: AcceptanceIssue): boolean {
-  const text = [issue.code, issue.evidence, issue.fixSuggestion].join("\n");
-  return includesAnyMarker(text, UNDER_LENGTH_MARKERS) && !includesAnyMarker(text, OVER_LENGTH_MARKERS);
+  const code = normalizeIssueCode(issue.code);
+  return UNDER_LENGTH_CODES.includes(code);
 }
 
 function isOverLengthIssue(issue: AcceptanceIssue): boolean {
-  const text = [issue.code, issue.evidence, issue.fixSuggestion].join("\n");
-  return includesAnyMarker(text, OVER_LENGTH_MARKERS);
+  const code = normalizeIssueCode(issue.code);
+  return OVER_LENGTH_CODES.includes(code) || code === "length_over_hard_max";
 }
 
 function isLengthDirective(directive: AcceptanceRepairDirective): boolean {
-  return includesAnyMarker(directive.instruction, [...UNDER_LENGTH_MARKERS, ...OVER_LENGTH_MARKERS]);
+  const instruction = directive.instruction.toLowerCase();
+  return instruction.includes("硬性字数上限")
+    || instruction.includes("扩写正文到目标长度")
+    || instruction.includes("扩写到目标字数")
+    || (instruction.includes("目标长度") && (instruction.includes("扩写") || instruction.includes("压缩")));
+}
+
+function isLengthRiskTag(tag: string): boolean {
+  const normalized = tag.trim().toLowerCase();
+  return UNDER_LENGTH_CODES.includes(normalized)
+    || OVER_LENGTH_CODES.includes(normalized)
+    || normalized === "length_over_hard_max";
 }
 
 function shouldDropLengthIssue(input: {
@@ -160,7 +159,48 @@ function reconcileLengthAssessment(
     ...output,
     blockingIssues,
     repairDirectives: output.repairDirectives.filter((directive) => !isLengthDirective(directive)),
-    riskTags: output.riskTags.filter((tag) => !includesAnyMarker(tag, [...UNDER_LENGTH_MARKERS, ...OVER_LENGTH_MARKERS])),
+    riskTags: output.riskTags.filter((tag) => !isLengthRiskTag(tag)),
+  };
+}
+
+/**
+ * 确定性超长护栏：正文实际字数超过硬性上限（目标×1.25）时，无论模型验收结论如何，
+ * 都注入一条 LENGTH_OVER_HARD_MAX blockingIssue 和整章压缩 repairDirective，
+ * 让修复环的 compress_chapter_for_length 提示真正被触发。
+ */
+function ensureOverHardMaxFinding(
+  output: ChapterAcceptanceAssessmentOutput,
+  content: string,
+  targetWordCount?: number | null,
+): ChapterAcceptanceAssessmentOutput {
+  const budget = resolveLengthBudgetContract(targetWordCount);
+  if (!budget) {
+    return output;
+  }
+  const actualWordCount = countChapterCharacters(content);
+  if (actualWordCount <= budget.hardMaxWordCount) {
+    return output;
+  }
+  if (output.blockingIssues.some((issue) => issue.code === "LENGTH_OVER_HARD_MAX")) {
+    return output;
+  }
+  const overHardMaxIssue: AcceptanceIssue = {
+    severity: "medium",
+    category: "mode_fit",
+    code: "LENGTH_OVER_HARD_MAX",
+    evidence: `正文实际 ${actualWordCount} 字，超出硬性上限 ${budget.hardMaxWordCount} 字（目标 ${budget.targetWordCount} 字）。`,
+    fixSuggestion: "整章压缩重复表达、碎片化对话与冗余解释，保留核心推进、义务兑现与结尾钩子，压回可接受区间。",
+  };
+  const compressDirective: AcceptanceRepairDirective = {
+    mode: "patch",
+    target: "plot",
+    instruction: `正文超出硬性字数上限（${actualWordCount}/${budget.hardMaxWordCount}）：整章压缩重复表达、碎片化对话与冗余解释，保留核心推进、义务兑现与结尾钩子，压回 ${budget.softMinWordCount}-${budget.softMaxWordCount} 字区间。`,
+  };
+  return {
+    ...output,
+    blockingIssues: [overHardMaxIssue, ...output.blockingIssues],
+    repairDirectives: [compressDirective, ...output.repairDirectives],
+    riskTags: Array.from(new Set([...output.riskTags, "LENGTH_OVER_HARD_MAX"])),
   };
 }
 
@@ -169,7 +209,9 @@ export function normalizeAssessment(
   content: string,
   targetWordCount?: number | null,
 ): ChapterAcceptanceAssessmentOutput {
-  const reconciled = reconcileLengthAssessment(output, content, targetWordCount);
+  const reconciledBase = reconcileLengthAssessment(output, content, targetWordCount);
+  const reconciled = ensureOverHardMaxFinding(reconciledBase, content, targetWordCount);
+  const reconcileDroppedIssues = reconciledBase !== output;
   const score = normalizeScore(reconciled.score ?? ruleScore(content));
   const missingObligations = reconciled.missingObligations ?? [];
   const hasHighRisk = reconciled.blockingIssues.some((issue) => issue.severity === "high" || issue.severity === "critical");
@@ -182,7 +224,7 @@ export function normalizeAssessment(
   if (status === "accepted" && (hasHighRisk || hasRepairWork)) {
     status = "repairable";
   }
-  if (status === "needs_manual_review" && reconciled !== output && !hasHighRisk && hasRepairWork) {
+  if (status === "needs_manual_review" && reconcileDroppedIssues && !hasHighRisk && hasRepairWork) {
     status = "repairable";
   }
   if (status === "repairable" && !hasRepairWork) {

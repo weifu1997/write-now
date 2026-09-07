@@ -85,6 +85,22 @@ keyMilestoneGuards: z.array(volumeKeyMilestoneGuardSchema).default([])
 
 **输出**：`repetitionClusters`、`openingPatternClusters`、`hasCriticalIssues` 和修复建议。
 
+### 八、审校与反AI规则目录打通
+
+**数据流**：`NovelCoreReviewService.reviewChapterContent` 在有 novelId 时通过 `AntiAiPolicyResolver.resolveEffectiveRules({ novelId })` 取生效反AI规则（已含 enabled 过滤与默认目录合并），经 `buildAntiAiRuleCatalogText` 生成目录文本，作为 `antiAiDirectiveText` 传入审校提示词 `novel.review.chapter`（v3 起）。
+
+**审校口径**：voice 与 repetition 维度必须逐条对照目录；命中规则的问题必须在 issue 文本中引用 `[规则标识] + 规则名`；evidence 必须指向正文具体句子，不得只凭目录推断正文有问题。规则引用随 issuesJson 进入修文链路，使 `novel.review.repair` 可以定向修复。
+
+**边界**：审校只把目录当检测参照，不替代 `PostGenerationStyleReviewRunner` 的生成后兜底；未绑定写法资产的书目录为空，审校行为与无目录时完全一致。
+
+### 九、默认反AI词表与跨章开头规避样本
+
+**默认 risk 词表**：`server/src/services/styleEngine/defaults.ts` 的默认目录维护一批高频中文 AI 腔 risk 规则（`risk-faint-quantity-modifiers`、`risk-reflexive-reaction-adverbs`、`risk-frozen-air-atmosphere-cliche`、`risk-uniform-expression-formula`、`risk-eye-flash-emotion-projection` 等）。risk 类规则只提醒规避、不升级为 forbidden，允许特定语境自然出现，避免字面误伤。新增默认规则时沿用现有 key 语义：type=risk、severity 适中、`globalBaselineEnabled=true`、必须带具体的 `promptInstruction` 与 `rewriteSuggestion`。种子逻辑是 missing_only：新 key 首次启动时插入数据库，用户自定义规则和用户已改过的默认规则行不会被覆盖。
+
+**改写方向多样性**：默认规则的 `rewriteSuggestion` 与 `style.rewrite`、`novel.chapter_editor.rewrite_candidates` 两个提示词（均 v3 起）都要求在删而不换、对话化、具体感官细节、决策变化、结构压缩之间轮换。禁止把「改成动作/环境反应」当万能答案——「删解释、加小动作」本身已是新的中文 AI 模板腔，同一篇多处命中或多个改写候选必须呈现至少两种不同替换策略。
+
+**跨章开头规避样本**：`GenerationContextAssembler.buildOpeningConstraintHint` 取近 3 章（`OPENING_COMPARE_LIMIT`，各截前 220 字符）开头，经 `formatOpeningAvoidanceSamples()`（`runtime/context/chapterSourceText.ts`）渲染成显式规避样本：「近几章这样开头（上一章在最前）：逐条样本 + 规避要求（不得复用相同开场表达模式，换切入位置/感官/节奏）」。该文本作为 `ChapterWriteContext.openingAntiRepeatHint` 进入 `opening_constraints` block（group 拓扑、priority=80 与 dropOrder 不变），渲染时直接输出样本文本，不再叠加英文前缀。没有前章开头时（新书、首章）`openingAntiRepeatHint` 为空字符串，`opening_constraints` block 整体不出现，不占预算。`recentScenePatterns` 恒为空数组的现状维持，等有真实数据源再启用。
+
 ## 失效模式
 
 - `completedMilestones` 和 `recentScenePatterns` 依赖上游服务在构建上下文时正确填入，若上游不填，这两个守卫就不生效。本次修改只建立了接口契约，数据填充需要在章节运行时协调器中实现。
@@ -93,8 +109,13 @@ keyMilestoneGuards: z.array(volumeKeyMilestoneGuardSchema).default([])
 - `requiredCharacterAppearances` 的缺席提示只附加在已经进入义务契约的角色上；如果角色根本没有进入该列表，应先检查角色动态概览和选角规则，而不是在提示词里硬塞角色名。
 - `characterKnowledgeStates` 只记录明显信息差。若所有角色都自然知晓同一事实，应省略该字段，避免把普通剧情进展误写成长期信息边界。
 
+- 审校侧反AI规则解析失败时静默降级为无目录（审校不因此失败），此时问题清单退回不引用规则名的泛化口径，修文定向性下降属于可接受退化。
+
 - `buildCompressionLog()` 是观测工具。若日志显示 dropped，不代表实际生成已经丢弃同名 block，真实裁剪仍以 prompt runner 的 context selection 为准。
 - `rebuild_story_world_slice` 重建切片后，如果后续又触发了 `ensureStoryWorldSlice` 且 stale 检测显示为最新状态，则已重建的切片会被复用而非再次生成，这是预期行为。
+
+- 新增默认 risk 规则后，已有安装要等下次服务启动触发 missing_only 种子才会出现新规则；如果某条规则被用户显式停用，不应在后续版本里悄悄改回，需要换新 key 表达新口径。
+- 开头规避样本只覆盖最近 3 章且各截 220 字符。若跨章复读仍发生，优先检查 `buildOpeningConstraintHint` 的取数窗口和规避要求文案，而不是扩大 block 预算。
 
 ## 相关模块
 
@@ -103,7 +124,14 @@ keyMilestoneGuards: z.array(volumeKeyMilestoneGuardSchema).default([])
 - `server/src/agents/tools/bookAnalysisTools.ts`（`audit_chapter_continuity`）
 - `server/src/prompting/prompts/novel/chapterLayeredContext.ts`
 - `server/src/prompting/prompts/novel/chapterWriter.prompts.ts`
+- `server/src/services/novel/runtime/context/chapterSourceText.ts`（`formatOpeningAvoidanceSamples`）
+- `server/src/services/novel/runtime/GenerationContextAssembler.ts`（`buildOpeningConstraintHint`）
+- `server/src/services/styleEngine/defaults.ts`（默认反AI规则目录）
+- `server/src/prompting/prompts/style/style.prompts.ts`（`style.rewrite`）
+- `server/src/prompting/prompts/novel/chapterEditor/rewriteCandidates.prompts.ts`
 - `shared/types/chapterRuntime.ts`（`ChapterWriteContext`、`VolumeWindowContext`）
+- `server/src/services/novel/novelCoreReviewService.ts`（审校入口）
+- `server/src/services/styleEngine/AntiAiPolicyResolver.ts`（反AI规则解析）
 
 ## 源文档
 

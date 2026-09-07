@@ -380,6 +380,7 @@ model Novel {
   continuationBookAnalysis BookAnalysis? @relation("NovelContinuationBookAnalysis", fields: [continuationBookAnalysisId], references: [id], onDelete: SetNull)
   referenceBookAnalysis BookAnalysis? @relation("NovelReferenceBookAnalysis", fields: [referenceBookAnalysisId], references: [id], onDelete: SetNull)
   chapters          Chapter[]
+  styleAnchorPassages StyleAnchorPassage[]
   characters        Character[]
   characterLibraryLinks CharacterLibraryLink[]
   characterSyncProposals CharacterSyncProposal[]
@@ -1759,6 +1760,21 @@ model StyleProfileAntiAiRule {
 
   @@unique([styleProfileId, antiAiRuleId])
   @@index([antiAiRuleId])
+}
+
+model StyleAnchorPassage {
+  id              String   @id @default(cuid())
+  novelId         String
+  sourceChapterId String?
+  source          String   @default("manual")
+  text            String
+  contentHash     String
+  pinned          Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  novel           Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+
+  @@unique([novelId, contentHash])
+  @@index([novelId, createdAt])
 }
 
 model StyleBinding {
@@ -3247,7 +3263,6 @@ model BookAnalysisCharacterAppearanceSnapshot {
 
   @@unique([characterId, chapterIndex])
   @@index([appearanceId, chapterIndex])
-  @@index([characterId, chapterIndex])
   @@index([chapterIndex])
 }
 

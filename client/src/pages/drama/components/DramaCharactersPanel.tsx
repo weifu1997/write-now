@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import SelectControl from "@/components/common/SelectControl";
+import { resolveImageAssetUrl } from "@/api/images";
 
 export interface DramaCharacterAssetInput {
   name: string;
@@ -194,9 +195,9 @@ function CharacterImagesBlock(props: {
 
       {/* 设计稿预览 — 横版大图 */}
       {sheet.status === "done" && sheet.url ? (
-        <a href={sheet.url} target="_blank" rel="noreferrer" className="block">
+        <a href={resolveImageAssetUrl(sheet.url)} target="_blank" rel="noreferrer" className="block">
           <img
-            src={sheet.url}
+            src={resolveImageAssetUrl(sheet.url)}
             alt={`${props.character.name} 角色设计稿`}
             className="w-full rounded-md border object-contain shadow-sm"
             style={{ maxHeight: "240px" }}

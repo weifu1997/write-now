@@ -91,7 +91,9 @@ export default function TaskCenterPage() {
   const recoveryCandidatesQuery = useQuery({
     queryKey: queryKeys.tasks.recoveryCandidates,
     queryFn: listRecoveryCandidates,
-    refetchInterval: (query) => (query.state.data?.data?.items.length ?? 0) > 0 ? 4000 : false,
+    // 恢复候选是等待用户到源页面处理的停滞任务，不会自行变化；
+    // 操作在源页面完成时会触发对应查询刷新，这里不再常驻轮询。
+    refetchInterval: false,
   });
 
   const allRows = listQuery.data?.data?.items ?? [];

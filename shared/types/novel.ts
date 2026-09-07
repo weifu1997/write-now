@@ -1061,6 +1061,15 @@ export interface VolumeSyncPreviewItem {
   changedFields: string[];
 }
 
+export interface VolumeSyncExecutionContractWarning {
+  volumeId: string;
+  chapterId: string;
+  chapterOrder: number;
+  title: string;
+  issues: string[];
+  repairGuidance: string[];
+}
+
 export interface VolumeSyncPreview {
   createCount: number;
   updateCount: number;
@@ -1072,6 +1081,7 @@ export interface VolumeSyncPreview {
   clearContentCount: number;
   affectedVolumeCount: number;
   items: VolumeSyncPreviewItem[];
+  incompleteExecutionContractWarnings?: VolumeSyncExecutionContractWarning[];
 }
 
 export interface ReplanRecommendation {

@@ -120,7 +120,13 @@ if (request.controlPolicy?.advanceMode === "full_book_autopilot") {
 
 原因：`chapter_sync` 步骤（结构化大纲阶段末尾）通过 `syncVolumeChaptersWithOptions` 将所有章节写入执行区 DB（即使没有 task sheet），`syncedChapterCount` 随即等于 `plannedChapterCount`，门控自然通过。
 
-同步边界必须允许 `full_book_autopilot` 把只有标题、摘要或部分执行字段的章节先写入正式章节区。部分 `taskSheet` 或 `sceneCards` 不能被误判为“完整合同已生成”并在同步阶段阻断任务；当前章进入正文执行前，`ChapterPlanJITService` 会调用统一的执行合同生成器补齐字段、通过质量校验并保存。非 JIT 的手动同步与普通执行路径仍保留完整合同门禁。
+同步边界必须允许 `full_book_autopilot` 把只有标题、摘要或部分执行字段的章节先写入正式章节区。部分 `taskSheet` 或 `sceneCards` 不能被误判为“完整合同已生成”并在同步阶段阻断任务；当前章进入正文执行前，`ChapterPlanJITService` 会调用统一的执行合同生成器补齐字段、通过质量校验并保存。
+
+同步阶段（`syncVolumeChaptersWithOptions`）的执行合同校验是“记录质量债务”，不是“阻断同步”，对所有调用方一致：
+
+1. 已有成稿正文（`content` 非空且 `chapterStatus=completed` 或 `generationState=approved`）的章节直接跳过校验。这些章节不会再次进入正文生成链路，其旧结构合同（早期版本规划产生的条目可能缺 `purpose`、`exclusiveEvent`、`endingState`、`nextChapterEntryState`）不得让重新接管或重跑大纲整体失败。
+2. 待执行章节的合同缺口通过 `VolumeSyncPreview.incompleteExecutionContractWarnings` 返回（章节、缺失问题、修复指引），并记录运行日志；同步继续执行。
+3. 缺口修复的唯一执行点在正文生成前：`ChapterPlanJITService`（autopilot）与 `ChapterExecutionContractService`（手动）按结构完整性判定复用或重新生成合同。禁止把修复重新前移到同步阶段造成阻断，也不得因同步期警告暂停全书链路——同步期警告是章节级质量债务，不是失败。
 
 ---
 

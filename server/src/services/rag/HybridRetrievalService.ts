@@ -63,6 +63,9 @@ function buildFacetWhere(facets?: RagChunkFacets) {
 }
 
 export class HybridRetrievalService {
+  /** 最近一次向量检索失败的原因（null = 成功），用于检索追踪诊断 */
+  private lastVectorSearchError: string | null = null;
+
   constructor(
     private readonly embeddingService: EmbeddingService,
     private readonly vectorStoreService: VectorStoreService,
@@ -212,7 +215,11 @@ export class HybridRetrievalService {
         source: "vector" as const,
         retrievalSource: "vector" as const,
       }));
-    } catch {
+    } catch (error) {
+      // 向量检索失败（Qdrant 不可用、维度不匹配、embedding 失败）会静默
+      // 退化为纯关键词检索；必须把原因透出给调用方记录到检索追踪里，
+      // 否则"RAG 为什么没召回"完全无法诊断。
+      this.lastVectorSearchError = error instanceof Error ? error.message : String(error);
       return [] as RetrievedChunk[];
     }
   }
@@ -293,10 +300,14 @@ export class HybridRetrievalService {
         search: () => Promise<RetrievedChunk[]>,
       ) => {
         const startedAt = Date.now();
+        this.lastVectorSearchError = null;
         const rows = await search();
         tracer.record(stage, {
           elapsedMs: Date.now() - startedAt,
           count: rows.length,
+          ...(stage === "vector" && this.lastVectorSearchError
+            ? { error: this.lastVectorSearchError }
+            : {}),
         });
         return rows;
       };

@@ -37,6 +37,7 @@
 - `NovelGenerationService.createChapterStream`、`NovelService.createRepairStream`、`startPipelineJob / resumePipelineJob` 只是不同控制入口；它们的业务执行面必须继续汇入同一 coordinator，而不是按入口复制 writer 或修文逻辑。
 - 默认 writer 继续整章一次性生成，不把 sceneCards、章节合同或分场景多轮写作重新接入正文热路径。
 - writer 只为生成可读正文服务，必须显式关闭不需要的推理模式，并使用与章节目标长度相称的输出上限；续写沿用同一边界。验收、局部修文与 `artifact_delta` 都是结构化子任务，必须各自携带更小的独立输出上限，结构校验重试也继承该上限。输入上下文预算不能代替输出费用保护。
+- 章节篇幅的区间守卫（超 hardMax 自动压缩收束、验收对仍超长的章节确定性标记 `LENGTH_OVER_HARD_MAX`）沿用写作 → 验收 → 修复这条链路，见 [章节字数控制链](./chapter-word-count-control.md)。
 - writer 仍然整章一次性生成，不按场景多轮拼接正文；但 `sceneCards` 顶层保存的 `ReaderExperienceContract` 会进入默认正文、验收和修复上下文，场景卡本身继续作为规划、诊断和局部修复辅助资产。
 - 正文生成前只做最低可写性检查：章节存在、人物可用、上下文包可组装、任务目标可解释。
 - 生成后用一次结构化接收闸门判断是否可继续、是否需要局部修文、是否需要人工确认。
@@ -101,7 +102,7 @@
 - 章节执行失败语义必须区分：正文未生成是 `draft_generation_failed`；正文已生成但未兑现本章义务是 `draft_obligation_unmet`；自动修复后仍有阻塞问题是 `draft_repair_exhausted`；需要调整邻章计划是 `replan_required`。UI 和任务详情应展示真实根因，不再把这些情况统一压成 `chapter.draft.write 未满足其完成标准。`
 - 质量闭环投影必须区分阻塞错误和非阻塞质量债务。`terminalAction=defer_and_continue` 且不是 `replan_required` / `recommendedAction=replan` / `blockingObligations` 的章节，只能作为“已记录质量债务”弱提示，不得驱动主状态进入“出错需处理”或生成 repair ticket；`local_patch_plan` / `continue_with_warning` 只能进入质量债务或局部修复建议通道，不得写入 `replanAlertDetails` 或 `PIPELINE_REPLAN_REQUIRED`；`replan_required` 即使同时带有 `defer_and_continue`，也仍是阻塞重规划。
 - 有可用正文的非阻塞质量债，在持久化状态上应完成降级定稿（`generationState=approved`、`chapterStatus=completed`），并保留质量债风险标记用于后续回收；阅读书架把历史遗留的同类记录投影为“已保存 · 待优化”，不能显示成“审校修复中”。只有结构化 `replan_required` 才显示为“等待重规划”。
-- `urgentPayoffs`、`overduePayoffs`、`ledgerSummary.urgentCount / overdueCount` 和 `nextAction=advance_payoff` 都是章节职责或质量债信号。它们可以进入写作上下文、接收闸门和后续质量回收，但不能单独触发全局重规划，否则系统会把“本章应该推进 payoff”误判成“整本计划已经失配”。
+- `urgentPayoffs`、`ledgerSummary.urgentCount` 和 `nextAction=advance_payoff` 可以进入写作上下文、接收闸门和本章质量回收。`overduePayoffs` / `payoff_overdue` 是 Payoff Ledger 的全书承诺风险：可以进入 `ledgerOverdueItems` 写作上下文，但不得进入 `hasBlockingIssues`、单章 patch、`chapter_retention_contract` / 「留存风险」，也不得把后文章节写成待优化。窗口内的 `payoff_missing_progress` 仍可能是本章义务，不按逾期处理。逾期不得单独触发全局重规划。
 - `replanRecommendation` 必须携带动作与作用域：`continue_with_warning` 表示只记录提示并继续；`local_patch_plan + local_window` 表示自动重规划当前章之后的未完成窗口并继续；`stop_for_replan + global_book` 才表示需要暂停批量流水线。调用方不得只看 `recommended=true` 或旧的动作名称就停止章节执行。
 - 人工章节审校只负责返回结构化 `qualityAssessment` 与 `replanRecommendation`，并把评估写成可恢复的章节状态。它不得在审校请求内直接调用规划器改写章节窗口；用户显式点击重规划时才进入书级重规划入口，自动生产则只允许 `ChapterQualityClosure` 消费明确的 `stop_for_replan + global_book` 并暂停。
 - 人工审校若得到明确重规划结论，应保留当前正文，把 `recommendedAction=replan` 写入 `riskFlags.qualityLoop`，并落到 `generationState=reviewed + chapterStatus=needs_repair`。这组字段是等待人工确认的章节检查点，不代表正文丢失或整本任务已经失败。
@@ -154,7 +155,8 @@
 - 自动导演在高章节数被早期 payoff 卡住：检查是否存在同义重复账本项被 AI 全量对账新建为无目标窗口的 `overdue`。正确行为是同步后处理复用未完成的同名 canonical ledgerKey，并把无明确窗口的 overdue 降级为待推进风险，避免把旧 `lastTouchedChapterOrder` 锚成跨几十章的重规划窗口。
 - 页面看起来反复“更新”：先区分后端是否真的产生新正文。若章节正文未变但 `updatedAt`、RAG job 或任务 heartbeat 持续刷新，检查已有正文复审是否被重新保存为草稿。
 - 正文已经可读但 UI 显示失败：检查正文状态、资产回灌状态和账本校准状态是否被混为一个状态。
-- 第 3-8 章这类章节都显示“建议补写修复 / 质量需修复”：先检查 `riskFlags.qualityLoop` 是否是 `defer_and_continue` 质量债务。若没有 `replan_required`、`recommendedAction=replan` 或 `blockingObligations`，主界面和 AI 驾驶舱不得把它显示为阻塞错误。
+- 第 3-8 章这类章节都显示“建议补写修复 / 质量需修复”：先检查 `riskFlags.qualityLoop` 是否是 `defer_and_continue` 质量债务。若没有 `replan_required`、`recommendedAction=replan` 或 `blockingObligations`，主界面和 AI 驾驶舱不得把它显示为阻塞错误。若未解决 code 只有 `payoff_overdue`，读路径不得再投影为「待优化」，那是全书账本风险，不是本章留存失败。
+- 后文章节被早期 Book Contract 窗口打成「留存风险」：检查 `payoff_overdue` 是否又进入了 `hasBlockingIssues`、`toReviewIssues` 或人工复审 legacy issues。正确行为是逾期留在账本，本章完成态只看正文局部问题。
 - 关闭自动审校后任务停在 `chapter.quality.review facts are not complete yet`：优先检查运行态 seed payload 中的 `autoExecution.autoReview`、`autoExecutionPlan.autoReview` 和 `directorInput.autoExecutionPlan.autoReview` 是否传入事实检查。若这些字段为 `false`，质量审校步骤应输出 `reviewSkipped=true` 并继续后续状态提交。
 - 章节出现未来剧情泄漏：优先检查章节边界、protected secrets、事实账本和 `reader_experience` 是否进入 writer prompt，不要把 Timeline 当成默认写章事实来源。
 - 下一章没有承接旧钩子：检查相邻章细化是否把责任写入 `inheritedHookResponsibilities`，以及 writer / acceptance / repair 是否消费同一个 `reader_experience` block。

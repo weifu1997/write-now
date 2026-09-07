@@ -74,9 +74,25 @@ export class NovelSideEffectWorker {
         await this.handlers.execute(job);
         await this.jobService.markSucceeded(job);
       } catch (error) {
-        const forceDead = error instanceof UnsupportedNovelSideEffectPayloadError;
-        await this.jobService.markFailedOrDead(job, error, { forceDead });
+        try {
+          const forceDead = error instanceof UnsupportedNovelSideEffectPayloadError;
+          await this.jobService.markFailedOrDead(job, error, { forceDead });
+        } catch (markError) {
+          // 租约过期被 recoverExpiredRunningJobs 回收后，markSucceeded /
+          // markFailedOrDead 的 CAS 更新都会匹配 0 行并抛错。tick 由
+          // setInterval 里的 void 调用，这里的拒绝若不就地消化会变成
+          // unhandledRejection 并使整个服务进程退出。
+          console.error(
+            `[novel-side-effect-worker] job ${job.id} failed and its failure could not be recorded`,
+            error,
+            markError,
+          );
+        }
       }
+    } catch (error) {
+      // leaseNext（或其它前置步骤）失败时仅记录，等待下一轮轮询重试；
+      // 同样避免 void 调用链上的未处理拒绝。
+      console.error("[novel-side-effect-worker] tick failed before leasing a job", error);
     } finally {
       this.isTicking = false;
     }

@@ -19,6 +19,7 @@ import {
 import { resolveAssetFile } from "./ComicCharacterAssetService";
 import { comicSpriteSheetService } from "./ComicSpriteSheetService";
 import { resolveSceneFile, type SceneBible } from "./ComicSceneService";
+import { resolveComicStoragePath } from "./comicStoragePaths";
 import { IMAGE_SIZES, type ImageSize } from "../image/types";
 import type { LLMProvider } from "@write-now/shared/types/llm";
 
@@ -511,7 +512,11 @@ export class ComicPanelImageService {
   async getPanelImageFile(
     panelId: string,
   ): Promise<{ buffer: Buffer; ext: string } | null> {
-    const dir = comicPanelDir(panelId);
+    // panelId 来自路由参数（会被百分号解码），越界 id 一律按 404 处理
+    const dir = resolveComicStoragePath(COMIC_IMAGES_DIR, panelId);
+    if (!dir) {
+      return null;
+    }
     let entries: string[];
     try {
       entries = await fs.readdir(dir);
