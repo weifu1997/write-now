@@ -303,7 +303,8 @@ export default function ChapterEditorShell(props: ChapterEditorShellProps) {
     onSuccess: async (nextContent) => {
       const anchorText = activeCandidate?.content?.trim();
       if (chapter && anchorText) {
-        createStyleAnchor(novelId, chapter.id, { text: anchorText, source: "adopted" }).catch(() => undefined);
+        createStyleAnchor(novelId, chapter.id, { text: anchorText, source: "adopted" }, { silent: true })
+          .catch(() => undefined);
       }
       setContentDraft(nextContent);
       setSavedContent(nextContent);
