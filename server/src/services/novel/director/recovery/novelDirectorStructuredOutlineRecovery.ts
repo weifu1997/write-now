@@ -239,6 +239,11 @@ export function resolveStructuredOutlineRecoveryCursor(input: {
   workspace: VolumePlanDocument;
   plan?: DirectorAutoExecutionPlan | null;
   allowPartialChapterListReady?: boolean;
+  /**
+   * full_book_autopilot / JIT：章节任务单在执行前即时生成，
+   * 拆章列表就绪后应直接进入 chapter_sync，而不是卡在 chapter_detail_bundle。
+   */
+  skipChapterDetail?: boolean;
 }): StructuredOutlineRecoveryCursor {
   const normalizedPlan = normalizeDirectorAutoExecutionPlan(input.plan);
   const requiredVolumes = resolveRequiredVolumes(input.workspace, normalizedPlan);
@@ -397,7 +402,7 @@ export function resolveStructuredOutlineRecoveryCursor(input: {
     normalizedPlan.mode === "volume" ? selectedChapters[0]?.volumeTitle ?? null : null,
   );
 
-  if (nextChapter && nextDetailMode) {
+  if (nextChapter && nextDetailMode && input.skipChapterDetail !== true) {
     return {
       step: "chapter_detail_bundle",
       scopeLabel,
@@ -431,9 +436,12 @@ export function resolveStructuredOutlineRecoveryCursor(input: {
     volumeChapterListComplete: !partialReadyVolume,
     selectedChapters,
     totalChapterCount: selectedChapters.length,
-    completedChapterCount,
-    totalDetailSteps,
-    completedDetailSteps,
+    // JIT 跳过细化时，把已选章节视为可同步的完成壳，避免恢复游标继续指向 detail。
+    completedChapterCount: input.skipChapterDetail === true
+      ? selectedChapters.length
+      : completedChapterCount,
+    totalDetailSteps: input.skipChapterDetail === true ? 0 : totalDetailSteps,
+    completedDetailSteps: input.skipChapterDetail === true ? 0 : completedDetailSteps,
     nextChapterIndex: null,
     volumeId: null,
     volumeOrder: null,

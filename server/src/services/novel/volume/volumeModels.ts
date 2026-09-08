@@ -121,6 +121,11 @@ export interface VolumeSyncInput {
   volumes: unknown;
   preserveContent?: boolean;
   applyDeletes?: boolean;
+  /**
+   * When true: skip incomplete-contract warning collection entirely (silent).
+   * When false/undefined: incomplete contracts are still synced, but console.warn
+   * records chapter-level quality debt; they do not hard-block the sync.
+   */
   allowIncompleteExecutionContracts?: boolean;
   executionContractChapterRange?: {
     startOrder: number;

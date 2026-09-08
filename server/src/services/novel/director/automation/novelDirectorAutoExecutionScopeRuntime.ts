@@ -206,6 +206,7 @@ async function resolveVolumeScopedRange(input: {
   chapters: DirectorAutoExecutionChapterRef[];
   getVolumes?: (novelId: string) => Promise<VolumePlanDocument>;
   allowPartialChapterListReady?: boolean;
+  skipChapterDetail?: boolean;
 }): Promise<DirectorAutoExecutionResolvedScope> {
   if (!input.getVolumes) {
     throw new Error("当前环境缺少卷工作区服务，无法解析按卷自动执行范围。");
@@ -216,6 +217,7 @@ async function resolveVolumeScopedRange(input: {
     workspace,
     plan: normalizedPlan,
     allowPartialChapterListReady: input.allowPartialChapterListReady,
+    skipChapterDetail: input.skipChapterDetail === true,
   });
   if (recoveryCursor.step !== "chapter_sync" && recoveryCursor.step !== "completed") {
     throw new Error(`${recoveryCursor.scopeLabel}还没有完成节奏 / 拆章同步，不能直接进入自动执行。`);
@@ -282,6 +284,7 @@ export async function resolveAutoExecutionRangeAndState(input: {
           workspace,
           plan: normalizedPlan,
           allowPartialChapterListReady: true,
+          skipChapterDetail: input.allowLazyChapterPlanning === true,
         });
         beatChapterListReady = recoveryCursor.beatChapterListReady;
         volumeChapterListComplete = recoveryCursor.volumeChapterListComplete;
@@ -297,6 +300,7 @@ export async function resolveAutoExecutionRangeAndState(input: {
       getVolumes: input.deps.getVolumes,
       allowPartialChapterListReady: input.existingState.beatChapterListReady === true
         || input.allowLazyChapterPlanning === true,
+      skipChapterDetail: input.allowLazyChapterPlanning === true,
     });
     range = resolvedVolumeScope.range;
     scopeLabel = resolvedVolumeScope.scopeLabel ?? scopeLabel;
@@ -317,14 +321,17 @@ export async function resolveAutoExecutionRangeAndState(input: {
       `${resolvedScopeLabel}对应的章节执行区还缺少第 ${missingChapterOrders.slice(0, 5).join("、")} 章，请先完成目标范围的拆章同步。`,
     );
   }
-  const missingExecutionContextOrders = findMissingExecutionContextOrders(chapters, range, input.existingState, {
-    allowLazyChapterPlanning: input.allowLazyChapterPlanning,
-  });
-  if (missingExecutionContextOrders.length > 0) {
-    const resolvedScopeLabel = scopeLabel ?? buildDirectorAutoExecutionScopeLabelFromState(input.existingState, range.totalChapterCount);
-    throw new Error(
-      `${resolvedScopeLabel}对应的章节执行区还有第 ${missingExecutionContextOrders.slice(0, 5).join("、")} 章缺少完整章节细化，请先回到节奏 / 拆章补齐章节细化后再继续。`,
-    );
+  // 懒规划：章节行存在即可进入执行；轻量种子 / task sheet 由写章前 JIT 补齐，不得硬挡回大纲。
+  if (input.allowLazyChapterPlanning !== true) {
+    const missingExecutionContextOrders = findMissingExecutionContextOrders(chapters, range, input.existingState, {
+      allowLazyChapterPlanning: false,
+    });
+    if (missingExecutionContextOrders.length > 0) {
+      const resolvedScopeLabel = scopeLabel ?? buildDirectorAutoExecutionScopeLabelFromState(input.existingState, range.totalChapterCount);
+      throw new Error(
+        `${resolvedScopeLabel}对应的章节执行区还有第 ${missingExecutionContextOrders.slice(0, 5).join("、")} 章缺少完整章节细化，请先回到节奏 / 拆章补齐章节细化后再继续。`,
+      );
+    }
   }
   return {
     range,

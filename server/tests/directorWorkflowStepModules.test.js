@@ -58,7 +58,19 @@ test("director workflow step registry exposes unified step modules", () => {
   const outlineModule = getDirectorPlanningStepModule("structured_outline");
   assert.equal(outlineModule.id, "volume.beat_sheet.generate");
   assert.equal(outlineModule.nodeKey, "volume_beat_sheet_generate");
-  assert.deepEqual(outlineModule.writes, ["chapter_task_sheet"]);
+  assert.deepEqual(outlineModule.writes, ["volume_beat_sheet"]);
+  assert.deepEqual(outlineModule.reads, ["volume_strategy", "character_cast"]);
+  const chapterListModule = directorWorkflowStepModuleRegistry.get("volume.chapter_list.generate");
+  const detailBundleModule = directorWorkflowStepModuleRegistry.get("volume.chapter_detail_bundle.generate");
+  assert.deepEqual(chapterListModule.writes, ["volume_chapter_list"]);
+  assert.deepEqual(chapterListModule.reads, ["volume_strategy", "character_cast", "volume_beat_sheet"]);
+  assert.deepEqual(detailBundleModule.writes, ["chapter_task_sheet"]);
+  assert.deepEqual(detailBundleModule.reads, [
+    "volume_strategy",
+    "character_cast",
+    "volume_beat_sheet",
+    "volume_chapter_list",
+  ]);
 
   const takeoverModule = getDirectorTakeoverStepModule();
   assert.equal(takeoverModule.id, "workflow.takeover.execute");
@@ -737,6 +749,154 @@ test("chapter quality review and repair facts are scoped to the active auto exec
   assert.equal(qualityRepairCompletion.evidence.draftedChapterCount, 2);
   assert.equal(qualityRepairCompletion.evidence.reviewedChapterCount, 2);
   assert.equal(qualityRepairCompletion.evidence.needsRepairChapters, 1);
+});
+
+test("payoff and character sync ignore unrelated old artifacts without draft-scoped evidence", async (t) => {
+  const originalFindMany = prisma.chapter.findMany;
+  const payoffModule = getDirectorExecutionStepModule("payoff_ledger_sync");
+  const characterModule = getDirectorExecutionStepModule("character_resource_sync");
+  const chapters = [
+    buildProgressChapter(1, { drafted: true }),
+    buildProgressChapter(2, { drafted: true }),
+  ];
+  prisma.chapter.findMany = async () => chapters.map(buildChapterRowFromProgressChapter);
+  t.after(() => {
+    prisma.chapter.findMany = originalFindMany;
+  });
+
+  const unrelatedArtifacts = [
+    {
+      id: "reader_promise:chapter:old-chapter:PayoffLedgerItem:old",
+      novelId: "novel-sync-scope",
+      artifactType: "reader_promise",
+      targetType: "chapter",
+      targetId: "old-chapter",
+      version: 1,
+      status: "active",
+      source: "ai_generated",
+      contentRef: { table: "PayoffLedgerItem", id: "old" },
+      schemaVersion: "v1",
+    },
+    {
+      id: "character_governance_state:novel:novel-sync-scope:Character:novel",
+      novelId: "novel-sync-scope",
+      artifactType: "character_governance_state",
+      targetType: "novel",
+      targetId: "novel-sync-scope",
+      version: 1,
+      status: "active",
+      source: "ai_generated",
+      contentRef: { table: "Character", id: "novel" },
+      schemaVersion: "v1",
+    },
+  ];
+  const context = {
+    taskId: "task-sync-scope",
+    novelId: "novel-sync-scope",
+    artifacts: unrelatedArtifacts,
+    projectionHints: {
+      directorCanonicalState: buildDirectorStateHint({
+        autoExecution: {
+          enabled: true,
+          mode: "chapter_range",
+          startOrder: 1,
+          endOrder: 2,
+          totalChapterCount: 2,
+          completedChapterCount: 2,
+          remainingChapterCount: 0,
+          autoReview: true,
+          autoRepair: true,
+        },
+      }, buildChapterProgressSummary(chapters)),
+    },
+  };
+
+  const payoffCompletion = await payoffModule.inspectCompletion(context);
+  const characterCompletion = await characterModule.inspectCompletion(context);
+
+  assert.equal(payoffCompletion.completed, false);
+  assert.equal(payoffCompletion.evidence.draftedChapterCount, 2);
+  assert.equal(payoffCompletion.evidence.artifactCount, 1);
+  assert.equal(payoffCompletion.evidence.scopedArtifactCount, 0);
+  assert.equal(payoffCompletion.evidence.syncDeferred, true);
+  assert.equal(characterCompletion.completed, false);
+  assert.equal(characterCompletion.evidence.draftedChapterCount, 2);
+  assert.equal(characterCompletion.evidence.scopedArtifactCount, 0);
+  assert.equal(characterCompletion.evidence.syncDeferred, true);
+
+  const scopedContext = {
+    ...context,
+    artifacts: [
+      ...unrelatedArtifacts,
+      {
+        id: "reader_promise:chapter:chapter-1:PayoffLedgerItem:new",
+        novelId: "novel-sync-scope",
+        artifactType: "reader_promise",
+        targetType: "chapter",
+        targetId: "chapter-1",
+        version: 1,
+        status: "active",
+        source: "ai_generated",
+        contentRef: { table: "PayoffLedgerItem", id: "new" },
+        schemaVersion: "v1",
+      },
+      {
+        id: "continuity_state:chapter:chapter-2:StoryStateSnapshot:snap-2",
+        novelId: "novel-sync-scope",
+        artifactType: "continuity_state",
+        targetType: "chapter",
+        targetId: "chapter-2",
+        version: 1,
+        status: "active",
+        source: "ai_generated",
+        contentRef: { table: "StoryStateSnapshot", id: "snap-2" },
+        schemaVersion: "v1",
+      },
+    ],
+  };
+
+  assert.equal((await payoffModule.inspectCompletion(scopedContext)).completed, true);
+  assert.equal((await characterModule.inspectCompletion(scopedContext)).completed, true);
+  assert.equal((await payoffModule.inspectCompletion(scopedContext)).evidence.scopedArtifactCount, 1);
+  assert.equal((await characterModule.inspectCompletion(scopedContext)).evidence.scopedArtifactCount, 1);
+});
+
+test("chapter draft buildInput resumes pending manual recovery even when task is still queued", async () => {
+  const module = getDirectorExecutionStepModule("chapter_execution");
+  const chapters = [buildProgressChapter(1, { drafted: true })];
+  const state = buildDirectorStateHint({
+    autoExecution: {
+      enabled: true,
+      mode: "chapter_range",
+      startOrder: 1,
+      endOrder: 1,
+      totalChapterCount: 1,
+      completedChapterCount: 0,
+      remainingChapterCount: 1,
+      autoReview: true,
+      autoRepair: true,
+      pipelineJobId: "pipeline-1",
+    },
+    directorInput: {
+      runMode: "full_book_autopilot",
+      idea: "test",
+      title: "test",
+    },
+  }, buildChapterProgressSummary(chapters));
+  state.task.status = "queued";
+  state.task.pendingManualRecovery = true;
+  state.task.checkpointType = "chapter_batch_ready";
+  const context = {
+    taskId: state.task.id,
+    novelId: "novel-scoped",
+    projectionHints: {
+      directorCanonicalState: state,
+    },
+  };
+
+  const input = await module.buildInput(context);
+  assert.equal(input.mode, "auto_director");
+  assert.equal(input.resumePendingManualRecovery, true);
 });
 
 test("workflow step fact inspections support novel-only manual context", async (t) => {

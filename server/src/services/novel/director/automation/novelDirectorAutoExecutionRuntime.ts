@@ -35,6 +35,11 @@ import {
 } from "./novelDirectorAutoExecutionRuntimeUtils";
 import { prepareRequestedAutoExecution as prepareRequestedAutoExecutionState, resolveAutoExecutionRuntimeRangeAndState, shouldStopAutoExecution } from "./novelDirectorAutoExecutionRuntimePreparation";
 import type { NovelDirectorAutoExecutionRuntimeDeps, PipelineJobSnapshot } from "./novelDirectorAutoExecutionRuntimePorts";
+import {
+  getPipelineReplanNotice,
+  parsePipelinePayload,
+  PIPELINE_REPLAN_NOTICE_CODE,
+} from "../../pipelineJobState";
 import { prisma } from "../../../../db/prisma";
 
 export class NovelDirectorAutoExecutionRuntime {
@@ -250,6 +255,14 @@ export class NovelDirectorAutoExecutionRuntime {
         }
         if (job.pendingManualRecovery) {
           const failureMessage = job.error?.trim() || "章节批次已暂停，等待人工确认后继续。";
+          const payload = parsePipelinePayload(job.payload);
+          const replanNotice = getPipelineReplanNotice(payload.replanAlertDetails);
+          const checkpointType = (
+            job.noticeCode === PIPELINE_REPLAN_NOTICE_CODE
+            || replanNotice.noticeCode === PIPELINE_REPLAN_NOTICE_CODE
+          )
+            ? "replan_required"
+            : "chapter_batch_ready";
           ({ range, autoExecution } = await resolveAutoExecutionRuntimeRangeAndState(this.deps, {
             novelId: input.novelId,
             existingState: autoExecution,
@@ -261,8 +274,8 @@ export class NovelDirectorAutoExecutionRuntime {
             stage: "quality_repair",
             itemKey: "quality_repair",
             itemLabel: buildDirectorAutoExecutionPausedLabel(autoExecution),
-            checkpointType: "chapter_batch_ready",
-            checkpointSummary: failureMessage,
+            checkpointType,
+            checkpointSummary: replanNotice.noticeSummary?.trim() || failureMessage,
             chapterId: autoExecution.nextChapterId ?? range.firstChapterId,
             progress: job.progress,
           });

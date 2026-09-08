@@ -31,6 +31,28 @@ export class DirectorCommandLeaseService {
       let actionApplied = false;
       const applyAction = async (action: "auto_retry" | "continue_with_warning" | "pause_for_manual" | "fail_task") => {
         if (action === "auto_retry" || action === "continue_with_warning") {
+          const taskRow = await prisma.novelWorkflowTask.findUnique({
+            where: { id: command.taskId },
+            select: { pendingManualRecovery: true },
+          });
+          // Quality/policy manual pauses must survive worker stale auto-recovery.
+          // Only an explicit user recovery command may clear pendingManualRecovery.
+          if (taskRow?.pendingManualRecovery) {
+            await prisma.directorRunCommand.updateMany({
+              where: { id: command.id },
+              data: {
+                status: "stale",
+                finishedAt: now,
+                errorMessage: STALE_COMMAND_INTERNAL_MESSAGE,
+              },
+            });
+            await prisma.directorStepRun.updateMany({
+              where: { taskId: command.taskId, status: "running" },
+              data: { status: "failed", finishedAt: now, error: STALE_COMMAND_INTERNAL_MESSAGE },
+            }).catch(() => null);
+            actionApplied = true;
+            return;
+          }
           await prisma.directorRunCommand.updateMany({
             where: { id: command.id },
             data: {

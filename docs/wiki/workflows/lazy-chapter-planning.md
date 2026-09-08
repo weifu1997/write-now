@@ -143,10 +143,17 @@ if (request.controlPolicy?.advanceMode === "full_book_autopilot") {
 
 失败模式：如果自动执行范围预检仍按普通路径要求完整 task sheet，`full_book_autopilot` 会在 JIT 触发前被 `runFromReady` 拦截，出现“缺少完整章节细化”的失败；这不是章节数据丢失，而是预检层与 JIT 契约不一致。
 
+### 恢复游标与对外文案
+
+`resolveStructuredOutlineRecoveryCursor` 在 `skipChapterDetail=true`（由 `full_book_autopilot` 调用方传入）且章节列表已就绪时，必须直接进入 `chapter_sync`，不得回到 `chapter_detail_bundle`。事实摘要、step factory、takeover 共用该游标。
+
+快速开篇 guidance 在 autopilot 下不得承诺“正文前已完整细化 detailAhead 章”；应说明任务单将在开写前按需即时生成。catalog 中 beat / list / detail 的读写产物分别对齐 `volume_beat_sheet` / `volume_chapter_list` / `chapter_task_sheet`。
+
 相关模块：
 - `server/src/services/novel/director/automation/novelDirectorAutoExecutionScopeRuntime.ts`
 - `server/src/services/novel/director/automation/novelDirectorAutoExecutionRuntimePreparation.ts`
 - `server/src/services/novel/director/runtime/novelDirectorTakeoverRuntime.ts`
+- `server/src/services/novel/director/recovery/novelDirectorStructuredOutlineRecovery.ts`
 
 ---
 

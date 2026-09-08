@@ -165,6 +165,8 @@ const DIRECTOR_EXECUTION_NODE_SEQUENCES: Record<DirectorExecutionFlow, DirectorE
     "payoff_ledger_sync",
     "character_resource_sync",
   ],
+  // quality_repair flow executes the chapter_repair node (not the quality_repair stage alias).
+  // quality_repair remains a catalog/UI alias that shares chapter_repair_node.
   quality_repair: [
     "chapter_repair",
     "chapter_quality_review",

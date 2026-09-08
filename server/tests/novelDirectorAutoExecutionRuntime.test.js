@@ -71,6 +71,61 @@ test("full-book autopilot keeps a bounded target while future chapters are still
   assert.deepEqual(result.autoExecution.remainingChapterOrders, [4, 5, 6]);
 });
 
+test("lazy planning does not hard-fail when chapter rows lack light execution seeds", async () => {
+  const result = await resolveAutoExecutionRangeAndState({
+    novelId: "novel-1",
+    deps: {
+      listChapters: async () => [1, 2, 3].map((order) => ({
+        id: `chapter-${order}`,
+        order,
+        title: `第${order}章`,
+      })),
+    },
+    existingState: {
+      enabled: true,
+      mode: "chapter_range",
+      startOrder: 1,
+      endOrder: 3,
+      autoReview: true,
+      autoRepair: true,
+    },
+    allowLazyChapterPlanning: true,
+  });
+
+  assert.deepEqual(result.range, {
+    startOrder: 1,
+    endOrder: 3,
+    totalChapterCount: 3,
+    firstChapterId: null,
+  });
+  assert.deepEqual(result.autoExecution.remainingChapterOrders, [1, 2, 3]);
+});
+
+test("non-lazy planning still requires complete chapter contracts", async () => {
+  await assert.rejects(
+    () => resolveAutoExecutionRangeAndState({
+      novelId: "novel-1",
+      deps: {
+        listChapters: async () => [1].map((order) => ({
+          id: `chapter-${order}`,
+          order,
+          title: `第${order}章`,
+        })),
+      },
+      existingState: {
+        enabled: true,
+        mode: "chapter_range",
+        startOrder: 1,
+        endOrder: 1,
+        autoReview: true,
+        autoRepair: true,
+      },
+      allowLazyChapterPlanning: false,
+    }),
+    /缺少完整章节细化|章节执行区/,
+  );
+});
+
 test("circuit-breaker governance continues, pauses, or fails the real workflow state", async () => {
   const originalReportIssue = directorIssueService.reportIssue;
   let selectedAction = "continue_with_warning";
@@ -767,6 +822,88 @@ test("runFromReady keeps a pending manual-recovery pipeline job paused", async (
     ["requeueTaskForRecovery", "chapter_batch_ready"],
     ["bootstrapTask", "job-paused", "queued"],
   ]);
+});
+
+test("runFromReady marks replan_required when paused pipeline carries replanAlertDetails", async () => {
+  const calls = [];
+  const runtime = new NovelDirectorAutoExecutionRuntime({
+    novelContextService: {
+      async listChapters() {
+        return [
+          withExecutionDetail({ id: "chapter-1", order: 1, generationState: "approved", content: "正文" }),
+        ];
+      },
+    },
+    novelService: {
+      async startPipelineJob() {
+        calls.push(["startPipelineJob"]);
+        return { id: "job-replan", status: "queued" };
+      },
+      async findActivePipelineJobForRange() {
+        return null;
+      },
+      async getPipelineJobById(jobId) {
+        calls.push(["getPipelineJobById", jobId]);
+        return {
+          id: "job-replan",
+          status: "queued",
+          progress: 0.65,
+          pendingManualRecovery: true,
+          currentStage: "queued",
+          currentItemLabel: null,
+          error: "章节需要人工确认，后续生成已暂停。",
+          payload: JSON.stringify({
+            replanAlertDetails: ["第 1 章职责与后续窗口失配，需要重规划"],
+          }),
+        };
+      },
+      async cancelPipelineJob() {
+        calls.push(["cancelPipelineJob"]);
+      },
+    },
+    workflowService: {
+      async bootstrapTask(input) {
+        calls.push(["bootstrapTask", input.seedPayload.autoExecution.pipelineJobId, input.seedPayload.autoExecution.pipelineStatus]);
+      },
+      async getTaskById() {
+        return { status: "running" };
+      },
+      async markTaskRunning() {
+        calls.push(["markTaskRunning"]);
+      },
+      async recordCheckpoint() {
+        calls.push(["recordCheckpoint"]);
+      },
+      async markTaskFailed() {
+        calls.push(["markTaskFailed"]);
+      },
+      async requeueTaskForRecovery(_taskId, _message, patch) {
+        calls.push(["requeueTaskForRecovery", patch.checkpointType]);
+      },
+    },
+    buildDirectorSeedPayload(_request, _novelId, extra) {
+      return extra ?? {};
+    },
+  });
+
+  await runtime.runFromReady({
+    taskId: "task-auto-exec",
+    novelId: "novel-1",
+    request: buildRequest(),
+    existingState: {
+      enabled: true,
+      firstChapterId: "chapter-1",
+      startOrder: 1,
+      endOrder: 1,
+      totalChapterCount: 1,
+      pipelineJobId: "job-replan",
+      pipelineStatus: "queued",
+    },
+    existingPipelineJobId: "job-replan",
+  });
+
+  assert.ok(calls.some((call) => call[0] === "requeueTaskForRecovery" && call[1] === "replan_required"));
+  assert.ok(!calls.some((call) => call[0] === "requeueTaskForRecovery" && call[1] === "chapter_batch_ready"));
 });
 
 test("runFromReady records a normal checkpoint when pipeline completes with quality notices", async () => {

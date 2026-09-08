@@ -501,6 +501,8 @@ export async function loadDirectorTakeoverState(input: {
     ? resolveStructuredOutlineRecoveryCursor({
         workspace,
         plan: effectiveAutoExecutionPlan,
+        allowPartialChapterListReady: allowLazyChapterPlanning,
+        skipChapterDetail: allowLazyChapterPlanning,
       })
     : null;
   const missingExecutionContractOrders = computeMissingExecutionContractOrders({

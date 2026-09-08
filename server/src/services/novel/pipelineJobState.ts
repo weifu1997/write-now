@@ -34,6 +34,7 @@ export type PipelineActiveStage = (typeof PIPELINE_ACTIVE_STAGES)[number];
 export interface PipelineJobLike {
   status: PipelineJobStatus;
   payload?: string | null;
+  pendingManualRecovery?: boolean | null;
 }
 
 export interface PipelineJobDecorations {
@@ -368,23 +369,25 @@ export function getPipelineReplanNotice(details: string[] | undefined): Pipeline
 export function decoratePipelineJob<T extends PipelineJobLike>(job: T): DecoratedPipelineJob<T> {
   const payload = parsePipelinePayload(job.payload);
   const qualityNotice = getPipelineQualityNotice(payload.qualityAlertDetails, payload.recoverableRepairDetails);
-  const notice = job.status === "succeeded"
-    ? (getPipelineReplanNotice(payload.replanAlertDetails).noticeCode
-      ? getPipelineReplanNotice(payload.replanAlertDetails)
-      : qualityNotice)
-    : qualityNotice.noticeSummary
-      ? {
-        ...qualityNotice,
-        displayStatus: "Failed with generation alerts",
-      }
-    : {
-      displayStatus: null,
-      noticeCode: null,
-      noticeSummary: null,
-      qualityAlertDetails: payload.qualityAlertDetails ?? [],
-      recoverableRepairDetails: payload.recoverableRepairDetails ?? [],
-      backgroundActivityLabels: [],
-    };
+  const replanNotice = getPipelineReplanNotice(payload.replanAlertDetails);
+  // stop_for_replan 会把 job 停在 queued + pendingManualRecovery，此时也必须暴露重规划 notice。
+  const notice = replanNotice.noticeCode && (job.status === "succeeded" || job.pendingManualRecovery)
+    ? replanNotice
+    : job.status === "succeeded"
+      ? qualityNotice
+      : qualityNotice.noticeSummary
+        ? {
+          ...qualityNotice,
+          displayStatus: "Failed with generation alerts",
+        }
+        : {
+          displayStatus: null,
+          noticeCode: null,
+          noticeSummary: null,
+          qualityAlertDetails: payload.qualityAlertDetails ?? [],
+          recoverableRepairDetails: payload.recoverableRepairDetails ?? [],
+          backgroundActivityLabels: [],
+        };
   return {
     ...job,
     displayStatus: notice.displayStatus,

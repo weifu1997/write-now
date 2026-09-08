@@ -177,7 +177,14 @@ export function createStructuredOutlineFactModule(input: {
 }): WorkflowStepModule<{ taskId: string; novelId: string; request: DirectorConfirmRequest }, void> {
   return createWorkflowStepModule(
     input.descriptor,
-    async (moduleInput) => getDirectorCoreStepRuntime().executeStructuredOutlineFactStep(moduleInput),
+    async (moduleInput, context) => {
+      // 已完成的 fact step 不得再次整段重跑 structured outline phase（避免重复 sync / checkpoint）。
+      const current = await inspectStructuredOutlineFactState(context, input.step);
+      if (current.completion.completed) {
+        return;
+      }
+      await getDirectorCoreStepRuntime().executeStructuredOutlineFactStep(moduleInput);
+    },
     {
       inspectReadiness: async (context) => (await inspectStructuredOutlineFactState(context, input.step)).readiness,
       inspectCompletion: async (context) => (await inspectStructuredOutlineFactState(context, input.step)).completion,

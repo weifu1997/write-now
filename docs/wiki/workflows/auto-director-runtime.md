@@ -245,6 +245,10 @@ Web API 只接收命令和返回轻量投影；Worker 负责执行重型生产�
 
 Worker 租约过期与章节运行共用问题治理的自动重试预算。第一次失去响应可以按 `runtime.worker_stale` 执行一次自动恢复，预算耗尽后停在人工恢复边界；不得再通过环境变量或运行模式维护独立的 2 次、5 次重试阈值。无法关联小说的孤立任务没有安全治理上下文，应直接暂停等待处理。
 
+若任务已经因质量策略或其他原因处于 `pendingManualRecovery=true`，Worker 租约过期后的 `auto_retry` / `continue_with_warning` 不得清掉该标志，也不得用租约过期文案覆盖原有 `lastError`。此时只能把过期命令收束为 `stale`，保留人工暂停，等待用户显式恢复。
+
+收口阶段的 `payoff_ledger_sync` / `character_resource_sync` 完成判据必须按本批已起草章节做 draft-scoped 过滤。任意旧的 `reader_promise` / `continuity_state` 等活跃产物不得冒充当前范围已同步；缺少本批章节级证据时保持 pending，由 BACKGROUND 投影等待或可恢复门禁处理，不得因此把全书任务打成失败。
+
 章节执行合同的复用必须先通过确定性结构门禁，不能只凭 `taskSheet` 和 `sceneCards` 存在就认定合同可用。只要章节目标、独占事件、结束状态、下一章入口、冲突与揭露强度、目标字数或禁止事项任一缺失，就必须保留旧规划作为生成上下文并重新进入执行合同生成与质量反馈循环。最终同步门禁与复用门禁必须使用同一套结构判断，避免旧任务在恢复时反复复用同一份残缺合同。
 
 回报账本的 `overdue` 只有在当前章节已经越过明确的 `targetEndChapterOrder` 后才生效。仍处于承诺窗口内的项目属于待推进或紧急提示，不得让生成决策提前返回 `replan`。账本内部标识（例如 `payoff/payoff_missing_progress`）只能用于诊断和质量记录，不能写入章节的“必须推进”合同。

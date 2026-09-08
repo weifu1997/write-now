@@ -1,5 +1,8 @@
 import { prisma } from "../../../db/prisma";
-import { isDirectorAutoExecutionRunMode } from "@write-now/shared/types/novelDirector";
+import {
+  isDirectorAutoExecutionRunMode,
+  isFullBookAutopilotRunMode,
+} from "@write-now/shared/types/novelDirector";
 import { buildChapterDetailBundleLabel, buildChapterDetailBundleProgress, DIRECTOR_PROGRESS } from "../director/projections/novelDirectorProgress";
 import {
   normalizeDirectorRunMode,
@@ -102,8 +105,10 @@ export class NovelWorkflowHealingService {
     const recoveryCursor = resolveStructuredOutlineRecoveryCursor({
       workspace,
       plan,
+      allowPartialChapterListReady: isDirectorAutoExecutionRunMode(runMode),
+      skipChapterDetail: isFullBookAutopilotRunMode(runMode),
     });
-    if (recoveryCursor.step === "completed") {
+    if (recoveryCursor.step === "completed" || recoveryCursor.step === "chapter_sync") {
       return null;
     }
 
@@ -131,18 +136,6 @@ export class NovelWorkflowHealingService {
         scopeLabel: recoveryCursor.scopeLabel,
         volumeId: recoveryCursor.volumeId,
         chapterId: null,
-      };
-    }
-
-    if (recoveryCursor.step === "chapter_sync") {
-      return {
-        step: "chapter_sync",
-        currentItemKey: "chapter_sync",
-        currentItemLabel: `${recoveryCursor.scopeLabel}细化已完成，正在同步章节执行资源`,
-        progress: DIRECTOR_PROGRESS.chapterDetailDone,
-        scopeLabel: recoveryCursor.scopeLabel,
-        volumeId: recoveryCursor.selectedChapters[0]?.volumeId ?? null,
-        chapterId: recoveryCursor.selectedChapters[0]?.id ?? null,
       };
     }
 
