@@ -521,6 +521,7 @@ export function buildRuntimePackage(input: BuildRuntimePackageInput): ChapterRun
       pendingReviewProposalCount: input.contextPackage.pendingReviewProposalCount,
       acceptanceStatus: input.acceptance.status,
       continuePolicy: input.acceptance.continuePolicy,
+      repairability: input.acceptance.repairability,
       riskTags: input.acceptance.riskTags,
       repairDirectives: input.acceptance.repairDirectives,
       assetSyncRecommendation: input.acceptance.assetSyncRecommendation,

@@ -42,6 +42,8 @@
 - 正文生成前只做最低可写性检查：章节存在、人物可用、上下文包可组装、任务目标可解释。
 - 生成后用一次结构化接收闸门判断是否可继续、是否需要局部修文、是否需要人工确认。
 - 接收闸门负责输出结构化事实、问题证据、缺失义务和修复可行性；流水线是否继续、暂停或结束，必须由任务启动时冻结的问题策略决定。AI 返回的 `continuePolicy` 只能作为兼容期诊断信号，不能越过用户策略直接改变全书任务状态。
+- 简易书架「一键自动修复全部质量项」走 `chapterScope=quality_debt`。该入口下 `pause` / `needs_manual_review` 仍表示本章未通过，但不能跳过自动修复。是否改写只消费验收结构化字段：`repairability=rewrite_needed`、`needs_manual_review` 或 `repairDirectives.mode=rewrite` 时升级为整章修文；`plan_misalignment` 仍不改写本章。普通写作入口保持原语义：验收暂停就跳过自动修复，轻量补丁失败不得升级成整章重写。
+- 质量债批次只修正文，不为局部质量问题调用后续章节重规划。只有结构化 `stop_for_replan` 或书级重规划才沿用原重规划报告路径。
 - 每个新建章节流水线任务都必须在 `GenerationJob.payload` 中保存 `issueGovernanceVersion + issuePolicySnapshot`。自动导演优先冻结工作流任务策略，手动流水线冻结小说当前生效策略；恢复和重试必须继续使用该快照，运行中修改全局或小说策略不能改变已启动任务。
 - 问题动作必须保持终态语义：`pause_for_manual` 保存为 `pendingManualRecovery` 并等待用户恢复，`fail_task` 结束任务且不得伪装成可恢复暂停，`continue_with_warning` 只记录质量债，`auto_retry` 只有在预算和安全重试入口都存在时才允许执行。
 - 接收闸门通过后、构建运行包前，会对最终正文执行一次确定性正文自然度/退化检测。该检测只做本地文本规则检查，覆盖 AI 自述、占位符、工程词泄漏、截断、复读、破折号/省略号、否定翻转句、碎句和长段落等风险；它不调用 LLM，也不改变正文。

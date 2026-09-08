@@ -500,3 +500,130 @@ test("a failed issue action stays unhandled and propagates to the runtime", asyn
     directorAutomationLedgerEventService.recordEvent = originalRecordEvent;
   }
 });
+
+function createQualityClosureInput(overrides = {}) {
+  return {
+    governance: {
+      novelId: "novel-quality-debt",
+      issueGovernanceVersion: 1,
+      policy: DEFAULT_DIRECTOR_ISSUE_POLICY,
+      runMode: "full_book_autopilot",
+      policySource: "novel",
+    },
+    workflowTaskId: "task-quality-debt",
+    novelId: "novel-quality-debt",
+    jobId: "job-quality-debt",
+    chapter: { id: "chapter-102", order: 102 },
+    chapterResult: {
+      retryCountUsed: 1,
+      score: {
+        coherence: 70,
+        repetition: 80,
+        pacing: 75,
+        voice: 78,
+        engagement: 72,
+        overall: 74,
+      },
+      issues: [],
+      pass: false,
+      reviewExecuted: false,
+      runtimePackage: {
+        replanRecommendation: {
+          recommended: true,
+          action: "local_patch_plan",
+          scope: "local_window",
+          reason: "局部质量问题",
+          blockingIssueIds: [],
+          affectedChapterOrders: [102, 103],
+        },
+      },
+      recoverableRepairFailure: null,
+    },
+    qualityThreshold: 75,
+    runtimePayload: {
+      provider: "deepseek",
+      model: "deepseek-chat",
+      temperature: 0.7,
+      runMode: "fast",
+      autoReview: true,
+      autoRepair: true,
+      skipCompleted: false,
+      qualityThreshold: 75,
+      repairMode: "light_repair",
+      chapterScope: "quality_debt",
+    },
+    qualityAlertDetails: [],
+    replanAlertDetails: [],
+    recoverableRepairDetails: [],
+    runLocalReplan: async () => {
+      throw new Error("quality debt repair must not local replan");
+    },
+    ...overrides,
+  };
+}
+
+test("quality-debt closure does not local-replan deferred chapter issues", async () => {
+  const originalRecordEvent = directorAutomationLedgerEventService.recordEvent;
+  directorAutomationLedgerEventService.recordEvent = async () => undefined;
+  let localReplanCalls = 0;
+  try {
+    const result = await applyChapterQualityClosure(createQualityClosureInput({
+      runLocalReplan: async () => {
+        localReplanCalls += 1;
+        throw new Error("quality debt repair must not local replan");
+      },
+    }));
+    assert.equal(localReplanCalls, 0);
+    assert.equal(result.shouldStopAfterCurrentChapter, false);
+    assert.equal(result.stopAction, null);
+  } finally {
+    directorAutomationLedgerEventService.recordEvent = originalRecordEvent;
+  }
+});
+
+test("quality-debt closure still reports an explicit stop-for-replan", async () => {
+  const originalRecordEvent = directorAutomationLedgerEventService.recordEvent;
+  directorAutomationLedgerEventService.recordEvent = async () => undefined;
+  let localReplanCalls = 0;
+  const replanAlertDetails = [];
+  try {
+    const result = await applyChapterQualityClosure(createQualityClosureInput({
+      replanAlertDetails,
+      chapterResult: {
+        retryCountUsed: 0,
+        score: {
+          coherence: 40,
+          repetition: 40,
+          pacing: 40,
+          voice: 40,
+          engagement: 40,
+          overall: 40,
+        },
+        issues: [],
+        pass: false,
+        reviewExecuted: false,
+        runtimePackage: {
+          replanRecommendation: {
+            recommended: true,
+            action: "stop_for_replan",
+            scope: "local_window",
+            reason: "必须先调整章节窗口",
+            blockingIssueIds: ["plan-misalignment"],
+            affectedChapterOrders: [24],
+          },
+        },
+        recoverableRepairFailure: null,
+      },
+      runLocalReplan: async () => {
+        localReplanCalls += 1;
+        throw new Error("explicit replan must not fall back to local replan in quality-debt batch");
+      },
+    }));
+    assert.equal(localReplanCalls, 0);
+    assert.equal(result.shouldStopAfterCurrentChapter, true);
+    assert.equal(result.stopAction, "pause_for_manual");
+    assert.equal(replanAlertDetails.length > 0, true);
+  } finally {
+    directorAutomationLedgerEventService.recordEvent = originalRecordEvent;
+  }
+});

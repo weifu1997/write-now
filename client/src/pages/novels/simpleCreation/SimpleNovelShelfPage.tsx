@@ -311,6 +311,11 @@ export default function SimpleNovelShelfPage() {
               </div>
             </div>
           ) : null}
+          {shelf.progress.qualityDebtRepair?.status === "completed" && shelf.materials.openQualityDebtCount > 0 ? (
+            <div className="border-t border-border px-5 py-3 text-sm leading-6 text-muted-foreground sm:px-7">
+              本轮已按章处理。还剩下需要跟进的局部质量项，可以再点一次自动修复。已保存正文不会被清空。
+            </div>
+          ) : null}
           {shelf.progress.safetyMessage ? (
             <div className="flex items-start gap-3 border-t border-amber-200 bg-amber-50 px-5 py-3 text-sm leading-6 text-amber-950 sm:px-7">
               <AlertTriangle className="mt-1 h-4 w-4 shrink-0 text-amber-600" />

@@ -1460,3 +1460,257 @@ test("runPipelineChapterWithRuntime clamps maxRetries to a single repair pass", 
     promptRunner.runStructuredPrompt = originalRunStructuredPrompt;
   }
 });
+
+function createPausedRuntimePackage(overallScore, extraMeta = {}) {
+  const base = createRuntimePackage(overallScore);
+  return {
+    ...base,
+    audit: {
+      ...base.audit,
+      hasBlockingIssues: true,
+    },
+    meta: {
+      acceptanceStatus: "needs_manual_review",
+      continuePolicy: "pause",
+      repairability: "rewrite_needed",
+      repairDirectives: [{
+        mode: "rewrite",
+        target: "plot",
+        instruction: "重写崩坏段落，去掉机械复读和提示词泄漏。",
+      }],
+      ...extraMeta,
+    },
+  };
+}
+
+function createPipelineDeps(overrides = {}) {
+  return {
+    validateRequest(input) {
+      return input;
+    },
+    async ensureNovelCharacters() {},
+    async assemble() {
+      return {
+        novel: { id: "novel-1", title: "测试小说" },
+        chapter: {
+          id: "chapter-1",
+          title: "第一章",
+          order: 1,
+          content: "已保存的崩坏正文。",
+          expectation: null,
+        },
+        contextPackage: {},
+      };
+    },
+    async generateDraftFromWriter() {
+      throw new Error("existing content should not be regenerated");
+    },
+    async saveDraftAndArtifacts() {},
+    async syncFinalChapterArtifacts() {},
+    async finalizeChapterContent({ content }) {
+      return {
+        finalContent: content,
+        runtimePackage: createPausedRuntimePackage(30),
+      };
+    },
+    async markChapterGenerationState() {},
+    async markChapterNeedsRepair() {},
+    ...overrides,
+  };
+}
+
+test("writable pipeline still skips repair when acceptance pauses for manual review", async () => {
+  const originalRunStructuredPrompt = promptRunner.runStructuredPrompt;
+  let patchRepairCalled = false;
+  let heavyRewriteCalls = 0;
+  promptRunner.runStructuredPrompt = async () => {
+    patchRepairCalled = true;
+    throw new Error("writable pause must not start patch repair");
+  };
+  promptRunner.setPromptRunnerLLMFactoryForTests(async () => ({
+    stream: async () => {
+      heavyRewriteCalls += 1;
+      throw new Error("writable pause must not start heavy rewrite");
+    },
+  }));
+
+  try {
+    const result = await runPipelineChapterWithRuntime(
+      createPipelineDeps(),
+      "novel-1",
+      "chapter-1",
+      {
+        autoReview: true,
+        autoRepair: true,
+        repairMode: "light_repair",
+      },
+    );
+    assert.equal(result.pass, false);
+    assert.equal(result.retryCountUsed, 0);
+    assert.equal(result.qualityDebtAttribution.repairAttemptsUsed, 0);
+    assert.equal(patchRepairCalled, false);
+    assert.equal(heavyRewriteCalls, 0);
+  } finally {
+    promptRunner.runStructuredPrompt = originalRunStructuredPrompt;
+    promptRunner.setPromptRunnerLLMFactoryForTests();
+  }
+});
+
+test("quality-debt batch rewrites paused unreadable chapters instead of skipping repair", async () => {
+  const originalRunStructuredPrompt = promptRunner.runStructuredPrompt;
+  let patchRepairCalled = false;
+  let heavyRewriteCalls = 0;
+  let reviewCount = 0;
+  promptRunner.runStructuredPrompt = async () => {
+    patchRepairCalled = true;
+    throw new Error("unreadable quality-debt chapters must not use light patch");
+  };
+  promptRunner.setPromptRunnerLLMFactoryForTests(async () => {
+    heavyRewriteCalls += 1;
+    return createTextStreamLLM("改写后的可读正文。");
+  });
+
+  try {
+    const result = await runPipelineChapterWithRuntime(
+      createPipelineDeps({
+        async saveDraftAndArtifacts() {},
+        async finalizeChapterContent({ content }) {
+          reviewCount += 1;
+          return {
+            finalContent: content,
+            runtimePackage: createPausedRuntimePackage(reviewCount === 1 ? 30 : 88),
+          };
+        },
+      }),
+      "novel-1",
+      "chapter-1",
+      {
+        chapterScope: "quality_debt",
+        autoReview: true,
+        autoRepair: true,
+        repairMode: "light_repair",
+      },
+    );
+    assert.equal(patchRepairCalled, false);
+    assert.equal(heavyRewriteCalls, 1);
+    assert.equal(result.retryCountUsed, 1);
+    assert.equal(result.qualityDebtAttribution.repairAttemptsUsed, 1);
+    assert.equal(reviewCount, 2);
+  } finally {
+    promptRunner.runStructuredPrompt = originalRunStructuredPrompt;
+    promptRunner.setPromptRunnerLLMFactoryForTests();
+  }
+});
+
+test("quality-debt batch still skips rewrite when acceptance reports plan misalignment", async () => {
+  const originalRunStructuredPrompt = promptRunner.runStructuredPrompt;
+  let patchRepairCalled = false;
+  let heavyRewriteCalls = 0;
+  promptRunner.runStructuredPrompt = async () => {
+    patchRepairCalled = true;
+    throw new Error("plan misalignment must not start patch repair");
+  };
+  promptRunner.setPromptRunnerLLMFactoryForTests(async () => ({
+    stream: async () => {
+      heavyRewriteCalls += 1;
+      throw new Error("plan misalignment must not start heavy rewrite");
+    },
+  }));
+
+  try {
+    const result = await runPipelineChapterWithRuntime(
+      createPipelineDeps({
+        async finalizeChapterContent({ content }) {
+          return {
+            finalContent: content,
+            runtimePackage: createPausedRuntimePackage(40, { repairability: "plan_misalignment" }),
+          };
+        },
+      }),
+      "novel-1",
+      "chapter-1",
+      {
+        chapterScope: "quality_debt",
+        autoReview: true,
+        autoRepair: true,
+        repairMode: "light_repair",
+      },
+    );
+    assert.equal(result.retryCountUsed, 0);
+    assert.equal(result.qualityDebtAttribution.repairAttemptsUsed, 0);
+    assert.equal(patchRepairCalled, false);
+    assert.equal(heavyRewriteCalls, 0);
+  } finally {
+    promptRunner.runStructuredPrompt = originalRunStructuredPrompt;
+    promptRunner.setPromptRunnerLLMFactoryForTests();
+  }
+});
+
+test("quality-debt batch keeps light repair for patchable chapters", async () => {
+  const originalRunStructuredPrompt = promptRunner.runStructuredPrompt;
+  let patchRepairCalled = false;
+  let heavyRewriteCalls = 0;
+  promptRunner.runStructuredPrompt = async () => {
+    patchRepairCalled = true;
+    return {
+      output: {
+        strategy: "patch_first",
+        summary: "补足承接。",
+        patches: [{
+          id: "patch-gap",
+          targetExcerpt: "已保存的崩坏正文。",
+          replacement: "已保存的正文并补上承接。",
+          reason: "补足局部义务。",
+          issueIds: [],
+        }],
+        requiresFullRewrite: false,
+        escalationReason: null,
+      },
+    };
+  };
+  promptRunner.setPromptRunnerLLMFactoryForTests(async () => ({
+    stream: async () => {
+      heavyRewriteCalls += 1;
+      throw new Error("patchable quality-debt chapters must stay on light repair");
+    },
+  }));
+
+  try {
+    const result = await runPipelineChapterWithRuntime(
+      createPipelineDeps({
+        async finalizeChapterContent({ content }) {
+          return {
+            finalContent: content,
+            runtimePackage: {
+              ...createRuntimePackage(72),
+              meta: {
+                acceptanceStatus: "repairable",
+                continuePolicy: "repair_once",
+                repairability: "patchable_obligation_gap",
+                repairDirectives: [{
+                  mode: "patch",
+                  target: "plot",
+                  instruction: "补上本章未兑现的局部义务。",
+                }],
+              },
+            },
+          };
+        },
+      }),
+      "novel-1",
+      "chapter-1",
+      {
+        chapterScope: "quality_debt",
+        autoReview: true,
+        autoRepair: true,
+        repairMode: "light_repair",
+      },
+    );
+    assert.equal(patchRepairCalled, true);
+    assert.equal(heavyRewriteCalls, 0);
+    assert.equal(result.retryCountUsed, 1);
+  } finally {
+    promptRunner.runStructuredPrompt = originalRunStructuredPrompt;
+    promptRunner.setPromptRunnerLLMFactoryForTests();
+  }
+});

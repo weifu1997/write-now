@@ -7,6 +7,7 @@ import type { DirectorIssueTaskContext } from "../../director/issues";
 import { reportPipelineIssue } from "../issueGovernance/PipelineIssueGovernance";
 import type { ReplanResult } from "@write-now/shared/types/novel";
 import type { DirectorIssueDecision } from "@write-now/shared/types/directorIssue";
+import { isQualityDebtRepairScope } from "../qualityDebtRepairPolicy";
 
 type ChapterPipelineResult = Awaited<ReturnType<ChapterRuntimeCoordinator["runPipelineChapter"]>>;
 type ChapterQualityStopAction = Extract<DirectorIssueDecision["action"], "pause_for_manual" | "fail_task">;
@@ -172,7 +173,7 @@ export async function applyChapterQualityClosure(input: {
     ? `影响章节=${replanRecommendation.affectedChapterOrders.join(",")}`
     : `锚点章节=${replanRecommendation.anchorChapterOrder ?? chapter.order}`;
   const detail = `第${chapter.order}章${replanRecommendation.scope === "global_book" ? "需要书级重规划" : "正在调整后续章节安排"}（${impactedOrders}；原因=${replanRecommendation.triggerReason ?? replanRecommendation.reason}）`;
-  if (replanRecommendation.scope !== "global_book") {
+  if (replanRecommendation.scope !== "global_book" && !isQualityDebtRepairScope(runtimePayload.chapterScope)) {
     try {
       const result = await input.runLocalReplan({
         chapterId: chapter.id,

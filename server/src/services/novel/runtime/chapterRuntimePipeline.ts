@@ -12,6 +12,10 @@ import {
 } from "./chapterEmptyContentError";
 import { runChapterRepairText } from "./repair/chapterRepairRuntime";
 import { ChapterPatchRepairFailedError } from "../chapterPatchRepairService";
+import {
+  resolveQualityDebtRepairMode,
+  shouldSkipAutomaticRepair,
+} from "../production/qualityDebtRepairPolicy";
 
 export interface PipelineRuntimeHooks {
   onCheckCancelled?: () => Promise<void>;
@@ -277,13 +281,30 @@ export async function runPipelineChapterWithRuntime(
         .filter((kind) => kind.trim().length > 0);
     }
 
-    if (shouldPauseForAcceptance || !autoRepair || repairMode === "detect_only" || attempt >= effectiveMaxRetries) {
+    if (shouldSkipAutomaticRepair({
+      chapterScope: request.chapterScope,
+      autoRepair,
+      repairMode,
+      attempt,
+      repairAttemptBudget: effectiveMaxRetries,
+      continuePolicy,
+      acceptanceStatus,
+      repairability: latestResult.runtimePackage.meta?.repairability,
+    })) {
       // 若是 attempt >= effectiveMaxRetries，这是第二次失败，记录二次 codes
       if (attempt > 0) {
         secondFailureIssueCodes = extractIssueCodes(latestResult.runtimePackage);
       }
       break;
     }
+
+    const activeRepairMode = resolveQualityDebtRepairMode({
+      chapterScope: request.chapterScope,
+      requestedMode: repairMode,
+      repairability: latestResult.runtimePackage.meta?.repairability,
+      acceptanceStatus,
+      repairDirectives: latestResult.runtimePackage.meta?.repairDirectives,
+    });
 
     await hooks.onStageChange?.("repairing");
     const repairResult = await repairDraftContent({
@@ -296,7 +317,7 @@ export async function runPipelineChapterWithRuntime(
         provider: request.provider,
         model: request.model,
         temperature: request.temperature,
-        repairMode,
+        repairMode: activeRepairMode,
       },
     });
     retryCountUsed += 1;
