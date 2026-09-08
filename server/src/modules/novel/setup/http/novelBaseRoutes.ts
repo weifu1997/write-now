@@ -14,6 +14,7 @@ import { validate } from "../../../../middleware/validate";
 import { KnowledgeService } from "../../../../services/knowledge/KnowledgeService";
 import { novelCreateResourceRecommendationService } from "../../../../services/novel/NovelCreateResourceRecommendationService";
 import type { NovelApplicationServices } from "../../../../services/novel/application/NovelApplicationContracts";
+import { selectCurrentQualityDebtRepairJob } from "../application/simpleCreationShelfProgress";
 
 const paginationSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -326,6 +327,25 @@ export function registerNovelBaseRoutes(input: RegisterNovelBaseRoutesInput): vo
               volumePlans: true,
             },
           },
+          generationJobs: {
+            where: {
+              status: { in: ["queued", "running", "failed", "succeeded"] },
+            },
+            orderBy: [{ createdAt: "desc" }, { updatedAt: "desc" }],
+            take: 24,
+            select: {
+              id: true,
+              status: true,
+              currentItemLabel: true,
+              completedCount: true,
+              totalCount: true,
+              pendingManualRecovery: true,
+              error: true,
+              payload: true,
+              createdAt: true,
+              updatedAt: true,
+            },
+          },
           workflowTasks: {
             where: { lane: "auto_director" },
             orderBy: { updatedAt: "desc" },
@@ -373,6 +393,17 @@ export function registerNovelBaseRoutes(input: RegisterNovelBaseRoutesInput): vo
         novel.estimatedChapterCount ?? 0,
         completedChapters,
       );
+      const qualityDebtRepairJob = selectCurrentQualityDebtRepairJob(novel.generationJobs);
+      const qualityDebtRepairStatus: NonNullable<SimpleCreationShelfProjection["progress"]["qualityDebtRepair"]>["status"] | null =
+        qualityDebtRepairJob
+          ? qualityDebtRepairJob.status === "failed" || qualityDebtRepairJob.pendingManualRecovery
+            ? "failed"
+            : qualityDebtRepairJob.status === "succeeded"
+              ? "completed"
+              : qualityDebtRepairJob.status === "running"
+                ? "running"
+                : "queued"
+          : null;
       const taskStatus = task?.status;
       const progressStatus: SimpleCreationShelfProjection["progress"]["status"] =
         taskStatus === "failed" ? "failed"
@@ -429,6 +460,16 @@ export function registerNovelBaseRoutes(input: RegisterNovelBaseRoutesInput): vo
           status: progressStatus,
           canRetry: progressStatus === "failed" || progressStatus === "paused",
           recoveryAction: task?.checkpointType === "replan_required" ? "replan_and_continue" : "continue",
+          qualityDebtRepair: qualityDebtRepairJob && qualityDebtRepairStatus
+            ? {
+              jobId: qualityDebtRepairJob.id,
+              status: qualityDebtRepairStatus,
+              currentLabel: qualityDebtRepairJob.currentItemLabel,
+              completedCount: qualityDebtRepairJob.completedCount,
+              totalCount: qualityDebtRepairJob.totalCount,
+              error: qualityDebtRepairJob.error ?? null,
+            }
+            : null,
           safetyMessage: task?.lastError ?? null,
           latestRiskAssessment: riskHistory[0] ?? null,
           riskHistory,

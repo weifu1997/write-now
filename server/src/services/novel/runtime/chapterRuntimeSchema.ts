@@ -21,6 +21,7 @@ export const chapterRuntimeRequestSchema = z.object({
   previousChaptersSummary: z.array(z.string()).optional(),
   taskStyleProfileId: z.string().trim().optional(),
   artifactSyncMode: z.enum(["adaptive", "deferred", "strict"]).optional(),
+  chapterScope: z.enum(["writable", "quality_debt"]).optional(),
   controlPolicy: chapterRuntimeControlPolicySchema.optional(),
 });
 

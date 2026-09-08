@@ -14,6 +14,7 @@ import { generationDecisionEngine } from "./GenerationDecisionEngine";
 export interface BuildStateDrivenContextInput extends CanonicalStateScope {
   novelId: string;
   policy?: Partial<NovelControlPolicy> | null;
+  chapterScope?: "writable" | "quality_debt" | null;
   pendingReviewProposalCount?: number;
   openAuditIssueCount?: number;
   hasRepairableDraft?: boolean;
@@ -140,6 +141,7 @@ export class ContextAssemblyService {
     const nextAction = generationDecisionEngine.decideNextAction({
       snapshot,
       policy: input.policy,
+      chapterScope: input.chapterScope,
       pendingReviewProposalCount: input.pendingReviewProposalCount,
       openAuditIssueCount: input.openAuditIssueCount,
       hasRepairableDraft: input.hasRepairableDraft,

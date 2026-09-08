@@ -85,3 +85,10 @@ test("task center stays read only and sends workflow actions back to the source 
   assert.match(detailPanel, /打开来源页面/);
   assert.match(detailPanel, /继续、恢复或重试请在来源页面完成/);
 });
+
+test("novel cover source page can dismiss failed history without using the task center", () => {
+  const coverCard = read("src/pages/novels/components/cover/NovelCoverCard.tsx");
+  assert.match(coverCard, /archiveTask\("image_generation"/);
+  assert.match(coverCard, /收起这次失败提醒/);
+  assert.doesNotMatch(coverCard, /现在|不再|已经|之前|原本/);
+});

@@ -407,6 +407,7 @@ export const pipelineRunSchema = llmGenerateSchema.extend({
   endOrder: z.number().int().min(1),
   maxRetries: z.number().int().min(0).max(5).optional(),
   runMode: z.enum(["fast", "polish"]).optional(),
+  chapterScope: z.enum(["writable", "quality_debt"]).optional(),
   autoReview: z.boolean().optional(),
   autoRepair: z.boolean().optional(),
   skipCompleted: z.boolean().optional(),

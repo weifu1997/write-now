@@ -1,3 +1,4 @@
+import { isLedgerOverdueIssueCode } from "@write-now/shared/types/chapterCreativeContract";
 import type { GenerationContextPackage } from "@write-now/shared/types/chapterRuntime";
 import { buildCompressionLog } from "../../../prompting/core/contextBudget";
 import { prisma } from "../../../db/prisma";
@@ -298,8 +299,9 @@ export class GenerationContextAssembler {
       chapterOrder: chapter.order,
       includeCurrentChapterState: false,
       policy: request.controlPolicy,
+      chapterScope: request.chapterScope,
       pendingReviewProposalCount,
-      openAuditIssueCount: openAuditIssues.length,
+      openAuditIssueCount: openAuditIssues.filter((issue) => !isLedgerOverdueIssueCode(issue.code)).length,
       hasRepairableDraft: Boolean(chapter.content?.trim()),
     });
     // Phase 2 缺陷5：timelineContext 在写作路径已不消费（PR-B 已移除），

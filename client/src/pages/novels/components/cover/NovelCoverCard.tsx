@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { listImageAssets, resolveImageAssetUrl } from "@/api/images";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { listImageAssets, listImageTasks, resolveImageAssetUrl } from "@/api/images";
+import { archiveTask } from "@/api/tasks";
 import { queryKeys } from "@/api/queryKeys";
 import { Button } from "@/components/ui/button";
 import type { NovelBasicFormState } from "../../novelBasicInfo.shared";
@@ -36,6 +37,7 @@ interface NovelCoverCardProps {
 
 export function NovelCoverCard(props: NovelCoverCardProps) {
   const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const assetsQuery = useQuery({
     queryKey: queryKeys.images.assets("novel_cover", props.novelId),
@@ -46,11 +48,35 @@ export function NovelCoverCard(props: NovelCoverCardProps) {
     staleTime: 30_000,
   });
 
+  const coverTasksQuery = useQuery({
+    queryKey: queryKeys.images.tasks("novel_cover", props.novelId),
+    queryFn: () => listImageTasks({
+      sceneType: "novel_cover",
+      sceneId: props.novelId,
+    }),
+    staleTime: 15_000,
+  });
+
   const assets = assetsQuery.data?.data ?? [];
   const primaryAsset = useMemo(
     () => assets.find((item) => item.isPrimary) ?? assets[0] ?? null,
     [assets],
   );
+  const latestFailedCoverTask = useMemo(() => {
+    const latestTask = coverTasksQuery.data?.data?.[0] ?? null;
+    return latestTask?.status === "failed" ? latestTask : null;
+  }, [coverTasksQuery.data?.data]);
+
+  const dismissCoverHistoryMutation = useMutation({
+    mutationFn: (taskId: string) => archiveTask("image_generation", taskId),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.images.tasks("novel_cover", props.novelId) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.overview }),
+        queryClient.invalidateQueries({ queryKey: ["tasks", "list"] }),
+      ]);
+    },
+  });
 
   return (
     <>
@@ -62,10 +88,30 @@ export function NovelCoverCard(props: NovelCoverCardProps) {
               先生成这本书的封面主画面。当前阶段不直接生成可用书名字体，后续仍可继续排版成正式封面。
             </div>
           </div>
-          <Button type="button" variant="outline" className="shrink-0" onClick={() => setOpen(true)}>
-            {assets.length > 0 ? "管理封面图库" : "生成封面主画面"}
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            {latestFailedCoverTask ? (
+              <Button
+                type="button"
+                variant="ghost"
+                className="shrink-0 text-muted-foreground"
+                disabled={dismissCoverHistoryMutation.isPending}
+                onClick={() => dismissCoverHistoryMutation.mutate(latestFailedCoverTask.id)}
+              >
+                {dismissCoverHistoryMutation.isPending ? "收起中..." : "收起这次失败提醒"}
+              </Button>
+            ) : null}
+            <Button type="button" variant="outline" className="shrink-0" onClick={() => setOpen(true)}>
+              {assets.length > 0 ? "管理封面图库" : "生成封面主画面"}
+            </Button>
+          </div>
         </div>
+
+        {latestFailedCoverTask ? (
+          <div className="text-sm leading-6 text-muted-foreground">
+            最近一次封面生成没有成功。可以继续重试，也可以收起这次失败提醒。收起后，运行记录里这条失败提醒会消失，已有封面不会被删除。
+            {latestFailedCoverTask.error ? ` 原因：${latestFailedCoverTask.error}` : ""}
+          </div>
+        ) : null}
 
         {assetsQuery.isLoading ? (
           <div className="py-5 text-sm text-muted-foreground">

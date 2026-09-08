@@ -245,6 +245,12 @@ export function NovelCoverDialog(props: NovelCoverDialogProps) {
     void queryClient.invalidateQueries({
       queryKey: queryKeys.images.assets("novel_cover", task.novelId ?? props.novelId),
     });
+    void queryClient.invalidateQueries({
+      queryKey: queryKeys.images.tasks("novel_cover", task.novelId ?? props.novelId),
+    });
+    void queryClient.invalidateQueries({
+      queryKey: queryKeys.tasks.overview,
+    });
     setActiveTaskId(null);
   }, [activeTaskId, activeTaskQuery.data, props.novelId, queryClient]);
 
@@ -283,6 +289,12 @@ export function NovelCoverDialog(props: NovelCoverDialogProps) {
       if (taskId) {
         setActiveTaskId(taskId);
       }
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.images.tasks("novel_cover", props.novelId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.tasks.overview,
+      });
     },
   });
 

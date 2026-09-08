@@ -1,4 +1,3 @@
-import type { Prisma } from "@prisma/client";
 import {
   DIRECTOR_ISSUE_GOVERNANCE_VERSION,
   type DirectorIssueAction,
@@ -35,9 +34,13 @@ import {
   stringifyPipelinePayload as stringifyPipelineJobPayload,
   type PipelineActiveStage,
 } from "../pipelineJobState";
+import {
+  buildPipelineChapterWhere,
+  resolvePipelineChapterScope,
+  selectPipelineChapters,
+} from "./pipelineChapterSelection";
 
 const PIPELINE_HEARTBEAT_INTERVAL_MS = 15000;
-const TERMINAL_CONTINUE_QUALITY_LOOP_RISK_FLAG_FRAGMENT = '"terminalAction":"defer_and_continue"';
 
 class PipelineIssueAppliedError extends Error {
   constructor(
@@ -68,29 +71,6 @@ function clampPipelineMaxRetries(value: number | null | undefined): number {
 
 function buildEmptyChapterDetail(chapter: { order: number; title: string }): string {
   return `第${chapter.order}章「${chapter.title}」正文生成失败：模型连续未返回可保存正文，已暂停继续。`;
-}
-
-function buildSkipCompletedChapterWhere(): Prisma.ChapterWhereInput {
-  return {
-    NOT: {
-      AND: [
-        { content: { not: null } },
-        { content: { not: "" } },
-        {
-          OR: [
-            { generationState: { in: ["approved", "published"] } },
-            { chapterStatus: "completed" },
-            {
-              AND: [
-                { riskFlags: { not: null } },
-                { riskFlags: { contains: TERMINAL_CONTINUE_QUALITY_LOOP_RISK_FLAG_FRAGMENT } },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-  };
 }
 
 export class NovelPipelineExecutor {
@@ -171,6 +151,7 @@ export class NovelPipelineExecutor {
       taskStyleProfileId: persistedPayload.taskStyleProfileId ?? options.taskStyleProfileId,
       maxRetries: clampPipelineMaxRetries(persistedPayload.maxRetries ?? options.maxRetries),
       runMode: persistedPayload.runMode ?? options.runMode ?? "fast",
+      chapterScope: resolvePipelineChapterScope(persistedPayload.chapterScope ?? options.chapterScope),
       autoReview: persistedPayload.autoReview ?? options.autoReview ?? true,
       autoRepair: persistedPayload.autoRepair ?? options.autoRepair ?? true,
       skipCompleted: persistedPayload.skipCompleted ?? options.skipCompleted ?? true,
@@ -305,21 +286,25 @@ export class NovelPipelineExecutor {
           maxRetries,
         });
 
-        const [novel, chapters] = await Promise.all([
+        const chapterScope = resolvePipelineChapterScope(runtimePayload.chapterScope);
+        const [novel, rawChapters] = await Promise.all([
           prisma.novel.findUnique({ where: { id: novelId } }),
           prisma.chapter.findMany({
-            where: {
+            where: buildPipelineChapterWhere({
               novelId,
-              order: { gte: options.startOrder, lte: options.endOrder },
-              ...(options.skipCompleted
-                ? buildSkipCompletedChapterWhere()
-                : {}),
-            },
+              startOrder: options.startOrder,
+              endOrder: options.endOrder,
+              chapterScope,
+              skipCompleted: runtimePayload.skipCompleted,
+            }),
             orderBy: { order: "asc" },
           }),
         ]);
+        const chapters = selectPipelineChapters(rawChapters, chapterScope);
         if (!novel || chapters.length === 0) {
-          throw new Error("任务执行失败：小说或章节不存在");
+          throw new Error(chapterScope === "quality_debt"
+            ? "当前没有待跟进的质量项。"
+            : "任务执行失败：小说或章节不存在");
         }
 
         logPipelineInfo("任务加载完成", {
@@ -424,6 +409,7 @@ export class NovelPipelineExecutor {
                     temperature: runtimePayload.temperature,
                     workflowTaskId: runtimePayload.workflowTaskId,
                     taskStyleProfileId: runtimePayload.taskStyleProfileId,
+                    chapterScope,
                     controlPolicy: runtimePayload.controlPolicy,
                     maxRetries: Math.max(0, chapterRetryBudget - chapterRetryCountUsed),
                     autoReview: runtimePayload.autoReview,

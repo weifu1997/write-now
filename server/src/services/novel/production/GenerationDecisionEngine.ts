@@ -7,9 +7,15 @@ import type {
 export interface GenerationDecisionInput {
   snapshot: CanonicalStateSnapshot;
   policy?: Partial<NovelControlPolicy> | null;
+  chapterScope?: "writable" | "quality_debt" | null;
   pendingReviewProposalCount?: number;
   openAuditIssueCount?: number;
   hasRepairableDraft?: boolean;
+}
+
+function shouldAutoContinueChapterRepair(input: GenerationDecisionInput): boolean {
+  return input.chapterScope === "quality_debt"
+    || input.policy?.advanceMode === "full_book_autopilot";
 }
 
 export class GenerationDecisionEngine {
@@ -19,7 +25,7 @@ export class GenerationDecisionEngine {
     }
 
     if ((input.pendingReviewProposalCount ?? 0) > 0 && input.hasRepairableDraft) {
-      if (input.policy?.advanceMode === "full_book_autopilot") {
+      if (shouldAutoContinueChapterRepair(input)) {
         return "repair_existing_chapter";
       }
       return "hold_for_review";

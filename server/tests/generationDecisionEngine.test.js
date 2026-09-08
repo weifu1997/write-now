@@ -101,6 +101,17 @@ test("GenerationDecisionEngine auto-repairs pending proposals during full-book a
   assert.equal(action, "repair_existing_chapter");
 });
 
+test("GenerationDecisionEngine auto-repairs pending proposals during quality-debt repair", () => {
+  const engine = new GenerationDecisionEngine();
+  const action = engine.decideNextAction({
+    snapshot: createSnapshot(),
+    chapterScope: "quality_debt",
+    pendingReviewProposalCount: 12,
+    hasRepairableDraft: true,
+  });
+  assert.equal(action, "repair_existing_chapter");
+});
+
 test("GenerationDecisionEngine keeps writing when pending proposals belong to a blank chapter", () => {
   const engine = new GenerationDecisionEngine();
   const action = engine.decideNextAction({

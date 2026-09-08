@@ -5,6 +5,7 @@ import type {
   CreativeDecision,
   Novel,
   NovelSnapshotListItem,
+  PipelineChapterScope,
   PipelineJob,
   PipelineRepairMode,
   PipelineRunMode,
@@ -18,6 +19,7 @@ export async function runNovelPipeline(
     endOrder: number;
     maxRetries?: number;
     runMode?: PipelineRunMode;
+    chapterScope?: PipelineChapterScope;
     autoReview?: boolean;
     autoRepair?: boolean;
     skipCompleted?: boolean;

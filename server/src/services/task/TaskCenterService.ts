@@ -28,6 +28,7 @@ import {
   type ListTasksFilters,
 } from "./taskCenter.shared";
 import { getArchivedTaskIdsByKind } from "./taskArchive";
+import { selectLatestVisibleImageTasks } from "./imageTaskOwnerVisibility";
 
 const overviewTaskKinds: TaskKind[] = [
   "book_analysis",
@@ -103,12 +104,19 @@ export class TaskCenterService {
         },
         _count: { _all: true },
       }),
-      prisma.imageGenerationTask.groupBy({
-        by: ["status"],
+      prisma.imageGenerationTask.findMany({
         where: {
           ...(archivedImageIds.length ? { id: { notIn: archivedImageIds } } : {}),
         },
-        _count: { _all: true },
+        select: {
+          id: true,
+          sceneType: true,
+          novelId: true,
+          baseCharacterId: true,
+          bookAnalysisCharacterId: true,
+          status: true,
+          updatedAt: true,
+        },
       }),
       prisma.agentRun.groupBy({
         by: ["status"],
@@ -179,7 +187,7 @@ export class TaskCenterService {
       recoveryCandidateCount: bookRecoveryCount + pipelineRecoveryCount + imageRecoveryCount + workflowRecoveryCount + styleExtractionRecoveryCount,
     };
 
-    for (const rows of [bookRows, pipelineRows, knowledgeRows, imageRows, agentRows, workflowRows, styleExtractionRows]) {
+    for (const rows of [bookRows, pipelineRows, knowledgeRows, agentRows, workflowRows, styleExtractionRows]) {
       for (const row of rows) {
         const count = row._count._all;
         if (row.status === "queued") {
@@ -193,6 +201,18 @@ export class TaskCenterService {
         } else if (row.status === "waiting_approval") {
           overview.waitingApprovalCount += count;
         }
+      }
+    }
+
+    for (const row of selectLatestVisibleImageTasks(imageRows)) {
+      if (row.status === "queued") {
+        overview.queuedCount += 1;
+      } else if (row.status === "running") {
+        overview.runningCount += 1;
+      } else if (row.status === "failed") {
+        overview.failedCount += 1;
+      } else if (row.status === "cancelled") {
+        overview.cancelledCount += 1;
       }
     }
 

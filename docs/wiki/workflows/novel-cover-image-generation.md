@@ -74,6 +74,8 @@ Prompt 也不走 service 内联字符串，而是进入 Prompt Registry：先把
 - `novel_cover` 任务标题显示为 `小说封面：{title}`。
 - `novel_cover` 的 `sourceRoute` 固定回到 `/novels/{novelId}/edit?stage=basic`。
 - 任务详情 `meta` 里必须保留 `novelId`，方便恢复与前端定位。
+- 同一本小说、同一个角色或同一个拆书角色的多次图片生成，运行记录和侧栏失败角标只计**当前这一次**。历史重试失败不能把 `F9` 这类红点一直堆上去。
+- 收起失败提醒的入口在封面来源页，不在运行记录。收起会归档该封面对象下已结束的图片任务，角标下降，但不删除已有封面图。
 
 ## Examples
 
@@ -92,6 +94,7 @@ Prompt 也不走 service 内联字符串，而是进入 Prompt Registry：先把
 ## Failure Modes
 
 - 小说页显示的封面和运行记录来源入口跳到不同位置：先检查 `sceneType` 分流是否一致，再查 `ImageTaskAdapter` 的 `sourceRoute`。恢复操作应在来源页面展示，运行记录只负责跳转。
+- 同一本小说封面连失败多次后，运行记录角标按失败次数累加：先检查 `selectLatestVisibleImageTasks` 是否按 owner 去重，再查封面页是否提供收起。
 - 删除主封面后出现“本书没有任何当前封面”：说明图片域的主图补位逻辑被绕过了。
 - 前端预填草稿和后端优化出来的上下文明显不一致：先检查是否两端没有复用同一套素材字段，尤其是商业标签、推进模式和世界切片核心框架。
 - 封面逻辑开始反向依赖小说 provider 配置或小说持久化状态：说明边界已经坏了，应把逻辑收回图片域 facade。
