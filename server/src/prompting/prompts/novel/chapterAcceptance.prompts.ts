@@ -221,12 +221,16 @@ export const chapterAcceptanceAssessmentSchema = z.object({
 
 export type ChapterAcceptanceAssessmentOutput = z.infer<typeof chapterAcceptanceAssessmentSchema>;
 
+export type ChapterReadGateTier = "normal" | "opening" | "climax";
+
 export interface ChapterAcceptancePromptInput {
   novelTitle: string;
   chapterOrder: number;
   chapterTitle: string;
   targetWordCount?: number | null;
   content: string;
+  /** opening=开书前3章；climax=卷高潮/高压章；normal=普通章 */
+  readGateTier?: ChapterReadGateTier;
 }
 
 const CHAPTER_ACCEPTANCE_EXAMPLE: ChapterAcceptanceAssessmentOutput = {
@@ -284,7 +288,7 @@ export const chapterAcceptanceAssessmentPrompt: PromptAsset<
   ChapterAcceptanceAssessmentOutput
 > = {
   id: "novel.chapter.acceptance_assessment",
-  version: "v2",
+  version: "v3",
   taskType: "review",
   mode: "structured",
   language: "zh",
@@ -345,6 +349,7 @@ export const chapterAcceptanceAssessmentPrompt: PromptAsset<
       "15. status 只能使用 accepted、repairable、needs_manual_review、continue_with_risk；不得输出 acceptable、pass、passed、ok、approved 等别名。",
       "16. reader_experience 是本章读者体验合同。检查 promisedReward 是否在正文中可见、主角是否围绕 protagonistWant 主动行动并遭遇 primaryResistance、keyTurn 与 netChange 是否成立、inheritedHookResponsibilities 是否得到回应，以及 endingHook 是否产生追读力。",
       "17. 普通读者体验缺口应输出可执行的 blockingIssues / repairDirectives，并优先使用 repairable 或 continue_with_risk；不得仅因爽点、钩子或情绪强度不足升级为 needs_manual_review 或全局重规划。",
+      "18. 若 readGateTier=opening 或 climax：对话过稀、人物互动缺失、engagement/voice 明显偏弱时，必须优先 status=repairable 并给出可执行 repairDirectives，不得直接 accepted；仍不得仅因此升级为全局重规划。",
       "正文退化检测边界：",
       ...CHAPTER_PROSE_QUALITY_AUDIT_RULES.map((rule, index) => `${index + 1}. ${rule}`),
     ].join("\n")),
@@ -352,6 +357,7 @@ export const chapterAcceptanceAssessmentPrompt: PromptAsset<
       `小说：${input.novelTitle}`,
       `章节：第 ${input.chapterOrder} 章 ${input.chapterTitle}`,
       typeof input.targetWordCount === "number" ? `目标长度：约 ${input.targetWordCount} 字` : "目标长度：未指定",
+      `读感门槛档位：${input.readGateTier ?? "normal"}`,
       "",
       "分层上下文：",
       renderSelectedContextBlocks(context),

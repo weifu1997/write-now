@@ -60,6 +60,8 @@
 - 当前章的钩子承接由 `ReaderExperienceContract.inheritedHookResponsibilities` 负责；已发生事实由 Novel Fact Ledger 负责；长期伏笔窗口由 Payoff Ledger 负责。
 - `ChapterTimelineFinalizationService` 只允许由 `ChapterContentFinalizationService` 调用。手动生成、批量执行、自动导演和手动修复都必须通过这个统一终态入口，不得各自补写 Timeline，也不得在 route、director 或旧 service 中直接调用。
 - writer prompt 必须包含原始 `chapter.taskSheet`、`reader_experience` 和上一章实际正文尾段。任务单负责执行职责，读者体验合同负责本章回报、主动性、转折、净变化和钩子责任，上一章尾段负责约束开场承接；三者不能被旧摘要挤掉。
+- writer 对推进章要求可见人物对白与当场互动，禁止整章纯流程旁白/审计说明体；若近章已连续同一玩法引擎，本章必须换玩法。
+- 接收闸门对开书前 3 章与高压/高潮章启用更严读感档位：对话过稀或 engagement/voice 明显偏弱时优先局部轻修，而不是直接放行。
 - 续写模式下，writer prompt 必须包含 `continuation_constraints` required context。该块只提炼前作承接约束，例如来源、角色当前状态、终局摘要、关键事实和未完线索；它不能携带大段原文，也不能替代结构规划阶段的参考注入。
 - 续写小说绑定已成功的拆书分析时，章节续写上下文优先消费结构化小节，尤其是 `character_system`、`timeline` 和 `plot_structure`。只有没有可用拆书分析或分析读取失败时，才退回站内小说 / 知识库原文的有限摘要切片。
 - 参考创作新书的拆书内容只服务候选方向和规划阶段，不进入 `continuation_constraints` 或章节事实上下文。章节写作只能消费由规划链生成的新书世界、角色和剧情事实，并通过绑定的写法资产继承表达技法；不得把参考原作的专名、人物关系或具体事件当作新书正史。

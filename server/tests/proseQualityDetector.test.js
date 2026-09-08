@@ -60,6 +60,27 @@ test("detectProseQuality keeps common false positives out of blocking findings",
   assert.equal(report.hasBlockingFindings, false);
 });
 
+test("detectProseQuality flags dialogue-sparse long chapters", () => {
+  const body = Array.from({ length: 40 }, (_, index) => (
+    `陆衡按住账册第${index + 1}页，因果金芒掠过墨线，度支印令落下，承兑窗口继续收紧。`
+  )).join("\n");
+  const report = detectProseQuality(body);
+  assert.equal(codes(report).includes("prose_dialogue_sparse"), true);
+  assert.equal(report.hasBlockingFindings, false);
+});
+
+test("detectProseQuality does not flag chapters with enough spoken interaction", () => {
+  const body = [
+    "陆衡抬眼：“这笔账，谁批的？”",
+    "楚疏影冷声道：“副掌教私印。”",
+    "萧斩秋按剑：“现在就封门。”",
+    "陆衡点头：“传令度支司，切断外流。”",
+    ...Array.from({ length: 20 }, (_, index) => `他们继续推进第${index + 1}步清查，场面依旧紧张。`),
+  ].join("\n");
+  const report = detectProseQuality(body);
+  assert.equal(codes(report).includes("prose_dialogue_sparse"), false);
+});
+
 test("buildProseQualityAuditReport maps findings into mode_fit runtime audit issues", () => {
   const report = detectProseQuality("作为AI语言模型，我无法继续生成这一章。后来他只能望着未完成的门");
   const auditReport = buildProseQualityAuditReport({

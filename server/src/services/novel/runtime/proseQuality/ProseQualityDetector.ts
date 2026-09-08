@@ -12,7 +12,8 @@ export type ProseQualityIssueCode =
   | "prose_truncation"
   | "prose_ai_self_reference"
   | "prose_placeholder_leak"
-  | "prose_engineering_term_leak";
+  | "prose_engineering_term_leak"
+  | "prose_dialogue_sparse";
 
 export interface ProseQualityFinding {
   code: ProseQualityIssueCode;
@@ -89,6 +90,7 @@ export function detectProseQuality(content: string): ProseQualityReport {
 
   scanVerbatimRepeat(segments, addFinding);
   scanTruncation(content, segments, addFinding);
+  scanDialogueSparse(content, segments, addFinding);
 
   return {
     findings,
@@ -376,6 +378,37 @@ function scanTruncation(
     message: "正文结尾缺少完整句读，疑似生成中断或被截断。",
     excerpt: formatExcerpt(lastSegment?.text ?? trimmed),
     fixSuggestion: "补齐结尾句、动作结果和章节收束，确认正文不是半句停在输出末尾。",
+  });
+}
+
+function scanDialogueSparse(
+  content: string,
+  segments: TextSegment[],
+  addFinding: (finding: ProseQualityFinding) => void,
+): void {
+  const visible = visibleLength(content);
+  if (visible < 1200) {
+    return;
+  }
+  const quoteMarkers = (content.match(/[“「]/gu) ?? []).length;
+  const colonSpeech = segments.filter((segment) => (
+    /[\u4e00-\u9fff]{1,12}[：:][^\n]{8,}/u.test(segment.text)
+    && !/(备注|案由|警告|执行标的|执行期限|传令弟子急促回禀)[：:]/u.test(segment.text)
+  )).length;
+  const dialogueUnits = quoteMarkers + colonSpeech;
+  // 约每 900 字至少 1 处对白；低于该密度视为过稀。
+  const expectedMin = Math.max(2, Math.floor(visible / 900));
+  if (dialogueUnits >= expectedMin) {
+    return;
+  }
+  addFinding({
+    code: "prose_dialogue_sparse",
+    severity: "medium",
+    line: 1,
+    column: 1,
+    message: "正文人物对白过稀，章节更像流程旁白或审计说明，削弱沉浸与追读。",
+    excerpt: formatExcerpt(segments[0]?.text ?? content),
+    fixSuggestion: "补上角色对白与当场互动：质问、讨价、威胁、误判或情绪反应，避免整章只写流程推进。",
   });
 }
 

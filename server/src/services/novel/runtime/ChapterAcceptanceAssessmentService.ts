@@ -13,6 +13,7 @@ import { resolveTargetWordRange } from "../../../prompting/prompts/novel/chapter
 import {
   chapterAcceptanceAssessmentPrompt,
   type ChapterAcceptanceAssessmentOutput,
+  type ChapterReadGateTier,
 } from "../../../prompting/prompts/novel/chapterAcceptance.prompts";
 import { openConflictService } from "../../state/OpenConflictService";
 import { normalizeScore, ruleScore } from "../novelP0Utils";
@@ -30,6 +31,84 @@ export interface ChapterAcceptanceAssessmentInput {
   provider?: LLMProvider;
   model?: string;
   temperature?: number;
+  readGateTier?: ChapterReadGateTier;
+}
+
+export function resolveChapterReadGateTier(input: {
+  chapterOrder: number;
+  conflictLevel?: number | null;
+  planRole?: string | null;
+}): ChapterReadGateTier {
+  if (input.chapterOrder > 0 && input.chapterOrder <= 3) {
+    return "opening";
+  }
+  if ((input.conflictLevel ?? 0) >= 75) {
+    return "climax";
+  }
+  if (input.planRole === "payoff" || input.planRole === "turn") {
+    return "climax";
+  }
+  return "normal";
+}
+
+export function applyCriticalReadGate(
+  output: ChapterAcceptanceAssessmentOutput,
+  options: {
+    readGateTier: ChapterReadGateTier;
+    hasDialogueSparse: boolean;
+  },
+): ChapterAcceptanceAssessmentOutput {
+  if (options.readGateTier === "normal") {
+    return output;
+  }
+
+  const blockingIssues = output.blockingIssues.map((issue) => (
+    issue.code === "prose_dialogue_sparse"
+      ? { ...issue, severity: "high" as const }
+      : issue
+  ));
+  const engagementWeak = (output.score?.engagement ?? 100) < 78;
+  const voiceWeak = (output.score?.voice ?? 100) < 78;
+  const needsRepair = options.hasDialogueSparse || engagementWeak || voiceWeak
+    || blockingIssues.some((issue) => (
+      issue.code === "prose_dialogue_sparse"
+      || issue.category === "voice"
+    ));
+
+  if (!needsRepair) {
+    return {
+      ...output,
+      blockingIssues: blockingIssues.slice(0, 5),
+    };
+  }
+
+  const repairDirectives = [...output.repairDirectives];
+  if (!repairDirectives.some((item) => item.target === "voice" || item.target === "plot")) {
+    repairDirectives.unshift({
+      mode: "patch",
+      target: options.hasDialogueSparse ? "voice" : "plot",
+      instruction: options.hasDialogueSparse
+        ? "补强人物对白与当场互动（质问、谈判、误判或冲突反应），避免整章流程旁白。"
+        : "补强可见回报、主角主动性与章末追读钩子，提高开书/高潮章的追读力。",
+    });
+  }
+
+  const status = output.status === "needs_manual_review"
+    ? output.status
+    : "repairable";
+
+  return {
+    ...output,
+    status,
+    continuePolicy: status === "needs_manual_review" ? "pause" : "repair_once",
+    blockingIssues: blockingIssues.slice(0, 5),
+    repairDirectives: repairDirectives.slice(0, 4),
+    riskTags: Array.from(new Set([
+      ...output.riskTags,
+      options.readGateTier === "opening" ? "critical_opening_read_gate" : "critical_climax_read_gate",
+      ...(options.hasDialogueSparse ? ["prose_dialogue_sparse"] : []),
+    ])),
+  };
 }
 
 export interface ChapterAcceptanceAssessmentResult {
@@ -281,7 +360,15 @@ function buildFallbackAssessment(content: string): ChapterAcceptanceAssessmentOu
 
 export class ChapterAcceptanceAssessmentService {
   async assess(input: ChapterAcceptanceAssessmentInput): Promise<ChapterAcceptanceAssessmentResult> {
-    const assessment = await this.invokeAssessment(input).catch(() => buildFallbackAssessment(input.content));
+    const readGateTier = input.readGateTier ?? resolveChapterReadGateTier({
+      chapterOrder: input.chapterOrder,
+      conflictLevel: input.contextPackage.chapter.conflictLevel,
+      planRole: input.contextPackage.plan?.planRole ?? null,
+    });
+    const assessment = await this.invokeAssessment({
+      ...input,
+      readGateTier,
+    }).catch(() => buildFallbackAssessment(input.content));
     const proseQuality = detectProseQuality(input.content);
     const proseIssues = proseQuality.findings.slice(0, 5).map((finding) => ({
       severity: finding.severity,
@@ -290,11 +377,15 @@ export class ChapterAcceptanceAssessmentService {
       evidence: `第 ${finding.line} 行：${finding.excerpt}`,
       fixSuggestion: finding.fixSuggestion,
     }));
-    const normalized = normalizeAssessment({
+    const normalizedBase = normalizeAssessment({
       ...assessment,
       blockingIssues: [...assessment.blockingIssues, ...proseIssues],
       riskTags: [...assessment.riskTags, ...proseQuality.findings.map((finding) => finding.code)],
     }, input.content, input.targetWordCount);
+    const normalized = applyCriticalReadGate(normalizedBase, {
+      readGateTier,
+      hasDialogueSparse: proseQuality.findings.some((finding) => finding.code === "prose_dialogue_sparse"),
+    });
     const score = normalizeScore(normalized.score);
     const issues = normalized.blockingIssues.map((issue) => ({
       severity: issue.severity,
@@ -342,6 +433,7 @@ export class ChapterAcceptanceAssessmentService {
         chapterTitle: input.chapterTitle,
         targetWordCount: input.targetWordCount ?? null,
         content: input.content,
+        readGateTier: input.readGateTier ?? "normal",
       },
       contextBlocks: resolvedContext.blocks,
       options: {

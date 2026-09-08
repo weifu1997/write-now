@@ -149,11 +149,13 @@ test("compatible fallback leaves cost and complication empty instead of inventin
   assert.equal(normalized.readerExperience.complication, "");
 });
 
-test("writer v9 requires visible fulfillment of cost and complication when present", () => {
-  assert.equal(chapterWriterPrompt.version, "v9");
+test("writer requires visible fulfillment of cost and complication when present", () => {
+  assert.equal(chapterWriterPrompt.version, "v10");
   const systemText = renderWriterSystemText();
   assert.ok(systemText.includes("1a-1. reader_experience 给出本章代价（expectedCost）或意外（complication）时"));
   assert.ok(systemText.includes("两者都缺省的缓冲章不强行插入"));
+  assert.ok(systemText.includes("推进章必须有可见人物对白与当场互动"));
+  assert.ok(systemText.includes("若 recent_chapters 已连续使用同一玩法引擎"));
 });
 
 test("review v4 checks organic fulfillment and tolerates buffer chapters", () => {
