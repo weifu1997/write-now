@@ -79,9 +79,9 @@ function classifyChapterListRetryIssue(reason: string): string {
   if (
     reason.includes("章节中主角或核心视角角色的主动行动不足")
     || reason.includes("连续多章呈现被动推进")
-    || reason.includes("同一套收网引擎")
+    || reason.includes("同一玩法引擎")
   ) {
-    return "章节功能：重排每章职责与玩法引擎，让核心视角角色主动选择、试探、反击、布局、交换、隐忍或承担代价，并避免连续审计收网同构。";
+    return "章节功能：重排每章职责与 engineType 玩法引擎，让核心视角角色主动选择、试探、反击、布局、交换、隐忍或承担代价，并避免连续同构。";
   }
   if (reason.includes("过多章节摘要偏空泛")) {
     return "摘要推进：每章 summary 必须写出新增信息、局面变化、冲突推进、关系变化、资源得失或风险转向。";
@@ -151,6 +151,7 @@ function getChapterFunctionQualityIssue(
     title: string;
     summary: string;
     beatKey: string;
+    engineType?: string | null;
   }>,
 ): string | null {
   if (!chapters.length) {
@@ -250,9 +251,9 @@ function getChapterFunctionQualityIssue(
     return "过多章节摘要偏空泛，不能大量使用“进一步推动 / 局势复杂 / 为后续铺垫 / 埋下伏笔”等低信息密度表达。";
   }
 
-  const auditEngineIssueEarly = getConsecutiveAuditEngineIssue(chapters);
-  if (auditEngineIssueEarly) {
-    return auditEngineIssueEarly;
+  const sameEngineIssue = getConsecutiveSameEngineIssue(chapters);
+  if (sameEngineIssue) {
+    return sameEngineIssue;
   }
 
   const activeCount = summaries.filter((summary) =>
@@ -304,48 +305,26 @@ function getChapterFunctionQualityIssue(
   return null;
 }
 
-function getConsecutiveAuditEngineIssue(
-  chapters: Array<{ title: string; summary: string }>,
+function getConsecutiveSameEngineIssue(
+  chapters: Array<{ engineType?: string | null }>,
 ): string | null {
-  const auditEnginePatterns = [
-    /账/,
-    /对赌/,
-    /扣押/,
-    /穿账/,
-    /清查/,
-    /查封/,
-    /起获/,
-    /质押/,
-    /承兑/,
-    /兑付/,
-    /坏账/,
-    /审计/,
-    /接管/,
-    /印令|度支|清算|催收/,
-  ];
-  const diversifyPatterns = [
-    /对质/,
-    /谈判/,
-    /误伤|误判/,
-    /兑换|交易|交换/,
-    /身份暴露|伪装拆穿/,
-    /反制|反咬|反杀/,
-    /关系|情感|信任裂/,
-    /救人|护送|撤离/,
-  ];
-
   let consecutive = 0;
+  let previousEngine: string | null = null;
   for (const chapter of chapters) {
-    const text = `${chapter.title} ${chapter.summary}`;
-    const isAudit = auditEnginePatterns.some((pattern) => pattern.test(text));
-    const isDiversified = diversifyPatterns.some((pattern) => pattern.test(text));
-    if (isAudit && !isDiversified) {
+    const engine = typeof chapter.engineType === "string" ? chapter.engineType.trim() : "";
+    if (!engine) {
+      consecutive = 0;
+      previousEngine = null;
+      continue;
+    }
+    if (engine === previousEngine) {
       consecutive += 1;
     } else {
-      consecutive = 0;
+      consecutive = 1;
+      previousEngine = engine;
     }
     if (consecutive >= 3) {
-      return "连续多章都在用查账/扣押/穿账/承兑/接管同一套收网引擎推进，需要插入关系博弈、公开对质、误伤代价、资源兑换或敌方反制等不同玩法。";
+      return `连续多章使用同一玩法引擎（engineType=${engine}）。必须轮换不同引擎，例如 setup / probe / pressure / confrontation / bargain / reveal / relationship / chase / payoff / aftermath。`;
     }
   }
   return null;
@@ -365,7 +344,7 @@ function isChapterFunctionQualityIssue(error: unknown): boolean {
     message.includes("当前节奏段缺少阶段性兑现") ||
     message.includes("结尾章缺少当前 beat") ||
     message.includes("过多章节摘要偏空泛")
-    || message.includes("同一套收网引擎")
+    || message.includes("同一玩法引擎")
   );
 }
 
@@ -388,7 +367,7 @@ export function createVolumeChapterListPrompt(
 
   return {
     id: "novel.volume.chapter_list",
-    version: "v10",
+    version: "v11",
     taskType: "planner",
     mode: "structured",
     language: "zh",
@@ -474,7 +453,7 @@ export function createVolumeChapterListPrompt(
           "",
           "二、硬性输出约束",
           "1. 顶层必须输出 beatKey、beatLabel、chapterCount、chapters 四个字段。",
-          "2. 每章只能包含 title、summary、beatKey、conflictLevel 四个字段，不得再新增其他字段。",
+          "2. 每章只能包含 title、summary、beatKey、conflictLevel、engineType 五个字段，不得再新增其他字段。",
           `3. beatKey 必须严格等于 ${targetBeatKey}。`,
           `4. beatLabel 必须严格等于 ${targetBeatLabel}。`,
           `5. chapterCount 与 chapters.length 必须严格等于 ${targetChapterCount}。`,
@@ -497,7 +476,7 @@ export function createVolumeChapterListPrompt(
           "1. 生成前必须在脑内把当前 beat 拆成若干章节功能：承接、加压、试探、发现、转折、反击、兑现、余波或钩子。",
           "2. 实际输出时不要暴露这些功能标签，但每章 summary 必须体现清晰功能。",
           "3. 连续章节不能承担完全相同的功能，尤其不能连续多章只做调查、讨论、铺垫、等待、意识到或发现。",
-          "4. 玩法引擎必须轮换：不能连续 3 章以上都靠同一套『查账/扣押/穿账/承兑/接管』收网流程推进；至少插入关系博弈、公开对质、误伤代价、资源兑换、身份暴露或敌方反制等不同引擎。",
+          "4. 每章必须输出 engineType（玩法引擎），且连续 3 章不得使用同一 engineType；允许值只能是 setup、probe、pressure、confrontation、bargain、reveal、relationship、chase、payoff、aftermath。",
           "5. 若目标章数大于等于 5，至少应包含一次局面加压、一次关键发现或判断反转、一次阶段性兑现或明确转向。",
           "6. 关键推进可以占更多章节，过渡章要短促有力，不要为了凑数制造低信息密度章节。",
           isBookFinale
@@ -563,8 +542,9 @@ export function createVolumeChapterListPrompt(
           `- beatKey 必须严格等于 ${targetBeatKey}`,
           `- beatLabel 必须严格等于 ${targetBeatLabel}`,
           `- chapterCount 与 chapters.length 必须严格等于 ${targetChapterCount}`,
-          "- 每章只能包含 title、summary、beatKey、conflictLevel",
+          "- 每章只能包含 title、summary、beatKey、conflictLevel、engineType",
           "- conflictLevel 是 0-100 的整数，本拍必须有起伏",
+          "- engineType 必须轮换，连续 3 章不得相同",
           "- 不得生成任何相邻 beat 的章节",
           "- 先在脑内规划章节功能分配与标题骨架配比，再输出完整章节块",
           "- 优先保证章节推进感、节奏承接、标题结构分散、摘要中的角色主动性与结尾牵引",

@@ -5,16 +5,17 @@ const {
   createVolumeChapterListPrompt,
 } = require("../dist/prompting/prompts/novel/volume/chapterList.prompts.js");
 
-function buildChapter(title, summary, conflictLevel) {
+function buildChapter(title, summary, conflictLevel, engineType) {
   return {
     title,
     summary,
     beatKey: "target_beat",
     conflictLevel,
+    engineType,
   };
 }
 
-test("chapter list postValidate rejects consecutive audit-engine chapters", () => {
+test("chapter list postValidate rejects consecutive identical engineType", () => {
   const prompt = createVolumeChapterListPrompt(3);
   assert.throws(
     () => prompt.postValidate({
@@ -22,26 +23,30 @@ test("chapter list postValidate rejects consecutive audit-engine chapters", () =
       beatLabel: "目标节奏段",
       chapterCount: 3,
       chapters: [
-        buildChapter("度支穿账", "陆衡清查假账并扣押度支印令。", 30),
-        buildChapter("承兑封门", "承兑台挤兑，查封坏账窗口继续加压。", 55),
-        buildChapter("接管清算", "接管内库账册，完成清算催收。", 80),
+        buildChapter("夜探仓房", "主角决定潜入仓房查清失踪货单。", 30, "probe"),
+        buildChapter("再探内库", "主角继续试探内库守卫并核对货单缺口。", 55, "probe"),
+        buildChapter("三探密道", "主角再次选择深入密道确认货单去向。", 80, "probe"),
       ],
     }),
-    /同一套收网引擎/,
+    /同一玩法引擎/,
   );
 });
 
-test("chapter list postValidate accepts audit chapters when engines diversify", () => {
+test("chapter list postValidate accepts chapters when engineType rotates", () => {
   const prompt = createVolumeChapterListPrompt(3);
   const output = prompt.postValidate({
     beatKey: "target_beat",
     beatLabel: "目标节奏段",
     chapterCount: 3,
     chapters: [
-      buildChapter("度支穿账", "陆衡清查假账并扣押度支印令。", 30),
-      buildChapter("当堂对质", "楚疏影公开对质长老，关系裂变逼出反制。", 58),
-      buildChapter("误伤兑换", "误伤代价迫使双方交换人质，局面转向。", 82),
+      buildChapter("夜探仓房", "主角决定潜入仓房查清失踪货单。", 30, "probe"),
+      buildChapter("当堂对质", "主角公开对质管事，逼出反制与关系裂变。", 58, "confrontation"),
+      buildChapter("交换人质", "双方交换人质承担代价，局面转向兑现。", 82, "bargain"),
     ],
   });
   assert.equal(output.chapters.length, 3);
+  assert.deepEqual(
+    output.chapters.map((chapter) => chapter.engineType),
+    ["probe", "confrontation", "bargain"],
+  );
 });

@@ -11,7 +11,7 @@
 ## 落点
 
 1. `chapterWriter.prompts.ts`：升版本；核心约束加对话/人物戏/反报告体；反模式替换补充。
-2. `chapterList.prompts.ts`：功能分配要求加「玩法引擎轮换」；`getChapterFunctionQualityIssue` 增加连续审计引擎检测。
+2. `chapterList.prompts.ts`：拆章输出结构化 `engineType`；后校验只拦「连续 ≥3 章同类引擎」，不使用题材关键词（避免书特化）。
 3. `ProseQualityDetector`：新增 `prose_dialogue_sparse`（确定性后处理）。
 4. `ChapterAcceptanceAssessmentService` + acceptance prompt：传入 `readGateTier`（`opening`/`climax`/`normal`）；关键档把对话稀疏与 engagement/voice 缺口导向 `repairable`。
 5. 组装 `readGateTier`：`chapterOrder<=3` → opening；当前 beatKey 为 `climax`/`pressure_lock` 或 `isBookFinale` → climax。
