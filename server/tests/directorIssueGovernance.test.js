@@ -581,6 +581,70 @@ test("quality-debt closure does not local-replan deferred chapter issues", async
   }
 });
 
+test("quality-debt closure refreshes residual items with standalone review", async () => {
+  const originalRecordEvent = directorAutomationLedgerEventService.recordEvent;
+  directorAutomationLedgerEventService.recordEvent = async () => undefined;
+  let reviewCalls = 0;
+  try {
+    const result = await applyChapterQualityClosure(createQualityClosureInput({
+      refreshQualityDebtByReview: async () => {
+        reviewCalls += 1;
+        return { recommendedAction: "continue" };
+      },
+    }));
+    assert.equal(reviewCalls, 1);
+    assert.equal(result.shouldStopAfterCurrentChapter, false);
+    assert.equal(result.stopAction, null);
+  } finally {
+    directorAutomationLedgerEventService.recordEvent = originalRecordEvent;
+  }
+});
+
+test("writable closure does not run standalone quality-debt review", async () => {
+  const originalRecordEvent = directorAutomationLedgerEventService.recordEvent;
+  directorAutomationLedgerEventService.recordEvent = async () => undefined;
+  let reviewCalls = 0;
+  try {
+    await applyChapterQualityClosure(createQualityClosureInput({
+      runtimePayload: {
+        provider: "deepseek",
+        model: "deepseek-chat",
+        temperature: 0.7,
+        runMode: "fast",
+        autoReview: true,
+        autoRepair: true,
+        skipCompleted: false,
+        qualityThreshold: 75,
+        repairMode: "light_repair",
+        chapterScope: "writable",
+      },
+      refreshQualityDebtByReview: async () => {
+        reviewCalls += 1;
+        return { recommendedAction: "continue" };
+      },
+    }));
+    assert.equal(reviewCalls, 0);
+  } finally {
+    directorAutomationLedgerEventService.recordEvent = originalRecordEvent;
+  }
+});
+
+test("quality-debt closure keeps going if standalone review fails", async () => {
+  const originalRecordEvent = directorAutomationLedgerEventService.recordEvent;
+  directorAutomationLedgerEventService.recordEvent = async () => undefined;
+  try {
+    const result = await applyChapterQualityClosure(createQualityClosureInput({
+      refreshQualityDebtByReview: async () => {
+        throw new Error("review unavailable");
+      },
+    }));
+    assert.equal(result.shouldStopAfterCurrentChapter, false);
+    assert.equal(result.stopAction, null);
+  } finally {
+    directorAutomationLedgerEventService.recordEvent = originalRecordEvent;
+  }
+});
+
 test("quality-debt closure still reports an explicit stop-for-replan", async () => {
   const originalRecordEvent = directorAutomationLedgerEventService.recordEvent;
   directorAutomationLedgerEventService.recordEvent = async () => undefined;

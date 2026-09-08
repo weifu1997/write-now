@@ -130,3 +130,20 @@ export function shouldEscalateFailedQualityDebtPatch(input: {
   }
   return true;
 }
+
+/**
+ * 质量债批次修完本章后，流水线闸门仍未通过时，再用与「重新审校」相同的独立审校刷新待跟进项。
+ * 普通写作入口不走这条收口，避免改变自动导演的 pass 语义。
+ */
+export function shouldRefreshQualityDebtByStandaloneReview(input: {
+  chapterScope?: string | null;
+  pass: boolean;
+}): boolean {
+  return isQualityDebtRepairScope(input.chapterScope) && !input.pass;
+}
+
+export function didStandaloneReviewCloseQualityDebt(
+  assessment: { recommendedAction?: string | null } | null | undefined | void,
+): boolean {
+  return assessment?.recommendedAction === "continue";
+}

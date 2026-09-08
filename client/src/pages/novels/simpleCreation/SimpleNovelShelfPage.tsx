@@ -313,7 +313,7 @@ export default function SimpleNovelShelfPage() {
           ) : null}
           {shelf.progress.qualityDebtRepair?.status === "completed" && shelf.materials.openQualityDebtCount > 0 ? (
             <div className="border-t border-border px-5 py-3 text-sm leading-6 text-muted-foreground sm:px-7">
-              本轮已按章处理。还剩下需要跟进的局部质量项时，可以再点一次自动修复。已保存正文不会被清空。
+              本轮已按章修复并重新审校。还剩下的局部质量项，可打开该章查看或继续自动修复。已保存正文不会被清空。
             </div>
           ) : null}
           {shelf.progress.safetyMessage ? (

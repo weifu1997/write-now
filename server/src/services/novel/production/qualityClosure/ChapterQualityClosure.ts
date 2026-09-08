@@ -1,5 +1,5 @@
 import type { PipelinePayload } from "../../novelCoreShared";
-import { logPipelineError, logPipelineWarn } from "../../novelCoreShared";
+import { logPipelineError, logPipelineInfo, logPipelineWarn } from "../../novelCoreShared";
 import { createQualityReport } from "../../novelCoreReviewService";
 import { chapterQualityLoopService } from "../../quality/ChapterQualityLoopService";
 import type { ChapterRuntimeCoordinator } from "../../runtime/ChapterRuntimeCoordinator";
@@ -7,7 +7,11 @@ import type { DirectorIssueTaskContext } from "../../director/issues";
 import { reportPipelineIssue } from "../issueGovernance/PipelineIssueGovernance";
 import type { ReplanResult } from "@write-now/shared/types/novel";
 import type { DirectorIssueDecision } from "@write-now/shared/types/directorIssue";
-import { isQualityDebtRepairScope } from "../qualityDebtRepairPolicy";
+import {
+  didStandaloneReviewCloseQualityDebt,
+  isQualityDebtRepairScope,
+  shouldRefreshQualityDebtByStandaloneReview,
+} from "../qualityDebtRepairPolicy";
 
 type ChapterPipelineResult = Awaited<ReturnType<ChapterRuntimeCoordinator["runPipelineChapter"]>>;
 type ChapterQualityStopAction = Extract<DirectorIssueDecision["action"], "pause_for_manual" | "fail_task">;
@@ -31,6 +35,10 @@ export async function applyChapterQualityClosure(input: {
     windowSize: number;
     reason: string;
   }) => Promise<ReplanResult>;
+  refreshQualityDebtByReview?: (input: {
+    novelId: string;
+    chapterId: string;
+  }) => Promise<{ recommendedAction?: string | null } | void>;
 }): Promise<{
   shouldStopAfterCurrentChapter: boolean;
   stopAction: ChapterQualityStopAction | null;
@@ -129,7 +137,34 @@ export async function applyChapterQualityClosure(input: {
     });
   }
 
-  if (chapterResult.reviewExecuted && !chapterResult.pass) {
+  let standaloneReviewClosedDebt = false;
+  if (
+    shouldRefreshQualityDebtByStandaloneReview({
+      chapterScope: runtimePayload.chapterScope,
+      pass: chapterResult.pass,
+    })
+    && input.refreshQualityDebtByReview
+  ) {
+    logPipelineInfo("质量债批次正在按独立审校刷新本章待跟进项", {
+      jobId: input.jobId,
+      order: chapter.order,
+    });
+    try {
+      const assessment = await input.refreshQualityDebtByReview({
+        novelId: input.novelId,
+        chapterId: chapter.id,
+      });
+      standaloneReviewClosedDebt = didStandaloneReviewCloseQualityDebt(assessment);
+    } catch (error) {
+      logPipelineWarn("质量债独立审校未完成，已保留当前正文和待跟进项", {
+        jobId: input.jobId,
+        order: chapter.order,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  if (chapterResult.reviewExecuted && !chapterResult.pass && !standaloneReviewClosedDebt) {
     input.qualityAlertDetails.push(
       `第${chapter.order}章（coherence=${final.score.coherence}, repetition=${final.score.repetition}, engagement=${final.score.engagement}）`,
     );

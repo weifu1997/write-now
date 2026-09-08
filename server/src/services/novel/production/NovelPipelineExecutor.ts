@@ -19,6 +19,7 @@ import {
   type PipelineRunOptions,
 } from "../novelCoreShared";
 import { plannerService } from "../../planner/PlannerService";
+import { NovelCoreReviewService } from "../novelCoreReviewService";
 import { applyChapterQualityClosure } from "./qualityClosure/ChapterQualityClosure";
 import { clampRepairAttemptBudget } from "./qualityDebtRepairPolicy";
 import {
@@ -81,7 +82,10 @@ function buildEmptyChapterDetail(chapter: { order: number; title: string }): str
 }
 
 export class NovelPipelineExecutor {
-  constructor(private readonly chapterRuntimeCoordinator = new ChapterRuntimeCoordinator()) {}
+  constructor(
+    private readonly chapterRuntimeCoordinator = new ChapterRuntimeCoordinator(),
+    private readonly reviewService = new NovelCoreReviewService(),
+  ) {}
 
   private async ensurePipelineNotCancelled(jobId: string): Promise<void> {
     const job = await prisma.generationJob.findUnique({
@@ -541,35 +545,44 @@ export class NovelPipelineExecutor {
                 });
               }
             }
+            if (!chapterResult) {
+              throw new Error(`第${chapter.order}章在自动重试后仍未生成可用结果。`);
+            }
+
+            totalRetryCount += Math.max(chapterRetryCountUsed, chapterResult.retryCountUsed);
+            const closure = await applyChapterQualityClosure({
+              governance: issueGovernance,
+              workflowTaskId: runtimePayload.workflowTaskId,
+              novelId,
+              jobId,
+              chapter: { id: chapter.id, order: chapter.order },
+              chapterResult,
+              qualityThreshold,
+              runtimePayload,
+              qualityAlertDetails,
+              replanAlertDetails,
+              recoverableRepairDetails,
+              runLocalReplan: (replan) => plannerService.replan(novelId, {
+                ...replan,
+                provider: runtimePayload.provider,
+                model: runtimePayload.model,
+                temperature: runtimePayload.temperature,
+              }),
+              refreshQualityDebtByReview: async ({ chapterId }) => {
+                await applyChapterStage("reviewing");
+                const review = await this.reviewService.reviewChapter(novelId, chapterId, {
+                  provider: runtimePayload.provider,
+                  model: runtimePayload.model,
+                  temperature: runtimePayload.temperature,
+                });
+                return review.qualityAssessment;
+              },
+            });
+            shouldStopAfterCurrentChapter = closure.shouldStopAfterCurrentChapter;
+            chapterStopAction = closure.stopAction;
           } finally {
             clearInterval(heartbeatTimer);
           }
-          if (!chapterResult) {
-            throw new Error(`第${chapter.order}章在自动重试后仍未生成可用结果。`);
-          }
-
-          totalRetryCount += Math.max(chapterRetryCountUsed, chapterResult.retryCountUsed);
-          const closure = await applyChapterQualityClosure({
-            governance: issueGovernance,
-            workflowTaskId: runtimePayload.workflowTaskId,
-            novelId,
-            jobId,
-            chapter: { id: chapter.id, order: chapter.order },
-            chapterResult,
-            qualityThreshold,
-            runtimePayload,
-            qualityAlertDetails,
-            replanAlertDetails,
-            recoverableRepairDetails,
-            runLocalReplan: (replan) => plannerService.replan(novelId, {
-              ...replan,
-              provider: runtimePayload.provider,
-              model: runtimePayload.model,
-              temperature: runtimePayload.temperature,
-            }),
-          });
-          shouldStopAfterCurrentChapter = closure.shouldStopAfterCurrentChapter;
-          chapterStopAction = closure.stopAction;
 
           // Phase 3：同步补齐下一段章节路线；正文执行合同仍由下一章 JIT 独立生成。
           if (!shouldStopAfterCurrentChapter && isAutopilotMode && chapter.order < autopilotTargetEndOrder) {

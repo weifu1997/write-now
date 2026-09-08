@@ -4,9 +4,11 @@ const assert = require("node:assert/strict");
 const {
   QUALITY_DEBT_REPAIR_ATTEMPT_BUDGET,
   clampRepairAttemptBudget,
+  didStandaloneReviewCloseQualityDebt,
   isQualityDebtRepairScope,
   resolveQualityDebtRepairMode,
   shouldEscalateFailedQualityDebtPatch,
+  shouldRefreshQualityDebtByStandaloneReview,
   shouldSkipAutomaticRepair,
 } = require("../dist/services/novel/production/qualityDebtRepairPolicy.js");
 
@@ -159,4 +161,22 @@ test("quality-debt batch escalates a failed light patch only when budget remains
     failureTypes: ["review_gate_unavailable"],
     remainingRepairBudget: 1,
   }), false);
+});
+
+test("only the quality-debt batch refreshes residual items with standalone review", () => {
+  assert.equal(shouldRefreshQualityDebtByStandaloneReview({
+    chapterScope: "quality_debt",
+    pass: false,
+  }), true);
+  assert.equal(shouldRefreshQualityDebtByStandaloneReview({
+    chapterScope: "quality_debt",
+    pass: true,
+  }), false);
+  assert.equal(shouldRefreshQualityDebtByStandaloneReview({
+    chapterScope: "writable",
+    pass: false,
+  }), false);
+  assert.equal(didStandaloneReviewCloseQualityDebt({ recommendedAction: "continue" }), true);
+  assert.equal(didStandaloneReviewCloseQualityDebt({ recommendedAction: "patch_repair" }), false);
+  assert.equal(didStandaloneReviewCloseQualityDebt(null), false);
 });
