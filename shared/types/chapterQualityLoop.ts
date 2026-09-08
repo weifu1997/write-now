@@ -23,7 +23,7 @@ export interface ChapterQualityDebtDetails {
   source: ChapterQualityDebtSource | null;
   evaluatedAt: string | null;
   repairAttemptsUsed: number | null;
-  repairAttemptsAllowed: 0 | 1;
+  repairAttemptsAllowed: 0 | 1 | 2;
   reason: string;
   issueCodes: string[];
 }
@@ -171,7 +171,7 @@ export function readChapterQualityDebtDetails(
   const repairAttemptsAllowed = typeof attribution?.repairAttemptsAllowed === "number"
     && Number.isFinite(attribution.repairAttemptsAllowed)
     && attribution.repairAttemptsAllowed >= 0
-    ? Math.min(1, Math.trunc(attribution.repairAttemptsAllowed)) as 0 | 1
+    ? Math.min(2, Math.trunc(attribution.repairAttemptsAllowed)) as 0 | 1 | 2
     : 1;
   const signals = Array.isArray(qualityLoop.signals)
     ? qualityLoop.signals.filter(isRecord)

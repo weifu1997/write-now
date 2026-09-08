@@ -20,6 +20,7 @@ import {
 } from "../novelCoreShared";
 import { plannerService } from "../../planner/PlannerService";
 import { applyChapterQualityClosure } from "./qualityClosure/ChapterQualityClosure";
+import { clampRepairAttemptBudget } from "./qualityDebtRepairPolicy";
 import {
   loadDirectorIssueTaskContext,
 } from "../director/issues";
@@ -65,8 +66,14 @@ class PipelineIssueFailure extends Error {
   }
 }
 
-function clampPipelineMaxRetries(value: number | null | undefined): number {
-  return Math.max(0, Math.min(value ?? 1, 1));
+function clampPipelineMaxRetries(
+  value: number | null | undefined,
+  chapterScope?: string | null,
+): number {
+  return clampRepairAttemptBudget({
+    chapterScope,
+    requestedMaxRetries: value,
+  });
 }
 
 function buildEmptyChapterDetail(chapter: { order: number; title: string }): string {
@@ -127,7 +134,6 @@ export class NovelPipelineExecutor {
   }
 
   async execute(jobId: string, novelId: string, options: PipelineRunOptions) {
-    const maxRetries = clampPipelineMaxRetries(options.maxRetries);
     const qualityThreshold = options.qualityThreshold ?? 75;
     const existingJob = await prisma.generationJob.findUnique({
       where: { id: jobId },
@@ -140,6 +146,11 @@ export class NovelPipelineExecutor {
       },
     });
     const persistedPayload = this.parsePipelinePayload(existingJob?.payload);
+    const chapterScope = resolvePipelineChapterScope(persistedPayload.chapterScope ?? options.chapterScope);
+    const maxRetries = clampPipelineMaxRetries(
+      persistedPayload.maxRetries ?? options.maxRetries,
+      chapterScope,
+    );
     const runtimePayload: PipelinePayload = {
       provider: persistedPayload.provider ?? options.provider ?? "deepseek",
       model: persistedPayload.model ?? options.model ?? "",
@@ -149,9 +160,9 @@ export class NovelPipelineExecutor {
       issuePolicySnapshot: persistedPayload.issuePolicySnapshot ?? options.issuePolicySnapshot,
       workflowTaskId: persistedPayload.workflowTaskId ?? options.workflowTaskId,
       taskStyleProfileId: persistedPayload.taskStyleProfileId ?? options.taskStyleProfileId,
-      maxRetries: clampPipelineMaxRetries(persistedPayload.maxRetries ?? options.maxRetries),
+      maxRetries,
       runMode: persistedPayload.runMode ?? options.runMode ?? "fast",
-      chapterScope: resolvePipelineChapterScope(persistedPayload.chapterScope ?? options.chapterScope),
+      chapterScope,
       autoReview: persistedPayload.autoReview ?? options.autoReview ?? true,
       autoRepair: persistedPayload.autoRepair ?? options.autoRepair ?? true,
       skipCompleted: persistedPayload.skipCompleted ?? options.skipCompleted ?? true,

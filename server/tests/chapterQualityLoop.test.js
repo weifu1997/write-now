@@ -535,6 +535,22 @@ test("quality debt details keep unknown historical repair attempts explicit", ()
   assert.equal(readChapterQualityDebtDetails("{}"), null);
 });
 
+test("quality debt details keep a two-attempt quality-debt budget", () => {
+  const details = readChapterQualityDebtDetails(JSON.stringify({
+    qualityLoop: {
+      terminalAction: "defer_and_continue",
+      overallStatus: "invalid",
+      recommendedAction: "patch_repair",
+      qualityDebtAttribution: {
+        repairAttemptsUsed: 2,
+        repairAttemptsAllowed: 2,
+      },
+    },
+  }));
+  assert.equal(details?.repairAttemptsUsed, 2);
+  assert.equal(details?.repairAttemptsAllowed, 2);
+});
+
 test("quality debt details exclude cleared reviews and explicit replanning", () => {
   const cleared = JSON.stringify({
     qualityLoop: {

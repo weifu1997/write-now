@@ -2,8 +2,11 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 
 const {
+  QUALITY_DEBT_REPAIR_ATTEMPT_BUDGET,
+  clampRepairAttemptBudget,
   isQualityDebtRepairScope,
   resolveQualityDebtRepairMode,
+  shouldEscalateFailedQualityDebtPatch,
   shouldSkipAutomaticRepair,
 } = require("../dist/services/novel/production/qualityDebtRepairPolicy.js");
 
@@ -112,4 +115,48 @@ test("only the quality-debt batch upgrades to heavy repair from structured accep
     repairability: "plan_misalignment",
     acceptanceStatus: "needs_manual_review",
   }), "light_repair");
+
+  assert.equal(resolveQualityDebtRepairMode({
+    chapterScope: "quality_debt",
+    requestedMode: "light_repair",
+    repairability: "patchable_obligation_gap",
+    acceptanceStatus: "repairable",
+    repairAttemptsUsed: 1,
+  }), "heavy_repair");
+});
+
+test("quality-debt batch uses two repair attempts while writable stays at one", () => {
+  assert.equal(QUALITY_DEBT_REPAIR_ATTEMPT_BUDGET, 2);
+  assert.equal(clampRepairAttemptBudget({
+    chapterScope: "writable",
+    requestedMaxRetries: 5,
+  }), 1);
+  assert.equal(clampRepairAttemptBudget({
+    chapterScope: "quality_debt",
+    requestedMaxRetries: 1,
+  }), 2);
+});
+
+test("quality-debt batch escalates a failed light patch only when budget remains", () => {
+  assert.equal(shouldEscalateFailedQualityDebtPatch({
+    chapterScope: "writable",
+    activeRepairMode: "light_repair",
+    remainingRepairBudget: 1,
+  }), false);
+  assert.equal(shouldEscalateFailedQualityDebtPatch({
+    chapterScope: "quality_debt",
+    activeRepairMode: "light_repair",
+    remainingRepairBudget: 1,
+  }), true);
+  assert.equal(shouldEscalateFailedQualityDebtPatch({
+    chapterScope: "quality_debt",
+    activeRepairMode: "heavy_repair",
+    remainingRepairBudget: 1,
+  }), false);
+  assert.equal(shouldEscalateFailedQualityDebtPatch({
+    chapterScope: "quality_debt",
+    activeRepairMode: "light_repair",
+    failureTypes: ["review_gate_unavailable"],
+    remainingRepairBudget: 1,
+  }), false);
 });

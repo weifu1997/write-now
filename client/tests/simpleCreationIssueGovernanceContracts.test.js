@@ -42,6 +42,7 @@ test("simple creation shelf can start sequential automatic quality-debt repair",
   assert.match(shelfSource, /provider: llm.provider/);
   assert.match(shelfSource, /重新自动修复质量项/);
   assert.match(shelfSource, /可以再点一次自动修复。已保存正文不会被清空。/);
+  assert.match(shelfSource, /maxRetries: 2/);
   assert.match(shelfSource, /本轮已按章处理。还剩下需要跟进的局部质量项/);
   assert.doesNotMatch(shelfSource, /配置好当前写作模型后/);
   assert.match(shelfSource, /qualityDebtRepair\?\.status === "failed"/);

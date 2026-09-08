@@ -17,11 +17,18 @@ import {
   resolvePipelineChapterScope,
   selectPipelineChapters,
 } from "./production/pipelineChapterSelection";
+import { clampRepairAttemptBudget } from "./production/qualityDebtRepairPolicy";
 
 export { buildPipelineCurrentItemLabel, buildPipelineStageProgress } from "./pipelineJobState";
 
-function clampPipelineMaxRetries(value: number | null | undefined): number {
-  return Math.max(0, Math.min(value ?? 1, 1));
+function clampPipelineMaxRetries(
+  value: number | null | undefined,
+  chapterScope?: string | null,
+): number {
+  return clampRepairAttemptBudget({
+    chapterScope,
+    requestedMaxRetries: value,
+  });
 }
 
 export class NovelCorePipelineService {
@@ -342,7 +349,7 @@ export class NovelCorePipelineService {
         issuePolicySnapshot: payload.issuePolicySnapshot,
         workflowTaskId: payload.workflowTaskId,
         taskStyleProfileId: payload.taskStyleProfileId,
-        maxRetries: clampPipelineMaxRetries(job.maxRetries),
+        maxRetries: clampPipelineMaxRetries(job.maxRetries, payload.chapterScope),
         runMode: job.runMode ?? payload.runMode,
         chapterScope: payload.chapterScope,
         autoReview: job.autoReview ?? payload.autoReview,
@@ -361,7 +368,7 @@ export class NovelCorePipelineService {
     const chapterScope = resolvePipelineChapterScope(options.chapterScope);
     const rangeKey = this.buildRangeKey(novelId, options.startOrder, options.endOrder, chapterScope);
     return this.withStartLock(rangeKey, async () => {
-      const maxRetries = clampPipelineMaxRetries(options.maxRetries);
+      const maxRetries = clampPipelineMaxRetries(options.maxRetries, chapterScope);
       const issuePolicySnapshot = await this.resolveIssuePolicySnapshot(novelId, options);
       const runtimeOptions: PipelineRunOptions = {
         ...options,
@@ -522,8 +529,9 @@ export class NovelCorePipelineService {
       taskStyleProfileId: payload.taskStyleProfileId,
       issueGovernanceVersion: payload.issueGovernanceVersion,
       issuePolicySnapshot: payload.issuePolicySnapshot,
-      maxRetries: clampPipelineMaxRetries(job.maxRetries),
+      maxRetries: clampPipelineMaxRetries(job.maxRetries, payload.chapterScope),
       runMode: job.runMode ?? payload.runMode,
+      chapterScope: payload.chapterScope,
       autoReview: job.autoReview ?? payload.autoReview,
       autoRepair: job.autoRepair ?? payload.autoRepair,
       skipCompleted: job.skipCompleted ?? payload.skipCompleted,
