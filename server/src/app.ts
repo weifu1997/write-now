@@ -89,6 +89,8 @@ function parseEnvFlag(value: string | undefined, defaultValue: boolean): boolean
 export function createApp() {
   getSharedNovelServices();
   const app = express();
+  // Docker 部署经 nginx 反代；信任一跳后 req.ip 才是浏览器地址，登录限流才按客户端计。
+  app.set("trust proxy", 1);
   const jsonBodyLimit = process.env.API_JSON_LIMIT ?? "20mb";
   const corsOriginEnv = process.env.CORS_ORIGIN;
   const corsAllowList = corsOriginEnv

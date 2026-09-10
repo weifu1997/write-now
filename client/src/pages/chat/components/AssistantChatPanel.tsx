@@ -12,6 +12,7 @@ import {
 import type { SSEFrame } from "@write-now/shared/types/api";
 import type { ChatMessage } from "@/store/chatStore";
 import MarkdownViewer from "@/components/common/MarkdownViewer";
+import { notifySiteAuthUnauthorizedFromHttpStatus } from "@/api/siteAuthEvents";
 import { API_BASE_URL } from "@/lib/constants";
 
 type ChatMode = "standard" | "agent";
@@ -235,6 +236,7 @@ export default function AssistantChatPanel({
           });
 
           if (!response.ok || !response.body) {
+            notifySiteAuthUnauthorizedFromHttpStatus(response.status);
             throw new Error(`请求失败，状态码 ${response.status}`);
           }
 

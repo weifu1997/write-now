@@ -34,7 +34,7 @@ export function resolveSiteAuthConfig(env: NodeJS.ProcessEnv = process.env): Sit
   const username = env.SITE_AUTH_USERNAME?.trim() ?? "";
   const password = env.SITE_AUTH_PASSWORD?.trim() ?? "";
   const configured = username.length > 0 && password.length > 0;
-  const isDesktop = env.AI_NOVEL_RUNTIME?.trim() === "desktop";
+  const isDesktop = env.AI_NOVEL_RUNTIME?.trim().toLowerCase() === "desktop";
   const defaultRequired = env.NODE_ENV === "production" && !isDesktop;
   const required = parseEnvFlag(env.SITE_AUTH_REQUIRED, defaultRequired);
   const secret = env.SITE_AUTH_SECRET?.trim() || deriveSessionSecret(username, password);

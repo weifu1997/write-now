@@ -18,6 +18,9 @@
 - 要求门禁但未配置 `SITE_AUTH_USERNAME` 或 `SITE_AUTH_PASSWORD` 时，除健康检查、登录状态和自动导演频道回调外拒绝访问。
 - 业务接口由 `createApp()` 对 `/api` 全局挂载 `authMiddleware` 拦截，不能只挡前端页面。
 - 会话使用 HttpOnly cookie，默认 7 天；HTTPS 才加 Secure。
+- Docker 经 nginx 反代时后端 `trust proxy = 1`，登录限流按浏览器 IP 计，而不是把所有用户算成容器网关。
+- 业务接口未登录返回 401，且 `message` 为 `SITE_AUTH_UNAUTHENTICATED`。登录页密码错误也是 401，但没有这个码，前端不得因此把正在登录的人清出会话。
+- axios 和流式 `fetch` 都带 cookie；流式请求遇到门禁 401 后回到登录页，不能只重连。
 - 钉钉/企微频道回调继续使用既有通道令牌，不要求浏览器登录 cookie。
 - compose 和示例配置不得写入可直接使用的默认密码。
 
@@ -40,7 +43,8 @@
 - 公开路径必须先规范化再判断，禁止用原始 URL 前缀放行 `/api/health/../novels` 这类路径。
 - 打开页面能进工作台、直接请求 API 也能拿到数据：先查全局 `/api` 中间件是否生效，再查 cookie 是否随请求发送。
 - 桌面端启动后要求登录：查 `AI_NOVEL_RUNTIME` 是否为 `desktop`，以及是否被 `SITE_AUTH_REQUIRED=true` 覆盖。
-- 登录后流式生成失败：查对应 `fetch` 是否带 `credentials: "include"`。
+- 登录后流式生成失败：查对应 `fetch` 是否带 `credentials: "include"`；会话过期后是否回到登录页而不是无限重连。
+- 登录几次后所有人都被限流：查是否设置了 `trust proxy`，以及 nginx 是否转发 `X-Forwarded-For` / `X-Forwarded-Proto`。
 - Docker 启动后提示未配置访问账号：查 compose 是否读到用户名和密码，而不是把健康检查失败当成登录问题。
 
 ## 相关模块

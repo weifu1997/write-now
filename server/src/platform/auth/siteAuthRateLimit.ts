@@ -21,6 +21,10 @@ export function consumeLoginAttempt(key: string, now = Date.now()): boolean {
   return true;
 }
 
+export function resetLoginAttempt(key: string): void {
+  attempts.delete(key);
+}
+
 export function resetLoginAttempts(): void {
   attempts.clear();
 }

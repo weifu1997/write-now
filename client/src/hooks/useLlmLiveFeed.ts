@@ -4,6 +4,7 @@ import type {
   LlmLiveSessionSnapshot,
   LlmLiveStreamFrame,
 } from "@write-now/shared/types/llmLive";
+import { notifySiteAuthUnauthorizedFromHttpStatus } from "@/api/siteAuthEvents";
 import { API_BASE_URL } from "@/lib/constants";
 import {
   clearLlmLiveCache,
@@ -199,6 +200,9 @@ export function useLlmLiveFeed(input: {
             { signal: controller.signal, credentials: "include" },
           );
           if (!response.ok || !response.body) {
+            if (notifySiteAuthUnauthorizedFromHttpStatus(response.status)) {
+              return;
+            }
             throw new Error("生成实况连接失败");
           }
           setConnected(true);

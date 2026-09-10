@@ -27,10 +27,15 @@ test("浏览器请求带上登录 cookie", async () => {
     read("src/pages/chat/components/AssistantChatPanel.tsx"),
   ]);
   assert.match(client, /withCredentials: true/);
+  assert.match(client, /isSiteAuthGateError/);
   assert.match(sse, /credentials: "include"/);
   assert.match(live, /credentials: "include"/);
   assert.match(hub, /credentials: "include"/);
   assert.match(chat, /credentials: "include"/);
+  assert.match(sse, /notifySiteAuthUnauthorizedFromHttpStatus/);
+  assert.match(live, /notifySiteAuthUnauthorizedFromHttpStatus/);
+  assert.match(hub, /notifySiteAuthUnauthorizedFromHttpStatus/);
+  assert.match(chat, /notifySiteAuthUnauthorizedFromHttpStatus/);
 });
 
 test("已登录工作台提供退出", async () => {

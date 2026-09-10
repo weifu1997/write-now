@@ -91,6 +91,9 @@ test("site auth defaults skip desktop production and require other production", 
     process.env.AI_NOVEL_RUNTIME = "desktop";
     assert.equal(resolveSiteAuthConfig().required, false);
 
+    process.env.AI_NOVEL_RUNTIME = "Desktop";
+    assert.equal(resolveSiteAuthConfig().required, false);
+
     delete process.env.AI_NOVEL_RUNTIME;
     assert.equal(resolveSiteAuthConfig().required, true);
 
@@ -107,7 +110,9 @@ test("site auth defaults skip desktop production and require other production", 
 test("site auth public paths keep health, login and channel callbacks open", () => {
   assert.equal(isSiteAuthPublicPath("/api/health"), true);
   assert.equal(isSiteAuthPublicPath("/api/health/"), true);
+  assert.equal(isSiteAuthPublicPath("/api/auth/status"), true);
   assert.equal(isSiteAuthPublicPath("/api/auth/login"), true);
+  assert.equal(isSiteAuthPublicPath("/api/auth/logout"), true);
   assert.equal(isSiteAuthPublicPath("/api/auto-director/channel-callbacks/dingtalk"), true);
   assert.equal(isSiteAuthPublicPath("/api/market-radar/sources"), false);
   assert.equal(isSiteAuthPublicPath("/api/drama/projects"), false);
@@ -197,6 +202,9 @@ test("configured site auth rejects anonymous access and accepts a valid login co
         body: JSON.stringify({ username: "operator", password: "wrong" }),
       });
       assert.equal(wrong.status, 401);
+      const wrongPayload = await wrong.json();
+      assert.notEqual(wrongPayload.message, "SITE_AUTH_UNAUTHENTICATED");
+      assert.equal(wrongPayload.error, "用户名或密码不正确。");
 
       const login = await fetch(`http://127.0.0.1:${port}/api/auth/login`, {
         method: "POST",
@@ -204,6 +212,11 @@ test("configured site auth rejects anonymous access and accepts a valid login co
         body: JSON.stringify({ username: "operator", password: "correct-horse" }),
       });
       assert.equal(login.status, 200);
+      const setCookie = login.headers.get("set-cookie") || "";
+      assert.match(setCookie, /Path=\//);
+      assert.match(setCookie, /HttpOnly/i);
+      assert.match(setCookie, /SameSite=Lax/i);
+      assert.doesNotMatch(setCookie, /Secure/i);
       const cookie = cookieHeader(login);
       assert.match(cookie, /^wn_site_session=/);
 

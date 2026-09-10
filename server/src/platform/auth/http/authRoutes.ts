@@ -5,7 +5,7 @@ import { SITE_AUTH_UNCONFIGURED } from "@write-now/shared/types/api";
 import { AppError } from "../../../middleware/errorHandler";
 import { validate } from "../../../middleware/validate";
 import { resolveSiteAuthConfig } from "../siteAuthConfig";
-import { consumeLoginAttempt } from "../siteAuthRateLimit";
+import { consumeLoginAttempt, resetLoginAttempt } from "../siteAuthRateLimit";
 import {
   applySessionCookie,
   clearSessionCookie,
@@ -56,6 +56,7 @@ router.post("/login", validate({ body: loginSchema }), (req, res, next) => {
     if (!secretsEqual(body.username, config.username) || !secretsEqual(body.password, config.password)) {
       throw new AppError("用户名或密码不正确。", 401);
     }
+    resetLoginAttempt(attemptKey);
     const token = createSessionToken(config.secret, Date.now(), config.sessionTtlSeconds);
     applySessionCookie(res, token, config.sessionTtlSeconds, isSecureRequest(req));
     const response: ApiResponse<SiteAuthStatus> = {
