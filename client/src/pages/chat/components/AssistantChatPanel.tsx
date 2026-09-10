@@ -211,6 +211,7 @@ export default function AssistantChatPanel({
 
           const response = await fetch(`${API_BASE_URL}/chat`, {
             method: "POST",
+            credentials: "include",
             headers: {
               "Content-Type": "application/json",
             },

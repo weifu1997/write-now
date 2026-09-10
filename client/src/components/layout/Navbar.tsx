@@ -7,6 +7,7 @@ import DesktopBrandMark from "@/components/layout/DesktopBrandMark";
 import LiveExecutionDialog from "@/components/liveExecution/LiveExecutionDialog";
 import ProjectGithubLink from "@/components/layout/ProjectGithubLink";
 import ThemeToggle from "@/components/theme/ThemeToggle";
+import { SiteAuthLogoutButton } from "@/components/layout/SiteAuthGate";
 import DesktopReleaseNotesDialog from "@/components/layout/DesktopReleaseNotesDialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -55,6 +56,7 @@ export default function Navbar(props: NavbarProps) {
         ) : null}
         <LiveExecutionDialog />
         <ThemeToggle />
+        <SiteAuthLogoutButton />
         <Button
           type="button"
           size="sm"

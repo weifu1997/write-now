@@ -7,7 +7,9 @@ import helmet from "helmet";
 import morgan from "morgan";
 import type { ApiResponse } from "@write-now/shared/types/api";
 import { ensureRuntimeDatabaseReady } from "./db/runtimeMigrations";
+import { authMiddleware } from "./middleware/auth";
 import { errorHandler } from "./middleware/errorHandler";
+import siteAuthRouter from "./platform/auth/http/authRoutes";
 import { loadProviderApiKeys } from "./llm/factory";
 import astrologyRouter from "./routes/astrology";
 import agentCatalogRouter from "./routes/agentCatalog";
@@ -125,7 +127,9 @@ export function createApp() {
   }));
   app.use(express.json({ limit: jsonBodyLimit }));
 
+  app.use("/api", authMiddleware);
   app.use("/api/health", healthRouter);
+  app.use("/api/auth", siteAuthRouter);
   app.use("/api/agent-catalog", agentCatalogRouter);
   app.use("/api/agent-runs", agentRunsRouter);
   app.use("/api/book-analysis", bookAnalysisRouter);

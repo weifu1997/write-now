@@ -8,6 +8,15 @@ export interface ApiResponse<T> {
   message?: string;
 }
 
+export const SITE_AUTH_UNAUTHENTICATED = "SITE_AUTH_UNAUTHENTICATED";
+export const SITE_AUTH_UNCONFIGURED = "SITE_AUTH_UNCONFIGURED";
+
+export interface SiteAuthStatus {
+  required: boolean;
+  configured: boolean;
+  authenticated: boolean;
+}
+
 export type SSEFrame =
   | { type: "chunk"; content: string }
   | { type: "done"; fullContent: string }

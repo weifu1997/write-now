@@ -145,6 +145,9 @@ export const queryKeys = {
     state: (threadId: string) => ["creative-hub", "state", threadId] as const,
     history: (threadId: string) => ["creative-hub", "history", threadId] as const,
   },
+  siteAuth: {
+    status: ["site-auth", "status"] as const,
+  },
   settings: {
     apiKeys: ["settings", "api-keys"] as const,
     llmSelection: ["settings", "llm-selection"] as const,

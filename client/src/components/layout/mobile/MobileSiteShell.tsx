@@ -18,6 +18,7 @@ import DesktopBrandMark from "../DesktopBrandMark";
 import ProjectGithubLink from "../ProjectGithubLink";
 import LiveExecutionDialog from "@/components/liveExecution/LiveExecutionDialog";
 import { Button } from "@/components/ui/button";
+import { SiteAuthLogoutButton } from "@/components/layout/SiteAuthGate";
 import { VisualAssetLibraryDialog } from "@/components/visualAssets";
 import { cn } from "@/lib/utils";
 import {
@@ -150,6 +151,7 @@ export default function MobileSiteShell({ children }: MobileSiteShellProps) {
                   </div>
                 </section>
               ))}
+              <SiteAuthLogoutButton className="w-full" />
             </div>
           </div>
         </div>

@@ -23,6 +23,9 @@ services:
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://ai_novel:ai_novel@db:5432/ai_novel
+      # 站点登录：必须自行设置，不要使用空值或示例密码直接上公网
+      SITE_AUTH_USERNAME: ${SITE_AUTH_USERNAME:-}
+      SITE_AUTH_PASSWORD: ${SITE_AUTH_PASSWORD:-}
       # 启用向量检索（RAG）时：加 --profile qdrant 启动，并取消下面注释
       # QDRANT_URL: http://qdrant:6333
     volumes:

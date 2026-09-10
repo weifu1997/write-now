@@ -1,0 +1,5 @@
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "登录门禁跨 API、前端路由、cookie 和部署配置，实现时按跨层合同检查。"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "鉴权必须复用全局中间件和现有 apiClient，避免每个路由或每个 fetch 各写一套。"}
+{"file": ".trellis/spec/server/backend/error-handling.md", "reason": "401/503 走现有 AppError 响应形状，不另造错误格式。"}
+{"file": "docs/wiki/architecture/configuration-conventions.md", "reason": "站点口令属于部署凭证，只能走 env，不能进设置面板。"}
+{"file": "docs/deploy/docker.md", "reason": "服务器部署是这次门禁的启用面，文档和 compose 必须同步。"}

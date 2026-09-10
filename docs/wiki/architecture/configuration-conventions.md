@@ -46,6 +46,7 @@
 ### 哪些场景仍允许走 env
 
 - `DATABASE_URL`、`PORT`、`HOST`、`NODE_ENV`、`SHADOW_DATABASE_URL` 等部署期固定参数。
+- 站点登录门禁凭证：`SITE_AUTH_USERNAME`、`SITE_AUTH_PASSWORD`、`SITE_AUTH_SECRET`、`SITE_AUTH_REQUIRED`。这是部署期密钥，禁止放进设置面板，也禁止在 compose 里写入可直接使用的默认密码。
 - API key（`OPENAI_API_KEY` 等）。`AppSetting` 可以覆盖，但 env 是首次启动的兜底。
 - `*_TIMEOUT_MS` 这类**仅启动期需要**且没有运行时调整需求的参数（极少见，能放面板就放面板）。
 - 调试开关：`*_VERBOSE_LOG`、`DEBUG=*`。
