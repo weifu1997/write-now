@@ -7,7 +7,9 @@ import helmet from "helmet";
 import morgan from "morgan";
 import type { ApiResponse } from "@write-now/shared/types/api";
 import { ensureRuntimeDatabaseReady } from "./db/runtimeMigrations";
+import { authMiddleware } from "./middleware/auth";
 import { errorHandler } from "./middleware/errorHandler";
+import siteAuthRouter from "./platform/auth/http/authRoutes";
 import { loadProviderApiKeys } from "./llm/factory";
 import astrologyRouter from "./routes/astrology";
 import agentCatalogRouter from "./routes/agentCatalog";
@@ -87,6 +89,8 @@ function parseEnvFlag(value: string | undefined, defaultValue: boolean): boolean
 export function createApp() {
   getSharedNovelServices();
   const app = express();
+  // Docker 部署经 nginx 反代；信任一跳后 req.ip 才是浏览器地址，登录限流才按客户端计。
+  app.set("trust proxy", 1);
   const jsonBodyLimit = process.env.API_JSON_LIMIT ?? "20mb";
   const corsOriginEnv = process.env.CORS_ORIGIN;
   const corsAllowList = corsOriginEnv
@@ -125,7 +129,9 @@ export function createApp() {
   }));
   app.use(express.json({ limit: jsonBodyLimit }));
 
+  app.use("/api", authMiddleware);
   app.use("/api/health", healthRouter);
+  app.use("/api/auth", siteAuthRouter);
   app.use("/api/agent-catalog", agentCatalogRouter);
   app.use("/api/agent-runs", agentRunsRouter);
   app.use("/api/book-analysis", bookAnalysisRouter);

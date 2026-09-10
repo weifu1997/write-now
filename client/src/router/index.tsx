@@ -4,6 +4,7 @@ import { Navigate, useRoutes } from "react-router-dom";
 import AppLayout from "@/components/layout/AppLayout";
 import { featureFlags } from "@/config/featureFlags";
 
+const LoginPage = lazy(() => import("@/pages/login/LoginPage"));
 const Home = lazy(() => import("@/pages/Home"));
 const HelpPage = lazy(() => import("@/pages/help/HelpPage"));
 const NovelList = lazy(() => import("@/pages/novels/NovelList"));
@@ -45,6 +46,7 @@ const WritingFormulaPage = lazy(() => import("@/pages/writingFormula/WritingForm
 const CharacterLibrary = lazy(() => import("@/pages/characters/CharacterLibrary"));
 
 const routes: RouteObject[] = [
+  { path: "/login", element: <LoginPage /> },
   {
     path: "/",
     element: <AppLayout />,

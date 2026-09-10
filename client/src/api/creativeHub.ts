@@ -8,6 +8,7 @@ import type {
 } from "@write-now/shared/types/creativeHub";
 import { API_BASE_URL } from "@/lib/constants";
 import { apiClient } from "./client";
+import { notifySiteAuthUnauthorizedFromHttpStatus } from "./siteAuthEvents";
 
 function ensureThreadId(threadId: string): string {
   const normalized = threadId.trim();
@@ -106,10 +107,12 @@ export async function* streamCreativeHubRun(
       "Content-Type": "application/json",
     },
     body: JSON.stringify(requestBody),
+    credentials: "include",
     signal: abortSignal,
   });
 
   if (!response.ok || !response.body) {
+    notifySiteAuthUnauthorizedFromHttpStatus(response.status);
     throw new Error(`创作中枢请求失败，状态码 ${response.status}`);
   }
 

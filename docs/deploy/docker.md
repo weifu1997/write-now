@@ -6,19 +6,25 @@
 
 - Docker 20.10+ 与 Docker Compose v2（`docker compose version` 可用即可）。
 - 构建过程需要访问网络下载依赖。
+- 准备一组站点登录用户名和密码。Docker 部署默认开启登录门禁；不填写时工作台不可用，只有健康检查可以访问。
 
 ## 快速启动
 
-在仓库根目录执行：
+在仓库根目录先设置站点登录账号，再启动：
 
 ```bash
+export SITE_AUTH_USERNAME='your-username'
+export SITE_AUTH_PASSWORD='your-password'
 docker compose -f infra/docker-compose.yml up -d --build
 ```
 
+也可以把这两个变量写进运行命令所在目录的 `.env`，不要把真实密码提交进仓库。
+
 首次构建约需几分钟到十几分钟。完成后：
 
-- 打开 **http://localhost:8080** 即可使用产品；
+- 打开 **http://localhost:8080**，用上面的用户名和密码登录后进入工作台；
 - API 通过 Web 的 `/api` 反向代理访问，无需单独暴露；`127.0.0.1:3000` 仅用于本机调试。
+- 如果打开页面后提示还没有设置访问账号，说明容器没有读到 `SITE_AUTH_USERNAME` / `SITE_AUTH_PASSWORD`，补上后重新启动 `api` 服务。
 
 首次启动时，API 容器会自动执行数据库迁移，日志中出现 `All migrations have been successfully applied` 后服务即可正常使用。
 
@@ -84,4 +90,6 @@ docker compose -f infra/docker-compose.yml logs -f api
 
 **修改了数据库密码但已有数据**：除改 compose 配置外，需要进入数据库执行 `ALTER USER ai_novel WITH PASSWORD '新密码';`，保持三者一致。
 
-**在别的机器/局域网访问**：浏览器直接访问部署机的 8080 端口即可（前端与 API 同源走反代，无需额外跨域配置）。
+**在别的机器/局域网访问**：浏览器直接访问部署机的 8080 端口即可（前端与 API 同源走反代，无需额外跨域配置）。打开后需要先登录；没有账号密码时页面会提示去配置环境变量，而不是直接进入工作台。
+
+**忘记站点登录账号**：改 `SITE_AUTH_USERNAME` / `SITE_AUTH_PASSWORD` 后执行 `docker compose -f infra/docker-compose.yml up -d api`。旧登录会话会失效，用新账号重新登录。

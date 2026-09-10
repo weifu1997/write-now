@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { SSEFrame } from "@write-now/shared/types/api";
 import type { ChapterRuntimePackage } from "@write-now/shared/types/chapterRuntime";
+import { notifySiteAuthUnauthorizedFromHttpStatus } from "@/api/siteAuthEvents";
 import { API_BASE_URL } from "@/lib/constants";
 
 interface UseSSEOptions {
@@ -112,10 +113,12 @@ export function useSSE(options?: UseSSEOptions) {
             ...(options?.headers ?? {}),
           },
           body: JSON.stringify(body ?? {}),
+          credentials: "include",
           signal: controller.signal,
         });
 
         if (!response.ok || !response.body) {
+          notifySiteAuthUnauthorizedFromHttpStatus(response.status);
           throw new Error(`请求失败，状态码 ${response.status}`);
         }
 

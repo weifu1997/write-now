@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "核对前端 cookie、后端全局门禁和 Docker 未配置拒绝是否同一合同。"}
+{"file": ".trellis/spec/server/backend/error-handling.md", "reason": "核对未登录/未配置的 HTTP 状态和响应体是否符合现有 API 错误形状。"}
+{"file": "docs/wiki/architecture/configuration-conventions.md", "reason": "核对口令没有泄漏到设置面板或 compose 默认值。"}
+{"file": "docs/deploy/docker.md", "reason": "核对部署文档是否写清未配置即拒绝、健康检查仍可用。"}
