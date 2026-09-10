@@ -3,8 +3,10 @@ const assert = require("node:assert/strict");
 
 const {
   ChapterScenePlanNormalizationError,
+  CHAPTER_TARGET_WORD_COUNT_MAX,
   normalizeChapterScenePlan,
   parseChapterScenePlan,
+  resolveChapterIntakeMaxChars,
   resolveLengthBudgetContract,
   serializeChapterScenePlan,
   generatedChapterScenePlanSchema,
@@ -56,6 +58,9 @@ test("chapter length control normalizes scene targets to the chapter target budg
   assert.equal(plan.lengthBudget.softMinWordCount, 2975);
   assert.equal(plan.lengthBudget.softMaxWordCount, 4025);
   assert.equal(plan.lengthBudget.hardMaxWordCount, 4375);
+  assert.equal(resolveChapterIntakeMaxChars(3500), 4375);
+  assert.ok(resolveChapterIntakeMaxChars(3500) > 4000);
+  assert.equal(resolveChapterIntakeMaxChars(), Math.ceil(CHAPTER_TARGET_WORD_COUNT_MAX * 1.25));
   assert.equal(plan.scenes.reduce((sum, scene) => sum + scene.targetWordCount, 0), 3500);
   assert.deepEqual(plan.readerExperience, EMPTY_READER_EXPERIENCE_CONTRACT);
   assert.equal(plan.scenes[0].resistance, "");

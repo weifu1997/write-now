@@ -1,6 +1,7 @@
 import type { DirectorChapterExecutionProgressSummary, DirectorArtifactRef, DirectorArtifactType } from "@write-now/shared/types/directorRuntime";
 import {
   isDirectorAutoExecutionRunMode,
+  isFullBookAutopilotRunMode,
   type DirectorAutoExecutionState,
   type DirectorConfirmRequest,
 } from "@write-now/shared/types/novelDirector";
@@ -206,6 +207,7 @@ export class DirectorCoreStepModuleRuntime {
       workspace,
       plan: request ? normalizeDirectorAutoExecutionPlan(request.autoExecutionPlan) : undefined,
       allowPartialChapterListReady: isDirectorAutoExecutionRunMode(request?.runMode),
+      skipChapterDetail: isFullBookAutopilotRunMode(request?.runMode),
     });
   }
 

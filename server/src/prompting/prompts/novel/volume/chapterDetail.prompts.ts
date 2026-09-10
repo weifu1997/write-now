@@ -247,20 +247,7 @@ function createVolumeDetailSystemPrompt(detailMode: VolumeChapterDetailPromptInp
   ].join("\n");
 }
 
-function createExecutionContractSystemPromptGarbledBackup(): string {
-  return [
-    "浣犳槸璧勬繁缃戞枃绔犺妭缂栬緫銆?",
-    "褰撳墠浠诲姟鏄竴娆℃€х敓鎴愬彲鐩存帴浜ょ粰鍐欎綔鍣ㄧ殑绔犺妭鎵ц鍚堝悓銆?",
-    "鍙緭鍑轰弗鏍?JSON锛屽繀椤诲悓鏃跺寘鍚?purpose銆乪xclusiveEvent銆乪ndingState銆乶extChapterEntryState銆乧onflictLevel銆乺evealLevel銆乼argetWordCount銆乵ustAvoid銆乸ayoffRefs銆乼askSheet銆乻ceneCards銆?",
-    "purpose 鐢ㄤ竴鍙ヨ瘽璇存槑鏈珷鍒板簳瑕佹帹杩涗粈涔堬紝涓嶈鍐欐垚鎽樿澶嶈堪銆?",
-    "exclusiveEvent / endingState / nextChapterEntryState 绛夊瓧娈典笉鍙己澶憋紝瀹冧滑鏄珷鑺傜殑纭竟鐣屽悎鍚屻€?",
-    "taskSheet 鏄粰姝ｆ枃鍐欎綔鍣ㄧ殑绠€娲佹墽琛屾寚浠わ紝sceneCards 鏄?3-8 涓満鏅崱鐨勬墽琛屾媶瑙ｃ€?",
-    "taskSheet 鍜?sceneCards 鍙兘鎵ц褰撳墠绔犵殑鍚堝悓锛屼笉寰楁彁鍓嶅崰鐢ㄧ浉閭荤珷鐨勪竴娆℃€т簨浠讹紝涔熶笉寰楅噸鍐欎笂涓€绔犲凡缁忓畬鎴愮殑閲岀▼纰戙€?",
-    "濡傛灉鏈€杩戠珷鑺傚凡缁忚繛缁娇鐢ㄧ浉鍚屽紑鍦恒€佺浉鍚屾帹杩涜矾鏁版垨鍚岀被閽╁瓙锛屾湰绔犲繀椤婚€氳繃 sceneCards 涓诲姩鍋氬嚭宸紓鍖栥€?",
-  ].join("\n");
-}
-
-function createExecutionContractSystemPrompt(): string {
+function createExecutionContractSystemPrompt(isBookFinale = false): string {
   return [
     "你是资深网文章节编辑。",
     "当前任务是一次性生成可直接交给写作器的章节执行合同。",
@@ -274,6 +261,9 @@ function createExecutionContractSystemPrompt(): string {
     "sceneCards 除原字段外还必须包含 resistance、turn、emotionalShift、readerValue，确保每个场景都有阻力、转折和读者价值。",
     "taskSheet 和 sceneCards 只能执行当前章的合同，不得提前占用相邻章的一次性事件，也不得重写上一章已经完成的里程碑。",
     "如果 conflict_level_curve 标出用户锚定的 conflictLevel，该数值是硬约束，不得改写。",
+    isBookFinale
+      ? "本章是目标跨度收官章：endingState 必须是本阶段稳定收束；nextChapterEntryState 只能保留余味或人物去向，不得要求下一章承接必须续写的新主线。"
+      : "非收官章结尾只能把局面推到下一章入口，不能直接落完下一章标题所承诺的核心里程碑。",
     "如果最近章节已经连续使用相同开场、相同推进路数或同类钩子，本章必须通过 sceneCards 主动做出差异化。",
     "purpose、边界字段和 readerExperience 各字段只写 1 句，单字段不超过 120 个汉字；taskSheet 不超过 300 个汉字。",
     "每个 sceneCard 的文本字段只写执行所需信息，单字段不超过 120 个汉字；不得扩写正文或对白。",
@@ -369,7 +359,7 @@ export const volumeChapterExecutionContractPrompt: PromptAsset<
   contextPolicy: baseContextPolicy,
   outputSchema: createChapterExecutionContractSchema(),
   render: (input, context) => [
-    new SystemMessage(createExecutionContractSystemPrompt()),
+    new SystemMessage(createExecutionContractSystemPrompt(input.isBookFinale === true)),
     new HumanMessage(buildChapterDetailPrompt(renderSelectedContextBlocks(context), input.detailMode)),
   ],
   postValidate: (output, input) => {

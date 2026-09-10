@@ -99,7 +99,9 @@ export const volumeBeatSheetPrompt: PromptAsset<
       "2. first_escalation 与中前段 beats 必须逐步体现 primaryPressureSource 与 escalationMode。",
       "3. midpoint_turn 必须体现 midVolumeRisk 或等价的局面转向，不能只是线性加码。",
       "4. climax 必须承接卷高潮承诺，形成明确兑现。",
-      "5. end_hook 必须承接 nextVolumeHook，并通过 resetPoint 或残局重组形成下一卷入口。",
+      input.isClosingVolume
+        ? "5. 这是目标跨度收官卷：end_hook 必须完成可见小结局或余味收束，不得再要求必须进入下一卷的新主线。"
+        : "5. end_hook 必须承接 nextVolumeHook，并通过 resetPoint 或残局重组形成下一卷入口。",
       "",
       "【质量要求】",
       "1. 每个 beat 都要回答：这一段章节为什么必须存在。",

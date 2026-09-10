@@ -13,6 +13,7 @@ test("director planning stages expose standard node adapter contracts", () => {
     "story_macro",
     "structured_outline",
     "volume_strategy",
+    "world_setup",
   ]);
 
   for (const [stage, adapter] of Object.entries(DIRECTOR_STAGE_NODE_ADAPTERS)) {
@@ -36,7 +37,11 @@ test("structured outline adapter declares chapter task sheet output", () => {
 
   assert.equal(adapter.nodeKey, "structured_outline_phase");
   assert.deepEqual(adapter.reads, ["volume_strategy", "character_cast"]);
-  assert.deepEqual(adapter.writes, ["chapter_task_sheet"]);
+  assert.deepEqual(adapter.writes, [
+    "volume_beat_sheet",
+    "volume_chapter_list",
+    "chapter_task_sheet",
+  ]);
   assert.equal(adapter.waitingState.stage, "structured_outline");
   assert.equal(adapter.waitingState.itemKey, "chapter_detail_bundle");
 });

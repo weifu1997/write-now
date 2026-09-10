@@ -21,10 +21,13 @@ import type { SimpleCreationShelfChapterStatus } from "@write-now/shared/types/n
 import {
   downloadNovelExport,
   getSimpleCreationShelf,
+  runNovelPipeline,
   setNovelCreationExperience,
 } from "@/api/novel";
+import { getAPIKeySettings, getLLMSelectionSetting } from "@/api/settings";
 import { continueNovelWorkflow } from "@/api/novelWorkflow";
 import { queryKeys } from "@/api/queryKeys";
+import { resolvePreferredLLMSelection } from "@/lib/llmSelection";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/toast";
@@ -104,8 +107,12 @@ export default function SimpleNovelShelfPage() {
     queryFn: () => getSimpleCreationShelf(id),
     enabled: Boolean(id),
     refetchInterval: (query) => {
-      const status = query.state.data?.data?.progress.status;
-      return status === "running" || status === "queued" ? 3000 : 10000;
+      const progress = query.state.data?.data?.progress;
+      const repairStatus = progress?.qualityDebtRepair?.status;
+      return progress?.status === "running" || progress?.status === "queued"
+        || repairStatus === "running" || repairStatus === "queued"
+        ? 3000
+        : 10000;
     },
   });
   const shelf = shelfQuery.data?.data ?? null;
@@ -155,6 +162,43 @@ export default function SimpleNovelShelfPage() {
       await queryClient.invalidateQueries({ queryKey: queryKeys.novels.simpleShelf(id) });
     },
     onError: (error) => toast.error(error instanceof Error ? error.message : "恢复失败，请重试。"),
+  });
+
+  const qualityDebtRepairMutation = useMutation({
+    mutationFn: async () => {
+      const debtChapters = (shelf?.chapters ?? [])
+        .filter((chapter) => chapter.status === "quality_debt")
+        .sort((left, right) => left.order - right.order);
+      if (debtChapters.length === 0) {
+        throw new Error("当前没有待跟进的质量项。");
+      }
+      const [selection, providers] = await Promise.all([
+        getLLMSelectionSetting(),
+        getAPIKeySettings(),
+      ]);
+      const llm = resolvePreferredLLMSelection(selection.data, providers.data ?? []);
+      if (!llm) {
+        throw new Error("还没有可用的写作模型。请先到系统设置配置模型，再开始自动修复。");
+      }
+      return runNovelPipeline(id, {
+        startOrder: debtChapters[0].order,
+        endOrder: debtChapters[debtChapters.length - 1].order,
+        chapterScope: "quality_debt",
+        autoReview: true,
+        autoRepair: true,
+        skipCompleted: false,
+        maxRetries: 2,
+        repairMode: "light_repair",
+        provider: llm.provider,
+        model: llm.model,
+        temperature: llm.temperature,
+      });
+    },
+    onSuccess: async () => {
+      toast.success("AI 正在按章节顺序自动修复待跟进质量项，修完一章再进入下一章。");
+      await queryClient.invalidateQueries({ queryKey: queryKeys.novels.simpleShelf(id) });
+    },
+    onError: (error) => toast.error(error instanceof Error ? error.message : "启动自动修复失败，请重试。"),
   });
 
   const switchExperienceMutation = useMutation({
@@ -233,10 +277,45 @@ export default function SimpleNovelShelfPage() {
                 {shelf.progress.recoveryAction === "replan_and_continue" ? "重规划后继续" : "继续创作"}
               </Button>
             ) : null}
+            {shelf.materials.openQualityDebtCount > 0 ? (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => qualityDebtRepairMutation.mutate()}
+                disabled={
+                  qualityDebtRepairMutation.isPending
+                  || shelf.progress.qualityDebtRepair?.status === "queued"
+                  || shelf.progress.qualityDebtRepair?.status === "running"
+                }
+              >
+                {qualityDebtRepairMutation.isPending || shelf.progress.qualityDebtRepair?.status === "queued" || shelf.progress.qualityDebtRepair?.status === "running"
+                  ? <Loader2 className="h-4 w-4 animate-spin" />
+                  : <Sparkles className="h-4 w-4" />}
+                {shelf.progress.qualityDebtRepair?.status === "queued" || shelf.progress.qualityDebtRepair?.status === "running"
+                  ? (shelf.progress.qualityDebtRepair.currentLabel || "正在按章自动修复")
+                  : shelf.progress.qualityDebtRepair?.status === "failed"
+                    ? "重新自动修复质量项"
+                    : "一键自动修复全部质量项"}
+              </Button>
+            ) : null}
             <div className="flex-1" />
             <Button variant="outline" size="sm" onClick={() => exportMutation.mutate()} disabled={exportMutation.isPending}><Download className="h-4 w-4" /> 导出已完成章节</Button>
             <Button variant="ghost" size="sm" onClick={() => switchExperienceMutation.mutate()} disabled={switchExperienceMutation.isPending}><Settings2 className="h-4 w-4" /> 专业模式</Button>
           </div>
+          {shelf.progress.qualityDebtRepair?.status === "failed" && shelf.progress.qualityDebtRepair.error ? (
+            <div className="flex items-start gap-3 border-t border-amber-200 bg-amber-50 px-5 py-3 text-sm leading-6 text-amber-950 sm:px-7">
+              <AlertTriangle className="mt-1 h-4 w-4 shrink-0 text-amber-600" />
+              <div>
+                <div className="font-medium">自动修复已暂停</div>
+                <div className="text-amber-900/75">{shelf.progress.qualityDebtRepair.error} 可以再点一次自动修复。已保存正文不会被清空。</div>
+              </div>
+            </div>
+          ) : null}
+          {shelf.progress.qualityDebtRepair?.status === "completed" && shelf.materials.openQualityDebtCount > 0 ? (
+            <div className="border-t border-border px-5 py-3 text-sm leading-6 text-muted-foreground sm:px-7">
+              本轮已按章修复并重新审校。还剩下的局部质量项，可打开该章查看或继续自动修复。已保存正文不会被清空。
+            </div>
+          ) : null}
           {shelf.progress.safetyMessage ? (
             <div className="flex items-start gap-3 border-t border-amber-200 bg-amber-50 px-5 py-3 text-sm leading-6 text-amber-950 sm:px-7">
               <AlertTriangle className="mt-1 h-4 w-4 shrink-0 text-amber-600" />

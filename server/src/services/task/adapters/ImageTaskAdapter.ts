@@ -13,6 +13,10 @@ import {
   getArchivedTaskIds,
   isTaskArchived,
 } from "../taskArchive";
+import {
+  isSameImageTaskOwner,
+  selectLatestVisibleImageTasks,
+} from "../imageTaskOwnerVisibility";
 
 function buildImageTaskPresentation(row: {
   id: string;
@@ -83,7 +87,6 @@ export class ImageTaskAdapter {
             },
           }
           : {}),
-        ...(status ? { status } : {}),
         ...(input.keyword
           ? {
             OR: [
@@ -109,30 +112,37 @@ export class ImageTaskAdapter {
         },
       },
       orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
-      take: input.take,
+      take: Math.max(input.take * 8, 80),
     });
 
-    return rows.map((row) => ({
-      ...buildImageTaskPresentation(row),
-      id: row.id,
-      kind: "image_generation",
-      status: row.status as TaskStatus,
-      progress: row.progress,
-      currentStage: row.currentStage,
-      currentItemLabel: row.currentItemLabel,
-      attemptCount: row.retryCount,
-      maxAttempts: row.maxRetries,
-      lastError: row.error,
-      createdAt: row.createdAt.toISOString(),
-      updatedAt: row.updatedAt.toISOString(),
-      heartbeatAt: row.heartbeatAt?.toISOString() ?? null,
-      failureCode: row.status === "failed" ? "IMAGE_GENERATION_FAILED" : null,
-      failureSummary: row.status === "failed"
-        ? normalizeFailureSummary(row.error, "图像任务失败，但没有记录明确错误。")
-        : row.error,
-      recoveryHint: buildTaskRecoveryHint("image_generation", row.status as TaskStatus),
-      targetResources: [],
-    }));
+    return selectLatestVisibleImageTasks(rows)
+      .filter((row) => !status || row.status === status)
+      .sort((left, right) => {
+        const timeDelta = right.updatedAt.getTime() - left.updatedAt.getTime();
+        return timeDelta !== 0 ? timeDelta : right.id.localeCompare(left.id);
+      })
+      .slice(0, input.take)
+      .map((row) => ({
+        ...buildImageTaskPresentation(row),
+        id: row.id,
+        kind: "image_generation",
+        status: row.status as TaskStatus,
+        progress: row.progress,
+        currentStage: row.currentStage,
+        currentItemLabel: row.currentItemLabel,
+        attemptCount: row.retryCount,
+        maxAttempts: row.maxRetries,
+        lastError: row.error,
+        createdAt: row.createdAt.toISOString(),
+        updatedAt: row.updatedAt.toISOString(),
+        heartbeatAt: row.heartbeatAt?.toISOString() ?? null,
+        failureCode: row.status === "failed" ? "IMAGE_GENERATION_FAILED" : null,
+        failureSummary: row.status === "failed"
+          ? normalizeFailureSummary(row.error, "图像任务失败，但没有记录明确错误。")
+          : row.error,
+        recoveryHint: buildTaskRecoveryHint("image_generation", row.status as TaskStatus),
+        targetResources: [],
+      }));
   }
 
   async detail(id: string): Promise<UnifiedTaskDetail | null> {
@@ -253,7 +263,34 @@ export class ImageTaskAdapter {
       throw new AppError("Only completed, failed, or cancelled tasks can be archived.", 400);
     }
 
-    await recordTaskArchive("image_generation", id);
+    const ownerWhere = task.sceneType === "novel_cover" && task.novelId
+      ? { sceneType: "novel_cover" as const, novelId: task.novelId }
+      : task.sceneType === "character" && task.baseCharacterId
+        ? { sceneType: "character" as const, baseCharacterId: task.baseCharacterId }
+        : task.sceneType === "book_analysis_character" && task.bookAnalysisCharacterId
+          ? {
+            sceneType: "book_analysis_character" as const,
+            bookAnalysisCharacterId: task.bookAnalysisCharacterId,
+          }
+          : { id: task.id };
+    const siblings = await prisma.imageGenerationTask.findMany({
+      where: ownerWhere,
+      select: {
+        id: true,
+        sceneType: true,
+        novelId: true,
+        baseCharacterId: true,
+        bookAnalysisCharacterId: true,
+        status: true,
+        updatedAt: true,
+      },
+    });
+    const idsToArchive = siblings
+      .filter((row) => isSameImageTaskOwner(task, row) && isArchivableTaskStatus(row.status as TaskStatus))
+      .map((row) => row.id);
+    await Promise.all(
+      (idsToArchive.length > 0 ? idsToArchive : [id]).map((taskId) => recordTaskArchive("image_generation", taskId)),
+    );
     return null;
   }
 }

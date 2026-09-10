@@ -1,5 +1,15 @@
 import type { LLMProvider } from "./llm";
 
+export const STYLE_ANCHOR_STORED_MAX_CHARS = 800;
+
+export function clipStyleAnchorText(text: string): string {
+  const normalized = text.trim();
+  if (normalized.length <= STYLE_ANCHOR_STORED_MAX_CHARS) {
+    return normalized;
+  }
+  return normalized.slice(0, STYLE_ANCHOR_STORED_MAX_CHARS);
+}
+
 export type StyleSourceType =
   | "manual"
   | "from_text"

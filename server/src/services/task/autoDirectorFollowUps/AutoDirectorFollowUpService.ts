@@ -8,6 +8,7 @@ import type {
 } from "@write-now/shared/types/autoDirectorFollowUp";
 import {
   AUTO_DIRECTOR_CHANNEL_TYPES,
+  countActionableFollowUpItems,
 } from "@write-now/shared/types/autoDirectorFollowUp";
 import { prisma } from "../../../db/prisma";
 import { NovelWorkflowService } from "../../novel/workflow/NovelWorkflowService";
@@ -72,6 +73,7 @@ export class AutoDirectorFollowUpService {
 
     return {
       totalCount: items.length,
+      actionableCount: countActionableFollowUpItems(items),
       countersByReason: buildCounters(items),
       countersBySection: buildSectionCounters(items),
     };

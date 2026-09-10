@@ -35,6 +35,7 @@ Book Contract 的 `chapter3Payoff / chapter10Payoff / chapter30Payoff` 是 Payof
 
 - Payoff 逾期是账本风险，不是单章留存失败，也不是全书计划失配的确定性证据。逾期距离、当前章窗口命中和当前章显式引用都不得单独升级为 `stop_for_replan`，不得进入章节 `hasBlockingIssues` / patch / `qualityLoop` 待优化。
 - `nextAction=replan`、人工强制或章节验收确认 `plan_misalignment` 可以输出 `stop_for_replan`。高优先级章节审计只能输出 `local_patch_plan`。生成决策不得仅因 `overduePayoffs` 返回 `replan` 或 `hold_for_review`。
+- 章节生成闸门不得把账本合成的 `payoff_overdue` 当成阻断审核项。全书自动推进和质量债自动修复遇到待审核状态提案时，只要没有真正的单章审计问题，就应继续审校/修复已保存正文，而不是暂停整批任务。
 - 所有全局调用方必须以 `action === "stop_for_replan"` 为最终闸门。`recommended` 可以表达局部处理建议，但不能单独暂停章节批次、写入 `PIPELINE_REPLAN_REQUIRED` 或创建 `replan_required` failure classification。
 
 ## Ownership Boundaries
@@ -58,6 +59,9 @@ Book Contract 的 `chapter3Payoff / chapter10Payoff / chapter30Payoff` 是 Payof
 - **保存 Book Contract 很慢**：同步不应在保存请求中直接调用 LLM；检查是否绕过持久副作用队列。
 - **普通逾期阻断整本写作**：检查是否错误把局部 payoff 风险直接升级成全局 replan。
 - **后文章节因早期窗口显示待优化**：检查 `payoff_overdue` 是否进入章节 blocking 或 `readChapterQualityDebtDetails`；仅逾期债应被读路径隐藏，混杂局部问题仍显示待优化。
+- **质量债自动修复被逾期伏笔或待审核状态提案暂停**：检查生成闸门是否把 `payoff_overdue` 算进阻断项，以及质量债任务是否带上 `chapterScope=quality_debt` 后仍走 `hold_for_review`。
+- **一键修复跑完仍有待跟进**：先看各章 `repairAttemptsUsed`。质量债批次同章最多 2 次（轻修后改写）。若是 0 且验收为 `needs_manual_review`，检查是否走了质量债入口；若已用满 2 次，属于完成优先的残余质量债，不是任务失败。不要把全书逾期伏笔当成单章补丁就能清掉的问题。
+- **当前模型已在跑，书架仍显示旧的暂停原因**：检查简易书架是否按 `updatedAt` 取到了仍 `pendingManualRecovery` 的旧质量债任务。当前这次修复应以进行中或最新创建的任务为准；新任务启动后应接替旧的暂停记录。
 - **局部审计触发全局停止**：检查调用方是否只判断 `recommended`，而没有同时要求 `action === "stop_for_replan"`。
 
 ## Related Modules

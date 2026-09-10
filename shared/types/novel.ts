@@ -132,6 +132,14 @@ export interface SimpleCreationShelfProjection {
     status: "queued" | "running" | "paused" | "failed" | "completed";
     canRetry: boolean;
     recoveryAction?: "replan_and_continue" | "continue";
+    qualityDebtRepair?: {
+      jobId: string;
+      status: "queued" | "running" | "paused" | "failed" | "completed";
+      currentLabel: string | null;
+      completedCount: number;
+      totalCount: number;
+      error: string | null;
+    } | null;
     safetyMessage?: string | null;
     latestRiskAssessment?: DirectorRiskHistoryItem | null;
     riskHistory?: DirectorRiskHistoryItem[];
@@ -181,6 +189,7 @@ export interface SimpleCreationShelfProjection {
 }
 
 export type PipelineRunMode = "fast" | "polish";
+export type PipelineChapterScope = "writable" | "quality_debt";
 export type ArtifactSyncMode = "adaptive" | "deferred" | "strict";
 export type PipelineRepairMode =
   | "detect_only"
@@ -663,6 +672,7 @@ export interface PipelineJob {
   startOrder: number;
   endOrder: number;
   runMode?: PipelineRunMode | null;
+  chapterScope?: PipelineChapterScope | null;
   autoReview?: boolean | null;
   autoRepair?: boolean | null;
   skipCompleted?: boolean | null;

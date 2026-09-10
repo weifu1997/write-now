@@ -3,6 +3,7 @@ const assert = require("node:assert/strict");
 
 const {
   NovelDirectorRuntimeOrchestrator,
+  isDirectorRuntimeGateError,
 } = require("../dist/services/novel/director/runtime/novelDirectorRuntimeOrchestrator.js");
 const {
   createWorkflowStepModule,
@@ -383,6 +384,205 @@ test("chapter execution waits for delayed state commit facts before projection v
     "character_governance_state",
     "continuity_state",
   ]);
+});
+
+test("chapter execution times out into a recoverable gate when state commit facts never land", async () => {
+  const continuityArtifact = buildArtifact("continuity_state", {
+    id: "continuity_state:chapter:chapter-1:StoryStateSnapshot:snapshot-1",
+    contentRef: { table: "StoryStateSnapshot", id: "snapshot-1" },
+  });
+  const readerPromiseArtifact = buildArtifact("reader_promise", {
+    id: "reader_promise:chapter:chapter-1:PayoffLedgerItem:payoff-1",
+    contentRef: { table: "PayoffLedgerItem", id: "payoff-1" },
+  });
+  const characterArtifact = buildArtifact("character_governance_state", {
+    id: "character_governance_state:chapter:chapter-1:CanonicalStateVersion:state-1",
+    contentRef: { table: "CanonicalStateVersion", id: "state-1" },
+  });
+  const fakeModules = new Map([
+    ["chapter.draft.write", buildNoopModule({
+      id: "chapter.draft.write",
+      nodeKey: "chapter_execution_node",
+      label: "执行章节生成批次",
+      stage: "chapter_execution",
+      writes: ["chapter_draft"],
+      mayModifyUserContent: true,
+      producedArtifacts: [artifact],
+    })],
+    ["chapter.quality.review", buildNoopModule({
+      id: "chapter.quality.review",
+      nodeKey: "chapter_quality_review_node",
+      label: "检查章节质量",
+      writes: ["audit_report"],
+      completed: true,
+    })],
+    ["chapter.state.commit", buildNoopModule({
+      id: "chapter.state.commit",
+      nodeKey: "chapter_state_commit_node",
+      label: "提交章节连续性状态",
+      writes: ["continuity_state", "character_governance_state"],
+      producedArtifacts: [continuityArtifact, characterArtifact],
+      // Facts never land within the projection wait window.
+      inspectCompletion: async () => ({
+        stepId: "chapter.state.commit",
+        completed: false,
+        completenessRatio: 0,
+      }),
+      validateOutput: async () => ({ valid: false, reason: "chapter.state.commit facts are not complete yet." }),
+    })],
+    ["payoff.ledger.sync", buildNoopModule({
+      id: "payoff.ledger.sync",
+      nodeKey: "payoff_ledger_sync_node",
+      label: "同步读者承诺与伏笔",
+      writes: ["reader_promise"],
+      completed: true,
+      producedArtifacts: [readerPromiseArtifact],
+    })],
+    ["character.resource.sync", buildNoopModule({
+      id: "character.resource.sync",
+      nodeKey: "character_resource_sync_node",
+      label: "同步角色资源状态",
+      writes: ["character_governance_state", "continuity_state"],
+      completed: true,
+      producedArtifacts: [characterArtifact, continuityArtifact],
+    })],
+  ]);
+  const originalGet = directorWorkflowStepModuleRegistry.get.bind(directorWorkflowStepModuleRegistry);
+  directorWorkflowStepModuleRegistry.get = (id) => fakeModules.get(id) ?? originalGet(id);
+  const { orchestrator, runtimeCalls } = buildOrchestrator([
+    artifact,
+    continuityArtifact,
+    readerPromiseArtifact,
+    characterArtifact,
+  ], {
+    projectionFactWaitTimeoutMs: 20,
+    projectionFactWaitIntervalMs: 1,
+  });
+
+  try {
+    await assert.rejects(
+      orchestrator.runChapterExecutionNode({
+        taskId: "task-1",
+        novelId: "novel-1",
+        request: {},
+        resumeCheckpointType: "chapter_batch_ready",
+      }),
+      (error) => isDirectorRuntimeGateError(error),
+    );
+  } finally {
+    directorWorkflowStepModuleRegistry.get = originalGet;
+  }
+
+  // The tail node must NOT execute while facts are incomplete (executing it would
+  // throw the plain validateOutput error that used to hard-fail the whole task).
+  const stateCommitCall = runtimeCalls.find((call) => call.nodeKey === "chapter_state_commit_node");
+  assert.equal(stateCommitCall, undefined);
+});
+
+test("chapter execution resumes and completes the tail node once gated facts land", async () => {
+  let factsCommitted = false;
+  const continuityArtifact = buildArtifact("continuity_state", {
+    id: "continuity_state:chapter:chapter-1:StoryStateSnapshot:snapshot-1",
+    contentRef: { table: "StoryStateSnapshot", id: "snapshot-1" },
+  });
+  const readerPromiseArtifact = buildArtifact("reader_promise", {
+    id: "reader_promise:chapter:chapter-1:PayoffLedgerItem:payoff-1",
+    contentRef: { table: "PayoffLedgerItem", id: "payoff-1" },
+  });
+  const characterArtifact = buildArtifact("character_governance_state", {
+    id: "character_governance_state:chapter:chapter-1:CanonicalStateVersion:state-1",
+    contentRef: { table: "CanonicalStateVersion", id: "state-1" },
+  });
+  const fakeModules = new Map([
+    ["chapter.draft.write", buildNoopModule({
+      id: "chapter.draft.write",
+      nodeKey: "chapter_execution_node",
+      label: "执行章节生成批次",
+      stage: "chapter_execution",
+      writes: ["chapter_draft"],
+      mayModifyUserContent: true,
+      producedArtifacts: [artifact],
+    })],
+    ["chapter.quality.review", buildNoopModule({
+      id: "chapter.quality.review",
+      nodeKey: "chapter_quality_review_node",
+      label: "检查章节质量",
+      writes: ["audit_report"],
+      completed: true,
+    })],
+    ["chapter.state.commit", buildNoopModule({
+      id: "chapter.state.commit",
+      nodeKey: "chapter_state_commit_node",
+      label: "提交章节连续性状态",
+      writes: ["continuity_state", "character_governance_state"],
+      producedArtifacts: [continuityArtifact, characterArtifact],
+      inspectCompletion: async () => ({
+        stepId: "chapter.state.commit",
+        completed: factsCommitted,
+        completenessRatio: factsCommitted ? 1 : 0,
+      }),
+      validateOutput: async () => ({ valid: factsCommitted }),
+    })],
+    ["payoff.ledger.sync", buildNoopModule({
+      id: "payoff.ledger.sync",
+      nodeKey: "payoff_ledger_sync_node",
+      label: "同步读者承诺与伏笔",
+      writes: ["reader_promise"],
+      completed: true,
+      producedArtifacts: [readerPromiseArtifact],
+    })],
+    ["character.resource.sync", buildNoopModule({
+      id: "character.resource.sync",
+      nodeKey: "character_resource_sync_node",
+      label: "同步角色资源状态",
+      writes: ["character_governance_state", "continuity_state"],
+      completed: true,
+      producedArtifacts: [characterArtifact, continuityArtifact],
+    })],
+  ]);
+  const originalGet = directorWorkflowStepModuleRegistry.get.bind(directorWorkflowStepModuleRegistry);
+  directorWorkflowStepModuleRegistry.get = (id) => fakeModules.get(id) ?? originalGet(id);
+  const { orchestrator, runtimeCalls } = buildOrchestrator([
+    artifact,
+    continuityArtifact,
+    readerPromiseArtifact,
+    characterArtifact,
+  ], {
+    projectionFactWaitTimeoutMs: 20,
+    projectionFactWaitIntervalMs: 1,
+  });
+
+  try {
+    // First run: facts still async in flight → the tail node lands on a recoverable gate.
+    await assert.rejects(
+      orchestrator.runChapterExecutionNode({
+        taskId: "task-1",
+        novelId: "novel-1",
+        request: {},
+        resumeCheckpointType: "chapter_batch_ready",
+      }),
+      (error) => isDirectorRuntimeGateError(error),
+    );
+    const gatedCall = runtimeCalls.find((call) => call.nodeKey === "chapter_state_commit_node");
+    assert.equal(gatedCall, undefined);
+
+    // Facts land asynchronously; a subsequent run must complete the tail node, not hard-fail.
+    factsCommitted = true;
+    await orchestrator.runChapterExecutionNode({
+      taskId: "task-1",
+      novelId: "novel-1",
+      request: {},
+      resumeCheckpointType: "chapter_batch_ready",
+    });
+    const stateCommitCall = runtimeCalls.find((call) => call.nodeKey === "chapter_state_commit_node");
+    assert.ok(stateCommitCall);
+    assert.deepEqual(stateCommitCall.producedArtifacts.map((item) => item.artifactType).sort(), [
+      "character_governance_state",
+      "continuity_state",
+    ]);
+  } finally {
+    directorWorkflowStepModuleRegistry.get = originalGet;
+  }
 });
 
 test("chapter execution stops projection steps while manual recovery is pending", async () => {

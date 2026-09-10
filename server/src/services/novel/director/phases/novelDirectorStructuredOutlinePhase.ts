@@ -46,11 +46,19 @@ function buildFastStartPlanningGuidance(request: DirectorConfirmRequest): string
   if (!preparation || preparation.strategy !== "fast_start") {
     return undefined;
   }
-  return [
+  const guidance = [
     "本次采用快速开篇：首个可执行节奏段只规划开篇路线，不提前锁死远期章节。",
     `首批路线必须覆盖 ${preparation.routeWindow.min}-${preparation.routeWindow.target} 章，优先形成可立即进入正文的因果链。`,
-    `正文前只需要完整细化未来 ${preparation.routeWindow.detailAhead} 章，其余章节保留为简略路线。`,
-  ].join("\n");
+  ];
+  // full_book_autopilot 走 JIT：不在大纲阶段预细化 task sheet，避免误导「正文前已完整细化 N 章」。
+  if (!isFullBookAutopilotRunMode(request.runMode)) {
+    guidance.push(
+      `正文前只需要完整细化未来 ${preparation.routeWindow.detailAhead} 章，其余章节保留为简略路线。`,
+    );
+  } else {
+    guidance.push("章节任务单与执行合同将在开写前按需即时生成，大纲阶段只保留可执行路线。");
+  }
+  return guidance.join("\n");
 }
 
 function findMissingSelectedChapterOrders(
@@ -208,10 +216,12 @@ export async function runDirectorStructuredOutlinePhase(input: {
     phase: "structured_outline",
     isBackgroundRunning: true,
   });
+  const skipChapterDetail = isFullBookAutopilotRunMode(request.runMode);
   const initialRecoveryCursor = resolveStructuredOutlineRecoveryCursor({
     workspace: baseWorkspace,
     plan: detailPlan,
     allowPartialChapterListReady: isDirectorAutoExecutionRunMode(normalizeDirectorRunMode(request.runMode)),
+    skipChapterDetail,
   });
   const runningResumeTarget = buildNovelEditResumeTarget({
     novelId,
@@ -238,6 +248,7 @@ export async function runDirectorStructuredOutlinePhase(input: {
       workspace,
       plan: detailPlan,
       allowPartialChapterListReady: isDirectorAutoExecutionRunMode(normalizeDirectorRunMode(request.runMode)),
+      skipChapterDetail,
     });
     const cursorKey = buildStructuredOutlineCursorKey(recoveryCursor);
     if (cursorKey === previousCursorKey) {
@@ -338,7 +349,12 @@ export async function runDirectorStructuredOutlinePhase(input: {
         ? getChapterTitleDiversityIssue(preparedVolume.chapters.map((chapter) => chapter.title))
         : null;
       if (titleDiversityIssue) {
-        throw new Error(titleDiversityIssue);
+        // full_book_autopilot：标题多样性问题记为可后续修复的债，不硬停整本大纲。
+        if (isFullBookAutopilotRunMode(request.runMode)) {
+          console.warn(`[structured-outline] ${titleDiversityIssue}`);
+        } else {
+          throw new Error(titleDiversityIssue);
+        }
       }
       workspace = await persistStructuredOutlineVolumeSnapshot({
         taskId,
@@ -402,9 +418,8 @@ export async function runDirectorStructuredOutlinePhase(input: {
           targetVolumeId,
           targetChapterId,
           detailMode: targetDetailMode,
-          chapterTaskSheetQualityMode: isFullBookAutopilotRunMode(request.runMode)
-            ? "full_book_autopilot"
-            : "ai_copilot",
+          // Autopilot JIT 已在上方 break；此分支仅非 autopilot 可达。
+          chapterTaskSheetQualityMode: "ai_copilot",
           draftWorkspace: workspace,
           taskId,
           entrypoint: "auto_director",
@@ -443,6 +458,7 @@ export async function runDirectorStructuredOutlinePhase(input: {
     workspace,
     plan: detailPlan,
     allowPartialChapterListReady: isDirectorAutoExecutionRunMode(normalizeDirectorRunMode(request.runMode)),
+    skipChapterDetail,
   }).preparedVolumeIds;
   const maxPreparedChapterOrder = Math.max(
     0,
@@ -511,6 +527,7 @@ export async function runDirectorStructuredOutlinePhase(input: {
     workspace: persistedOutlineWorkspace,
     plan: detailPlan,
     allowPartialChapterListReady: allowIncrementalExecutionWindow,
+    skipChapterDetail,
   });
   const selectedChapters = syncCursor.selectedChapters;
   if (selectedChapters.length === 0) {
@@ -536,7 +553,9 @@ export async function runDirectorStructuredOutlinePhase(input: {
     taskId,
     "structured_outline",
     "chapter_detail_bundle",
-    `${autoExecutionScopeLabel}细化已完成，正在同步章节执行资源`,
+    skipChapterDetail
+      ? `${autoExecutionScopeLabel}拆章已同步，章节任务单将在开写前即时生成`
+      : `${autoExecutionScopeLabel}细化已完成，正在同步章节执行资源`,
     DIRECTOR_PROGRESS.chapterDetailDone,
     {
       chapterId: selectedChapters[0]?.id ?? null,

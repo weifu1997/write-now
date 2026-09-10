@@ -85,7 +85,9 @@ export function formatProjectContext(input: DirectorProjectContextInput): string
     typeof input.estimatedChapterCount === "number" ? `estimated chapters: ${input.estimatedChapterCount}` : "",
     completionProfile?.mode === "compact_book"
       ? `compact book: three-act structure, ending required by chapter ${completionProfile.endingRequiredBy}, close-only extension up to ${completionProfile.maxChapterCount}`
-      : "",
+      : completionProfile
+        ? `serial book: staged continuation; visible mini-ending required by chapter ${completionProfile.endingRequiredBy}; aftertaste allowed, no new must-continue mainline`
+        : "",
   ].filter(Boolean);
   return lines.join("\n");
 }

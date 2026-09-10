@@ -31,13 +31,16 @@
 ### 采集与回流
 
 - 服务端：`POST /novels/:id/chapters/:chapterId/style-anchors`（adopted/manual）+ `GET/DELETE /novels/:id/style-anchors`；经 `NovelApplicationServices` 门面到 `StyleAnchorPassageService`。
-- 客户端：`ChapterEditorShell.acceptMutation` 采纳成功后 fire-and-forget 回流（失败静默，不阻塞章节保存）；`SelectionAIFloatingToolbar` 提供「存为范文」一键标记；`ChapterEditorSidebar` 提供本书范文的查看与移除入口。
+- 请求体 `text` 的 HTTP 上限按章节目标字数硬上限计算（`resolveChapterIntakeMaxChars`），不是固定 4000；入库与生成注入仍截断为 800 字范文片段。
+- 客户端：`ChapterEditorShell.acceptMutation` 采纳成功后 fire-and-forget 回流（提交前截成 800 字，失败静默，不阻塞章节保存）；`SelectionAIFloatingToolbar` 提供「存为范文」一键标记；`ChapterEditorSidebar` 提供本书范文的查看与移除入口。
 - 去重：`contentHash = sha256(trimmed text)`，同书同文幂等；创建时超上限淘汰最旧未固定条目。
 
 ## 失效模式
 
 - 无范文、未绑定拆书写法、检索异常：锚点块静默缺省，属于预期降级而非故障；排查时先看 `GenerationContextPackage.styleAnchorPassages` 是否为空数组。
 - 新默认行为依赖客户端回流：若用户禁用了编辑器脚本或走了旧客户端，adopted 回流不会发生，属于可接受退化。
+- HTTP `text` 上限必须跟章节目标字数硬上限走（`resolveChapterIntakeMaxChars`，即目标字数的 1.25 倍，缺省按 20000 字目标得到 25000），不能写死 4000。采纳整章改写候选时正文经常落在 3500–4500 字，固定 4000 会在章节保存成功后弹出「请求参数校验失败 / text：不能超过 4000 个字符」，并被 axios 拦截器打成可见 toast。入库仍只保留 800 字范文片段；客户端提交前截断，adopted 回流失败保持静默。
+- 章节篇幅的软/硬区间（0.85 / 1.15 / 1.25）属于生成与验收质量合同，不是范文采集的请求校验。超长章节应记质量债或走压缩，不得在范文入口用固定字符数拦下整章。
 - `forbiddenEntities` 为空时（写法资产无源文本或净化未跑），source_book 锚点仍会注入但没有实体清单——此时应先检查写法资产净化链路，而不是删掉实体护栏逻辑。
 - 删除小说时锚点随 `onDelete: Cascade` 级联清理；迁移 SQL 沿仓库惯例不写 FK，由 Prisma 关系声明保证语义。
 

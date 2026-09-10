@@ -72,6 +72,8 @@ export class VolumeChapterSyncService {
   ): Promise<VolumeSyncPreview> {
     const workspace = await this.deps.ensureVolumeWorkspace(novelId);
     const mergedDocument = mergeVolumeWorkspaceInput(novelId, workspace, { volumes: input.volumes });
+    // allowIncompleteExecutionContracts=true → silent skip of warning scan.
+    // false/undefined → warn-only quality debt; never hard-blocks this sync.
     let incompleteExecutionContractWarnings: VolumeSyncExecutionContractWarning[] = [];
     if (!input.allowIncompleteExecutionContracts) {
       const chapterRows = await prisma.chapter.findMany({

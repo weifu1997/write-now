@@ -11,6 +11,7 @@ import {
   VOLUME_BEAT_SLOT_DEFINITIONS,
 } from "@write-now/shared/types/volumeBeatSlots";
 import { MAX_VOLUME_COUNT } from "@write-now/shared/types/volumePlanning";
+import { CHAPTER_PLAY_ENGINE_TYPES } from "@write-now/shared/types/volumeChapterEngines";
 
 function normalizeObjectAlias(raw: unknown, aliasMap: Record<string, string[]>): unknown {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
@@ -217,24 +218,26 @@ function normalizeBeatPayload(raw: unknown): unknown {
 }
 
 function normalizeChapterListItemPayload(raw: unknown, expectedBeatKey?: string): unknown {
-  const normalized = normalizeObjectAlias(raw, {
+  const aliased = normalizeObjectAlias(raw, {
     title: ["chapterTitle", "name"],
     summary: ["description", "content", "outline"],
     beatKey: ["beat", "beat_key", "stageKey", "stage_key"],
+    conflictLevel: ["conflict_level", "conflict", "冲突强度", "紧张度"],
+    engineType: ["engine", "engine_type", "playEngine", "play_engine", "玩法引擎", "章节引擎"],
   });
-  if (
-    expectedBeatKey
-    && normalized
-    && typeof normalized === "object"
-    && !Array.isArray(normalized)
-    && (normalized as Record<string, unknown>).beatKey == null
-  ) {
-    return {
-      ...normalized as Record<string, unknown>,
-      beatKey: expectedBeatKey,
-    };
+  if (!aliased || typeof aliased !== "object" || Array.isArray(aliased)) {
+    return aliased;
   }
-  return normalized;
+  const normalized = aliased as Record<string, unknown>;
+  const rawEngine = typeof normalized.engineType === "string"
+    ? normalized.engineType.trim().toLowerCase()
+    : normalized.engineType;
+  return {
+    ...normalized,
+    beatKey: normalized.beatKey == null && expectedBeatKey ? expectedBeatKey : normalized.beatKey,
+    conflictLevel: normalizeInteger(normalized.conflictLevel),
+    engineType: rawEngine,
+  };
 }
 
 function normalizeChapterBeatBlockPayload(
@@ -404,10 +407,14 @@ const generatedChapterListItemSchema = z.object({
   summary: z.string().trim().min(1).max(240),
 });
 
+const chapterPlayEngineTypeSchema = z.enum(CHAPTER_PLAY_ENGINE_TYPES);
+
 const generatedChapterBeatBlockItemSchema = z.preprocess((raw) => normalizeChapterListItemPayload(raw), z.object({
   title: z.string().trim().min(1).max(32),
   summary: z.string().trim().min(1).max(240),
   beatKey: z.string().trim().min(1).max(64),
+  conflictLevel: z.number().int().min(0).max(100),
+  engineType: chapterPlayEngineTypeSchema,
 }));
 
 const generatedVolumeStrategyVolumeSchema = z.object({

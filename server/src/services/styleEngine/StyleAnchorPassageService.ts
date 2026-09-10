@@ -1,8 +1,8 @@
 import { createHash } from "node:crypto";
+import { clipStyleAnchorText } from "@write-now/shared/types/styleEngine";
 import { prisma } from "../../db/prisma";
 import { ragServices } from "../rag";
 
-const ANCHOR_TEXT_MAX_LENGTH = 800;
 const MAX_ANCHORS_PER_NOVEL = 200;
 const GENERATION_ANCHOR_LIMIT = 2;
 
@@ -52,7 +52,7 @@ export class StyleAnchorPassageService {
   }
 
   async create(input: StyleAnchorPassageCreateInput): Promise<{ created: boolean; anchor: { id: string } | null }> {
-    const text = input.text.trim().slice(0, ANCHOR_TEXT_MAX_LENGTH);
+    const text = clipStyleAnchorText(input.text);
     if (!text) {
       return { created: false, anchor: null };
     }
@@ -163,7 +163,7 @@ export class StyleAnchorPassageService {
         .map((text) => ({
           order: null,
           title: null,
-          text: text.slice(0, ANCHOR_TEXT_MAX_LENGTH),
+          text: clipStyleAnchorText(text),
           source: "source_book",
           forbiddenEntities: input.forbiddenEntities ?? [],
         }));

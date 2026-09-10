@@ -21,6 +21,7 @@ import type {
   VolumeGenerationNovel,
   VolumeWorkspace,
 } from "../volumeModels";
+import { isBookFinaleBeat } from "../volumeChapterListGeneration";
 
 type StoryMacroPlanResult = Awaited<ReturnType<StoryMacroPlanService["getPlan"]>> | null;
 
@@ -96,8 +97,22 @@ export async function generateChapterTaskSheetDetail(params: {
   sceneCards: string;
 }> {
   const existingChapter = params.promptInput.targetChapter;
+  const targetIndex = params.promptInput.workspace.volumes.findIndex(
+    (volume) => volume.id === params.promptInput.targetVolume.id,
+  );
+  const chapterBudgets = params.promptInput.workspace.volumes.map((volume) => volume.chapters.length);
+  const promptInput = {
+    ...params.promptInput,
+    isBookFinale: isBookFinaleBeat({
+      completionProfile: params.promptInput.novel.completionProfile,
+      targetVolumeIndex: targetIndex,
+      chapterBudgets,
+      beatChapterEndOrder: existingChapter.chapterOrder,
+    }),
+  };
   if (
     !params.promptInput.guidance?.trim()
+    && typeof existingChapter.conflictLevel === "number"
     && canReuseChapterExecutionContract({
       novelId: params.promptInput.workspace.novelId,
       volumeId: params.promptInput.targetVolume.id,
@@ -113,7 +128,7 @@ export async function generateChapterTaskSheetDetail(params: {
       exclusiveEvent: existingChapter.exclusiveEvent?.trim() || existingChapter.summary.trim(),
       endingState: existingChapter.endingState?.trim() || "本章完成当前章节任务，并为下一章留下明确入口。",
       nextChapterEntryState: existingChapter.nextChapterEntryState?.trim() || existingChapter.endingState?.trim() || "下一章承接本章结果继续推进。",
-      conflictLevel: existingChapter.conflictLevel ?? 3,
+      conflictLevel: existingChapter.conflictLevel,
       revealLevel: existingChapter.revealLevel ?? 2,
       targetWordCount: existingChapter.targetWordCount ?? 2200,
       mustAvoid: existingChapter.mustAvoid?.trim() || "避免偏离本章任务单和卷节奏。",
@@ -129,19 +144,19 @@ export async function generateChapterTaskSheetDetail(params: {
 
   for (let attempt = 0; attempt < 2; attempt += 1) {
     try {
-      const promptInput = qualityFeedback
+      const generatedPromptInput = qualityFeedback
         ? {
-          ...params.promptInput,
+          ...promptInput,
           guidance: [
-            params.promptInput.guidance?.trim(),
+            promptInput.guidance?.trim(),
             `上一版章节执行合同未通过质量门禁：${qualityFeedback}`,
           ].filter(Boolean).join("\n"),
         }
-        : params.promptInput;
+        : promptInput;
       const generated = await runStructuredPrompt({
         asset: volumeChapterExecutionContractPrompt,
-        promptInput,
-        contextBlocks: buildVolumeChapterDetailContextBlocks(promptInput),
+        promptInput: generatedPromptInput,
+        contextBlocks: buildVolumeChapterDetailContextBlocks(generatedPromptInput),
         options: {
           provider: params.options.provider,
           model: params.options.model,

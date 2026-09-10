@@ -12,6 +12,10 @@ function isInternalPayoffMarker(value: string): boolean {
   return /^payoff\/(?:payoff_missing_progress|payoff_overdue)$/u.test(value);
 }
 
+export function isLedgerOverdueIssueCode(code: string | null | undefined): boolean {
+  return (code ?? "").trim().toLowerCase() === "payoff_overdue";
+}
+
 function normalizeContractMarker(value: string): string {
   return value
     .replace(/\s+/g, "")

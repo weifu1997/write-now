@@ -3,6 +3,8 @@ const assert = require("node:assert/strict");
 
 const {
   normalizeAssessment,
+  applyCriticalReadGate,
+  resolveChapterReadGateTier,
 } = require("../dist/services/novel/runtime/ChapterAcceptanceAssessmentService.js");
 const { chapterAcceptanceAssessmentPrompt } = require("../dist/prompting/prompts/novel/chapterAcceptance.prompts.js");
 const { chapterWriterPrompt } = require("../dist/prompting/prompts/novel/chapterWriter.prompts.js");
@@ -211,10 +213,54 @@ test("writer and acceptance prompts share the prose quality boundary", () => {
     chapterOrder: 1,
     chapterTitle: "测试章",
     content: "测试正文",
+    readGateTier: "opening",
   }, { slots: null, blocks: [], selectedBlockIds: [], droppedBlockIds: [], summarizedBlockIds: [], estimatedInputTokens: 0 }).map((message) => message.content).join("\n");
 
   assert.match(writerText, /破折号、省略号或连续连字符/);
   assert.match(writerText, /否定翻转句/);
+  assert.match(writerText, /可见人物对白与当场互动/);
   assert.match(acceptanceText, /必须检查破折号、省略号/);
   assert.match(acceptanceText, /否定翻转句/);
+  assert.match(acceptanceText, /对话与人物互动是否过稀/);
+  assert.match(acceptanceText, /readGateTier=opening 或 climax/);
+  assert.match(acceptanceText, /读感门槛档位：opening/);
+});
+
+test("resolveChapterReadGateTier marks opening and climax chapters", () => {
+  assert.equal(resolveChapterReadGateTier({ chapterOrder: 1 }), "opening");
+  assert.equal(resolveChapterReadGateTier({ chapterOrder: 3 }), "opening");
+  assert.equal(resolveChapterReadGateTier({ chapterOrder: 8, conflictLevel: 80 }), "climax");
+  assert.equal(resolveChapterReadGateTier({ chapterOrder: 8, planRole: "payoff" }), "climax");
+  assert.equal(resolveChapterReadGateTier({ chapterOrder: 8, conflictLevel: 40 }), "normal");
+});
+
+test("applyCriticalReadGate upgrades dialogue-sparse opening chapters to repairable", () => {
+  const gated = applyCriticalReadGate(createAssessment({
+    status: "accepted",
+    continuePolicy: "continue",
+    score: {
+      coherence: 85,
+      pacing: 85,
+      repetition: 85,
+      engagement: 70,
+      voice: 70,
+      overall: 79,
+    },
+    blockingIssues: [{
+      severity: "medium",
+      category: "voice",
+      code: "prose_dialogue_sparse",
+      evidence: "几乎没有对白。",
+      fixSuggestion: "补对白。",
+    }],
+  }), {
+    readGateTier: "opening",
+    hasDialogueSparse: true,
+  });
+
+  assert.equal(gated.status, "repairable");
+  assert.equal(gated.continuePolicy, "repair_once");
+  assert.equal(gated.blockingIssues[0].severity, "high");
+  assert.ok(gated.riskTags.includes("critical_opening_read_gate"));
+  assert.ok(gated.repairDirectives.some((item) => item.target === "voice"));
 });

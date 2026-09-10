@@ -7,9 +7,15 @@ import type {
 export interface GenerationDecisionInput {
   snapshot: CanonicalStateSnapshot;
   policy?: Partial<NovelControlPolicy> | null;
+  chapterScope?: "writable" | "quality_debt" | null;
   pendingReviewProposalCount?: number;
   openAuditIssueCount?: number;
   hasRepairableDraft?: boolean;
+}
+
+function shouldAutoContinueChapterRepair(input: GenerationDecisionInput): boolean {
+  return input.chapterScope === "quality_debt"
+    || input.policy?.advanceMode === "full_book_autopilot";
 }
 
 export class GenerationDecisionEngine {
@@ -19,14 +25,10 @@ export class GenerationDecisionEngine {
     }
 
     if ((input.pendingReviewProposalCount ?? 0) > 0 && input.hasRepairableDraft) {
-      if (input.policy?.advanceMode === "full_book_autopilot") {
+      if (shouldAutoContinueChapterRepair(input)) {
         return "repair_existing_chapter";
       }
       return "hold_for_review";
-    }
-
-    if (input.snapshot.narrative.overduePayoffs.length > 0) {
-      return "replan";
     }
 
     if (
@@ -45,10 +47,6 @@ export class GenerationDecisionEngine {
       && !input.snapshot.narrative.currentChapterGoal?.trim()
     ) {
       return "repair_chapter_mission";
-    }
-
-    if (input.policy?.advanceMode === "stage_review" && input.snapshot.narrative.overduePayoffs.length > 0) {
-      return "hold_for_review";
     }
 
     return "write_chapter";

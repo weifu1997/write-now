@@ -1005,6 +1005,127 @@ test("createChapterStream lets full_book_autopilot continue past pending state p
   assert.deepEqual(statusCalls, [["chapter-1", "generating"]]);
 });
 
+test("createChapterStream lets full_book_autopilot continue past overdue payoff issues", async () => {
+  const assembled = createAssembledChapter();
+  assembled.contextPackage.nextAction = "hold_for_review";
+  assembled.contextPackage.pendingReviewProposalCount = 12;
+  assembled.contextPackage.openAuditIssues = [{
+    code: "payoff_overdue",
+    description: "伏笔“开局撕破假账与驱散雷劫逆转免死”已经超过目标窗口仍未兑现。",
+  }];
+  const writerCalls = [];
+
+  const coordinator = new ChapterRuntimeCoordinator({
+    validateRequest: (input) => input,
+    ensureNovelCharacters: async () => undefined,
+    ensureChapterExecutionContract: async () => undefined,
+    assembler: {
+      assemble: async () => assembled,
+    },
+    chapterWritingGraph: {
+      createChapterStream: async (input) => {
+        writerCalls.push(input);
+        return {
+          stream: createEmptyStream(),
+          onDone: async () => ({ finalContent: "chapter draft" }),
+        };
+      },
+    },
+    agentRuntime: createAgentRuntime(),
+  });
+  coordinator.streamOrchestrator.markChapterStatus = async () => undefined;
+
+  await coordinator.createChapterStream("novel-1", "chapter-1", {
+    controlPolicy: {
+      kickoffMode: "director_start",
+      advanceMode: "full_book_autopilot",
+      reviewCheckpoints: [],
+      autoExecutionRange: { mode: "book" },
+    },
+  });
+
+  assert.equal(writerCalls.length, 1);
+});
+
+test("createChapterStream still blocks manual generation when pending proposals remain", async () => {
+  const assembled = createAssembledChapter();
+  assembled.contextPackage.nextAction = "hold_for_review";
+  assembled.contextPackage.pendingReviewProposalCount = 12;
+  assembled.contextPackage.openAuditIssues = [{
+    code: "payoff_overdue",
+    description: "伏笔“开局撕破假账与驱散雷劫逆转免死”已经超过目标窗口仍未兑现。",
+  }];
+  const statusCalls = [];
+
+  const coordinator = new ChapterRuntimeCoordinator({
+    validateRequest: (input) => input,
+    ensureNovelCharacters: async () => undefined,
+    ensureChapterExecutionContract: async () => undefined,
+    assembler: {
+      assemble: async () => assembled,
+    },
+    chapterWritingGraph: {
+      createChapterStream: async () => {
+        throw new Error("writer should not run");
+      },
+    },
+    agentRuntime: createAgentRuntime(),
+  });
+  coordinator.streamOrchestrator.markChapterStatus = async (...args) => {
+    statusCalls.push(args);
+  };
+
+  await assert.rejects(
+    () => coordinator.createChapterStream("novel-1", "chapter-1", {}),
+    /blocked until review is resolved/i,
+  );
+  assert.deepEqual(statusCalls, []);
+});
+
+test("createChapterStream lets quality-debt repair continue past pending proposals and overdue payoffs", async () => {
+  const assembled = createAssembledChapter();
+  assembled.contextPackage.nextAction = "hold_for_review";
+  assembled.contextPackage.pendingReviewProposalCount = 12;
+  assembled.contextPackage.openAuditIssues = [{
+    code: "payoff_overdue",
+    description: "伏笔“开局撕破假账与驱散雷劫逆转免死”已经超过目标窗口仍未兑现。",
+  }, {
+    code: "payoff_overdue",
+    description: "伏笔“开局撕破因果假账驱散天道雷劫逆转免死”已经超过目标窗口仍未兑现。",
+  }];
+  const writerCalls = [];
+  const statusCalls = [];
+
+  const coordinator = new ChapterRuntimeCoordinator({
+    validateRequest: (input) => input,
+    ensureNovelCharacters: async () => undefined,
+    ensureChapterExecutionContract: async () => undefined,
+    assembler: {
+      assemble: async () => assembled,
+    },
+    chapterWritingGraph: {
+      createChapterStream: async (input) => {
+        writerCalls.push(input);
+        return {
+          stream: createEmptyStream(),
+          onDone: async () => ({ finalContent: "chapter draft" }),
+        };
+      },
+    },
+    agentRuntime: createAgentRuntime(),
+  });
+  coordinator.streamOrchestrator.markChapterStatus = async (...args) => {
+    statusCalls.push(args);
+  };
+
+  await coordinator.createChapterStream("novel-1", "chapter-1", {
+    chapterScope: "quality_debt",
+  });
+
+  assert.equal(writerCalls.length, 1);
+  assert.deepEqual(statusCalls, [["chapter-1", "generating"]]);
+});
+
 test("createChapterStream retries once before failing empty generated content", async () => {
   const assembled = createAssembledChapter();
   const writerCalls = [];

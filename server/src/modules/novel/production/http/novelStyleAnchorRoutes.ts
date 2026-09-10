@@ -1,5 +1,6 @@
 import type { Router } from "express";
 import type { ApiResponse } from "@write-now/shared/types/api";
+import { resolveChapterIntakeMaxChars } from "@write-now/shared/types/chapterLengthControl";
 import { z } from "zod";
 import { AppError } from "../../../../middleware/errorHandler";
 import { validate } from "../../../../middleware/validate";
@@ -8,8 +9,8 @@ import type { NovelApplicationServices } from "../../../../services/novel/applic
 const novelParamsSchema = z.object({ id: z.string().min(1) });
 const chapterParamsSchema = z.object({ id: z.string().min(1), chapterId: z.string().min(1) });
 const anchorParamsSchema = z.object({ id: z.string().min(1), anchorId: z.string().min(1) });
-const styleAnchorCreateSchema = z.object({
-  text: z.string().min(1).max(4000),
+export const styleAnchorCreateSchema = z.object({
+  text: z.string().min(1).max(resolveChapterIntakeMaxChars()),
   source: z.enum(["adopted", "manual"]),
 });
 

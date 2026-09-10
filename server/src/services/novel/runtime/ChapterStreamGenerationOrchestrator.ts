@@ -1,6 +1,7 @@
 import type { BaseMessageChunk } from "@langchain/core/messages";
 import type { StreamDoneHelpers, StreamDonePayload, WritableSSEFrame } from "../../../llm/streaming";
 import type { ChapterRuntimePackage, GenerationContextPackage } from "@write-now/shared/types/chapterRuntime";
+import { isLedgerOverdueIssueCode } from "@write-now/shared/types/chapterCreativeContract";
 import { ChapterWritingGraph } from "../chapterWritingGraph";
 import { toText } from "../novelP0Utils";
 import { GenerationContextAssembler } from "./GenerationContextAssembler";
@@ -199,17 +200,19 @@ export class ChapterStreamGenerationOrchestrator {
 
   private assertStateDrivenReady(contextPackage: GenerationContextPackage, request: ChapterRuntimeRequestInput): void {
     if (contextPackage.nextAction === "hold_for_review") {
-      const isFullBookAutopilot = request.controlPolicy?.advanceMode === "full_book_autopilot";
-      const hasPendingStateProposals = contextPackage.pendingReviewProposalCount > 0;
-      const hasOpenAuditIssues = contextPackage.openAuditIssues.length > 0;
-      if (isFullBookAutopilot && hasPendingStateProposals && !hasOpenAuditIssues) {
+      const blockingAuditIssues = contextPackage.openAuditIssues.filter((issue) => (
+        !isLedgerOverdueIssueCode(issue.code)
+      ));
+      const canAutoContinue = request.chapterScope === "quality_debt"
+        || request.controlPolicy?.advanceMode === "full_book_autopilot";
+      if (canAutoContinue && blockingAuditIssues.length === 0) {
         return;
       }
       const reasons = [
         contextPackage.pendingReviewProposalCount > 0
           ? `${contextPackage.pendingReviewProposalCount} pending state proposal(s)`
           : "",
-        ...contextPackage.openAuditIssues.slice(0, 2).map((issue) => issue.description),
+        ...blockingAuditIssues.slice(0, 2).map((issue) => issue.description),
       ].filter(Boolean);
       throw new Error(
         `Chapter generation is blocked until review is resolved.${reasons.length > 0 ? ` ${reasons.join(" | ")}` : ""}`,

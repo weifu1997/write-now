@@ -209,6 +209,8 @@ function createChapterDraftExecutableModule(
         }
         const directorRequest = requireDirectorRequest(request);
         const requestedAutoExecutionContinue = state.task.status === "failed" || state.task.status === "cancelled";
+        const resumePendingManualRecovery = requestedAutoExecutionContinue
+          || state.task.pendingManualRecovery === true;
         return {
           mode: "auto_director",
           taskId: state.task.id,
@@ -224,7 +226,7 @@ function createChapterDraftExecutableModule(
             : "chapter_batch_ready",
           previousFailureMessage: state.task.lastError ?? null,
           allowSkipReviewBlockedChapter: requestedAutoExecutionContinue && isDirectorAutoExecutionRunMode(directorRequest.runMode),
-          resumePendingManualRecovery: requestedAutoExecutionContinue,
+          resumePendingManualRecovery,
         };
       },
       validateOutput: async (_output, context) => {
@@ -598,6 +600,61 @@ function chapterHasCompletedStage(
   return Array.isArray(chapter.completedStages) && chapter.completedStages.includes(stage);
 }
 
+/**
+ * Background sync completion must be draft-scoped.
+ * Unrelated active artifacts from earlier chapters must not fake-complete the current range.
+ * Missing scoped evidence stays pending so the BACKGROUND projection gate can wait or soft-pause.
+ */
+async function inspectDraftScopedBackgroundSyncFacts(input: {
+  context: WorkflowStepExecutionContext;
+  artifactTypes: string[];
+  stepId: string;
+  completedLabel: string;
+  pendingLabel: string;
+  nextWhenCompleted: string;
+  nextWhenPending: string;
+}) {
+  const progress = await inspectScopedChapterExecutionProgress(input.context);
+  const draftedChapters = (progress?.chapters ?? []).filter((chapter) => (
+    chapterHasCompletedStage(chapter, "draft_saved")
+  ));
+  const draftedChapterIds = new Set(draftedChapters.map((chapter) => chapter.chapterId));
+  const draftedChapterCount = draftedChapters.length;
+  const activeArtifacts = getActiveArtifactsFromContext(input.context, input.artifactTypes);
+  const scopedArtifacts = activeArtifacts.filter((artifact) => (
+    artifact.targetType === "chapter"
+    && typeof artifact.targetId === "string"
+    && draftedChapterIds.has(artifact.targetId)
+  ));
+  const evidence = {
+    draftedChapterCount,
+    artifactCount: activeArtifacts.length,
+    scopedArtifactCount: scopedArtifacts.length,
+    syncDeferred: draftedChapterCount > 0 && scopedArtifacts.length === 0,
+  };
+  const completed = draftedChapterCount > 0 && scopedArtifacts.length > 0;
+  return {
+    readiness: readyState({ evidence }),
+    completion: completed
+      ? completedFact(input.stepId, { evidence, producedArtifacts: scopedArtifacts })
+      : pendingFact(input.stepId, {
+        ratio: draftedChapterCount > 0
+          ? scopedArtifacts.length / Math.max(draftedChapterCount, 1)
+          : 0,
+        evidence,
+      }),
+    progress: buildSimpleProgress({
+      status: completed ? "completed" : draftedChapterCount > 0 ? "partially_done" : "not_started",
+      ratio: completed ? 1 : draftedChapterCount > 0
+        ? Math.min(1, scopedArtifacts.length / Math.max(draftedChapterCount, 1))
+        : 0,
+      label: completed ? input.completedLabel : input.pendingLabel,
+      evidence,
+      nextAction: completed ? input.nextWhenCompleted : input.nextWhenPending,
+    }),
+  };
+}
+
 async function isAutoQualityReviewDisabled(context: WorkflowStepExecutionContext): Promise<boolean> {
   const { state, request } = await loadDirectorModuleState(context, { requireNovel: false });
   const seedPayload = state.seedPayload as {
@@ -644,13 +701,22 @@ export const DIRECTOR_EXECUTION_STEP_MODULES: Record<
       const draftedCount = progress?.draftedChapterCount ?? 0;
       const reviewedCount = progress?.chapters?.filter((chapter) => chapterHasCompletedStage(chapter, "audit_completed")).length ?? 0;
       const reviewed = reviewedCount;
+      // completion-first：有可用正文时，审校缺口记为延期质量债，不得让全局导演收口失败。
+      const reviewDeferred = !autoReviewDisabled
+        && draftedCount > 0
+        && reviewedCount < draftedCount;
       const evidence = {
         draftedChapterCount: draftedCount,
         reviewedChapterCount: reviewedCount,
         autoReview: autoReviewDisabled ? false : true,
         reviewSkipped: autoReviewDisabled,
+        reviewDeferred,
       };
-      const completed = draftedCount > 0 && (autoReviewDisabled || reviewedCount >= draftedCount);
+      const completed = draftedCount > 0 && (
+        autoReviewDisabled
+        || reviewedCount >= draftedCount
+        || reviewDeferred
+      );
       return {
         readiness: draftedCount > 0
           ? readyState({ evidence })
@@ -668,14 +734,26 @@ export const DIRECTOR_EXECUTION_STEP_MODULES: Record<
           status: completed ? "completed" : draftedCount > 0 ? "partially_done" : "blocked",
           ratio: completed ? 1 : draftedCount > 0 ? reviewed / draftedCount : 0,
           label: completed
-            ? (autoReviewDisabled ? "本轮不执行自动审校" : "章节审校已完成")
+            ? (autoReviewDisabled
+              ? "本轮不执行自动审校"
+              : reviewDeferred
+                ? "正文已产出，审校缺口已记为质量债"
+                : "章节审校已完成")
             : "正在根据最新正文补齐审校结果",
-          evidence: { draftedChapterCount: draftedCount, reviewedChapterCount: reviewed, autoReview: !autoReviewDisabled, reviewSkipped: autoReviewDisabled },
+          evidence: {
+            draftedChapterCount: draftedCount,
+            reviewedChapterCount: reviewed,
+            autoReview: !autoReviewDisabled,
+            reviewSkipped: autoReviewDisabled,
+            reviewDeferred,
+          },
           nextAction: completed ? "commit_chapter_state" : "run_quality_review",
         }),
       };
     },
   }),
+  // chapter_repair: fact/node used inside the quality_repair flow sequence.
+  // Do not confuse with the quality_repair stage alias below (same nodeKey, different step id).
   chapter_repair: createFactOnlyExecutionModule({
     descriptor: createWorkflowStepDescriptorFromDirectorAdapter({
       id: DIRECTOR_EXECUTION_STEP_IDS.chapter_repair,
@@ -777,22 +855,15 @@ export const DIRECTOR_EXECUTION_STEP_MODULES: Record<
       adapter: getDirectorExecutionNodeAdapter("payoff_ledger_sync"),
       promptAssets: [{ id: "novel.payoff_ledger.sync", version: "v5" }],
     }),
-    inspectFacts: async (context) => {
-      const activeArtifacts = getActiveArtifactsFromContext(context, ["reader_promise", "repair_ticket"]);
-      return {
-        readiness: readyState({ evidence: { artifactCount: activeArtifacts.length } }),
-        completion: activeArtifacts.length > 0
-          ? completedFact(DIRECTOR_EXECUTION_STEP_IDS.payoff_ledger_sync, { evidence: { artifactCount: activeArtifacts.length }, producedArtifacts: activeArtifacts })
-          : pendingFact(DIRECTOR_EXECUTION_STEP_IDS.payoff_ledger_sync, { evidence: { artifactCount: 0 } }),
-        progress: buildSimpleProgress({
-          status: activeArtifacts.length > 0 ? "completed" : "partially_done",
-          ratio: activeArtifacts.length > 0 ? 1 : 0,
-          label: activeArtifacts.length > 0 ? "伏笔账本与读者承诺已同步" : "等待同步伏笔账本与读者承诺",
-          evidence: { artifactCount: activeArtifacts.length },
-          nextAction: activeArtifacts.length > 0 ? "sync_character_resources" : "sync_payoff_ledger",
-        }),
-      };
-    },
+    inspectFacts: async (context) => inspectDraftScopedBackgroundSyncFacts({
+      context,
+      artifactTypes: ["reader_promise", "repair_ticket"],
+      stepId: DIRECTOR_EXECUTION_STEP_IDS.payoff_ledger_sync,
+      completedLabel: "伏笔账本与读者承诺已同步",
+      pendingLabel: "等待同步伏笔账本与读者承诺",
+      nextWhenCompleted: "sync_character_resources",
+      nextWhenPending: "sync_payoff_ledger",
+    }),
   }),
   character_resource_sync: createFactOnlyExecutionModule({
     descriptor: createWorkflowStepDescriptorFromDirectorAdapter({
@@ -800,23 +871,18 @@ export const DIRECTOR_EXECUTION_STEP_MODULES: Record<
       stage: "quality_repair",
       adapter: getDirectorExecutionNodeAdapter("character_resource_sync"),
     }),
-    inspectFacts: async (context) => {
-      const activeArtifacts = getActiveArtifactsFromContext(context, ["character_governance_state", "continuity_state"]);
-      return {
-        readiness: readyState({ evidence: { artifactCount: activeArtifacts.length } }),
-        completion: activeArtifacts.length > 0
-          ? completedFact(DIRECTOR_EXECUTION_STEP_IDS.character_resource_sync, { evidence: { artifactCount: activeArtifacts.length }, producedArtifacts: activeArtifacts })
-          : pendingFact(DIRECTOR_EXECUTION_STEP_IDS.character_resource_sync, { evidence: { artifactCount: 0 } }),
-        progress: buildSimpleProgress({
-          status: activeArtifacts.length > 0 ? "completed" : "partially_done",
-          ratio: activeArtifacts.length > 0 ? 1 : 0,
-          label: activeArtifacts.length > 0 ? "角色治理与连续性状态已同步" : "等待同步角色治理与连续性状态",
-          evidence: { artifactCount: activeArtifacts.length },
-          nextAction: activeArtifacts.length > 0 ? "continue_chapter_execution" : "sync_character_resources",
-        }),
-      };
-    },
+    inspectFacts: async (context) => inspectDraftScopedBackgroundSyncFacts({
+      context,
+      artifactTypes: ["character_governance_state", "continuity_state"],
+      stepId: DIRECTOR_EXECUTION_STEP_IDS.character_resource_sync,
+      completedLabel: "角色治理与连续性状态已同步",
+      pendingLabel: "等待同步角色治理与连续性状态",
+      nextWhenCompleted: "continue_chapter_execution",
+      nextWhenPending: "sync_character_resources",
+    }),
   }),
+  // quality_repair: stage/flow alias for takeover and UI projection.
+  // Sequence lookup uses chapter_repair as the executable repair node (see DIRECTOR_EXECUTION_NODE_SEQUENCES).
   quality_repair: createFactOnlyExecutionModule({
     descriptor: createWorkflowStepDescriptorFromDirectorAdapter({
       id: DIRECTOR_EXECUTION_STEP_IDS.quality_repair,

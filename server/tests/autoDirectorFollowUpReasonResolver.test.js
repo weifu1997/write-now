@@ -88,7 +88,47 @@ test("follow-up resolver exposes retry metadata for failed tasks", () => {
   assert.ok(result);
   assert.equal(result.reason, "runtime_failed");
   assert.equal(result.priority, "P0");
-  assert.deepEqual(actionCodes(result), ["retry_with_task_model", "retry_with_route_model", "open_detail"]);
+  assert.deepEqual(actionCodes(result), ["retry_with_task_model", "retry_with_route_model", "open_detail", "dismiss_history"]);
   assert.deepEqual(result.batchActionCodes, ["retry_with_task_model"]);
   assert.equal(result.supportsBatch, true);
+});
+
+test("follow-up resolver exposes dismiss for cancelled and replaced history, not for running or waiting approval", () => {
+  const cancelled = resolveAutoDirectorFollowUpReason({
+    status: "cancelled",
+    checkpointType: "chapter_batch_ready",
+  });
+  assert.ok(cancelled);
+  assert.equal(cancelled.reason, "runtime_cancelled");
+  assert.ok(actionCodes(cancelled).includes("dismiss_history"));
+
+  const replaced = resolveAutoDirectorFollowUpReason({
+    status: "cancelled",
+    replacementTaskId: "task_next",
+  });
+  assert.ok(replaced);
+  assert.equal(replaced.reason, "runtime_replaced");
+  assert.deepEqual(actionCodes(replaced), ["open_detail", "dismiss_history"]);
+
+  const running = resolveAutoDirectorFollowUpReason({
+    status: "running",
+  });
+  assert.ok(running);
+  assert.equal(running.reason, "auto_progress_running");
+  assert.equal(actionCodes(running).includes("dismiss_history"), false);
+
+  const waiting = resolveAutoDirectorFollowUpReason({
+    status: "waiting_approval",
+    checkpointType: "chapter_batch_ready",
+  });
+  assert.ok(waiting);
+  assert.equal(actionCodes(waiting).includes("dismiss_history"), false);
+
+  const recovering = resolveAutoDirectorFollowUpReason({
+    status: "failed",
+    pendingManualRecovery: true,
+  });
+  assert.ok(recovering);
+  assert.equal(recovering.reason, "manual_recovery_required");
+  assert.equal(actionCodes(recovering).includes("dismiss_history"), false);
 });

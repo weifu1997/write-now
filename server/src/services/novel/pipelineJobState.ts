@@ -34,6 +34,7 @@ export type PipelineActiveStage = (typeof PIPELINE_ACTIVE_STAGES)[number];
 export interface PipelineJobLike {
   status: PipelineJobStatus;
   payload?: string | null;
+  pendingManualRecovery?: boolean | null;
 }
 
 export interface PipelineJobDecorations {
@@ -234,6 +235,7 @@ export function parsePipelinePayload(payload: string | null | undefined): Pipeli
       taskStyleProfileId: typeof parsed.taskStyleProfileId === "string" ? parsed.taskStyleProfileId : undefined,
       maxRetries: typeof parsed.maxRetries === "number" ? parsed.maxRetries : undefined,
       runMode: parsed.runMode === "polish" ? "polish" : parsed.runMode === "fast" ? "fast" : undefined,
+      chapterScope: parsed.chapterScope === "quality_debt" ? "quality_debt" : parsed.chapterScope === "writable" ? "writable" : undefined,
       autoReview: typeof parsed.autoReview === "boolean" ? parsed.autoReview : undefined,
       autoRepair: typeof parsed.autoRepair === "boolean" ? parsed.autoRepair : undefined,
       skipCompleted: typeof parsed.skipCompleted === "boolean" ? parsed.skipCompleted : undefined,
@@ -274,6 +276,7 @@ export function stringifyPipelinePayload(input: PipelinePayload): string {
     ...(input.taskStyleProfileId?.trim() ? { taskStyleProfileId: input.taskStyleProfileId.trim() } : {}),
     ...(typeof input.maxRetries === "number" ? { maxRetries: input.maxRetries } : {}),
     runMode: input.runMode ?? "fast",
+    chapterScope: input.chapterScope ?? "writable",
     autoReview: input.autoReview ?? true,
     autoRepair: input.autoRepair ?? true,
     skipCompleted: input.skipCompleted ?? true,
@@ -366,23 +369,25 @@ export function getPipelineReplanNotice(details: string[] | undefined): Pipeline
 export function decoratePipelineJob<T extends PipelineJobLike>(job: T): DecoratedPipelineJob<T> {
   const payload = parsePipelinePayload(job.payload);
   const qualityNotice = getPipelineQualityNotice(payload.qualityAlertDetails, payload.recoverableRepairDetails);
-  const notice = job.status === "succeeded"
-    ? (getPipelineReplanNotice(payload.replanAlertDetails).noticeCode
-      ? getPipelineReplanNotice(payload.replanAlertDetails)
-      : qualityNotice)
-    : qualityNotice.noticeSummary
-      ? {
-        ...qualityNotice,
-        displayStatus: "Failed with generation alerts",
-      }
-    : {
-      displayStatus: null,
-      noticeCode: null,
-      noticeSummary: null,
-      qualityAlertDetails: payload.qualityAlertDetails ?? [],
-      recoverableRepairDetails: payload.recoverableRepairDetails ?? [],
-      backgroundActivityLabels: [],
-    };
+  const replanNotice = getPipelineReplanNotice(payload.replanAlertDetails);
+  // stop_for_replan 会把 job 停在 queued + pendingManualRecovery，此时也必须暴露重规划 notice。
+  const notice = replanNotice.noticeCode && (job.status === "succeeded" || job.pendingManualRecovery)
+    ? replanNotice
+    : job.status === "succeeded"
+      ? qualityNotice
+      : qualityNotice.noticeSummary
+        ? {
+          ...qualityNotice,
+          displayStatus: "Failed with generation alerts",
+        }
+        : {
+          displayStatus: null,
+          noticeCode: null,
+          noticeSummary: null,
+          qualityAlertDetails: payload.qualityAlertDetails ?? [],
+          recoverableRepairDetails: payload.recoverableRepairDetails ?? [],
+          backgroundActivityLabels: [],
+        };
   return {
     ...job,
     displayStatus: notice.displayStatus,

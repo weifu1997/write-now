@@ -113,7 +113,7 @@ export const DIRECTOR_STAGE_NODE_ADAPTERS: Record<DirectorPlanningStage, Directo
     label: "生成章节任务单",
     targetType: "novel",
     reads: ["volume_strategy", "character_cast"],
-    writes: ["chapter_task_sheet"],
+    writes: ["volume_beat_sheet", "volume_chapter_list", "chapter_task_sheet"],
     mayModifyUserContent: true,
     requiresApprovalByDefault: false,
     supportsAutoRetry: false,

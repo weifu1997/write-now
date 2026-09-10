@@ -1,4 +1,3 @@
-import type { Prisma } from "@prisma/client";
 import { DIRECTOR_ISSUE_GOVERNANCE_VERSION, directorIssuePolicySchema } from "@write-now/shared/types/directorIssue";
 import { prisma } from "../../db/prisma";
 import {
@@ -13,40 +12,23 @@ import { selectPrimaryPipelineJob } from "./pipelineJobDedup";
 import { buildPipelineCurrentItemLabel, buildPipelineStageProgress, decoratePipelineJob as decoratePipelineJobRow, isPipelineActiveStage, parsePipelinePayload as parsePipelineJobPayload, stringifyPipelinePayload as stringifyPipelineJobPayload, type DecoratedPipelineJob, type PipelineActiveStage, type PipelineJobLike } from "./pipelineJobState";
 import { NovelPipelineExecutor } from "./production/NovelPipelineExecutor";
 import { directorIssuePolicyService, loadDirectorIssueTaskContext } from "./director/issues";
+import {
+  buildPipelineChapterWhere,
+  resolvePipelineChapterScope,
+  selectPipelineChapters,
+} from "./production/pipelineChapterSelection";
+import { clampRepairAttemptBudget } from "./production/qualityDebtRepairPolicy";
 
 export { buildPipelineCurrentItemLabel, buildPipelineStageProgress } from "./pipelineJobState";
 
-const TERMINAL_CONTINUE_QUALITY_LOOP_RISK_FLAG_FRAGMENT = '"terminalAction":"defer_and_continue"';
-const REPLAN_REQUIRED_QUALITY_LOOP_RISK_FLAG_FRAGMENT = '"rootCauseCode":"replan_required"';
-const REPLAN_ACTION_QUALITY_LOOP_RISK_FLAG_FRAGMENT = '"recommendedAction":"replan"';
-
-function clampPipelineMaxRetries(value: number | null | undefined): number {
-  return Math.max(0, Math.min(value ?? 1, 1));
-}
-
-function buildSkipCompletedChapterWhere(): Prisma.ChapterWhereInput {
-  return {
-    NOT: {
-      AND: [
-        { content: { not: null } },
-        { content: { not: "" } },
-        {
-          OR: [
-            { generationState: { in: ["approved", "published"] } },
-            { chapterStatus: "completed" },
-            {
-              AND: [
-                { riskFlags: { not: null } },
-                { riskFlags: { contains: TERMINAL_CONTINUE_QUALITY_LOOP_RISK_FLAG_FRAGMENT } },
-                { riskFlags: { not: { contains: REPLAN_REQUIRED_QUALITY_LOOP_RISK_FLAG_FRAGMENT } } },
-                { riskFlags: { not: { contains: REPLAN_ACTION_QUALITY_LOOP_RISK_FLAG_FRAGMENT } } },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-  };
+function clampPipelineMaxRetries(
+  value: number | null | undefined,
+  chapterScope?: string | null,
+): number {
+  return clampRepairAttemptBudget({
+    chapterScope,
+    requestedMaxRetries: value,
+  });
 }
 
 export class NovelCorePipelineService {
@@ -62,8 +44,13 @@ export class NovelCorePipelineService {
       : DecoratedPipelineJob<Extract<T, PipelineJobLike>>;
   }
 
-  private buildRangeKey(novelId: string, startOrder: number, endOrder: number): string {
-    return `${novelId}:${startOrder}:${endOrder}`;
+  private buildRangeKey(
+    novelId: string,
+    startOrder: number,
+    endOrder: number,
+    chapterScope: ReturnType<typeof resolvePipelineChapterScope> = "writable",
+  ): string {
+    return `${novelId}:${chapterScope}:${startOrder}:${endOrder}`;
   }
 
   private async resolveIssuePolicySnapshot(novelId: string, options: PipelineRunOptions) {
@@ -96,8 +83,13 @@ export class NovelCorePipelineService {
     }
   }
 
-  private async listActivePipelineJobsForRange(novelId: string, startOrder: number, endOrder: number) {
-    return prisma.generationJob.findMany({
+  private async listActivePipelineJobsForRange(
+    novelId: string,
+    startOrder: number,
+    endOrder: number,
+    chapterScope: ReturnType<typeof resolvePipelineChapterScope> = "writable",
+  ) {
+    const jobs = await prisma.generationJob.findMany({
       where: {
         novelId,
         startOrder,
@@ -112,15 +104,25 @@ export class NovelCorePipelineService {
         { createdAt: "asc" },
       ],
     });
+    return jobs.filter((job) => {
+      const payload = this.parsePipelinePayload(job.payload);
+      return resolvePipelineChapterScope(payload.chapterScope) === chapterScope;
+    });
   }
 
   private async reconcileActivePipelineJobsForRange(input: {
     novelId: string;
     startOrder: number;
     endOrder: number;
+    chapterScope?: ReturnType<typeof resolvePipelineChapterScope>;
     preferredJobId?: string | null;
   }) {
-    const jobs = await this.listActivePipelineJobsForRange(input.novelId, input.startOrder, input.endOrder);
+    const jobs = await this.listActivePipelineJobsForRange(
+      input.novelId,
+      input.startOrder,
+      input.endOrder,
+      input.chapterScope,
+    );
     if (jobs.length === 0) {
       return null;
     }
@@ -145,13 +147,51 @@ export class NovelCorePipelineService {
       });
       logPipelineWarn("发现重复活跃批量任务，已取消重复项", {
         novelId: input.novelId,
-        range: `${input.startOrder}-${input.endOrder}`,
+        range: `${input.chapterScope ?? "writable"}:${input.startOrder}-${input.endOrder}`,
         primaryJobId: primaryJob.id,
         cancelledJobIds: duplicateJobs.map((job) => job.id),
       });
     }
 
     return primaryJob;
+  }
+
+  private async supersedePausedQualityDebtRepairJobs(input: {
+    novelId: string;
+    replacementJobId: string;
+  }): Promise<void> {
+    const pausedJobs = await prisma.generationJob.findMany({
+      where: {
+        novelId: input.novelId,
+        id: { not: input.replacementJobId },
+        status: { in: ["queued", "running"] },
+        pendingManualRecovery: true,
+      },
+      select: { id: true, payload: true },
+    });
+    const supersededIds = pausedJobs
+      .filter((job) => resolvePipelineChapterScope(this.parsePipelinePayload(job.payload).chapterScope) === "quality_debt")
+      .map((job) => job.id);
+    if (supersededIds.length === 0) {
+      return;
+    }
+    const supersededAt = new Date();
+    await prisma.generationJob.updateMany({
+      where: { id: { in: supersededIds } },
+      data: {
+        status: "cancelled",
+        pendingManualRecovery: false,
+        error: `已由新的自动修复任务接替：${input.replacementJobId}`,
+        cancelRequestedAt: supersededAt,
+        heartbeatAt: supersededAt,
+        finishedAt: supersededAt,
+      },
+    });
+    logPipelineWarn("已接替仍暂停的质量债自动修复任务", {
+      novelId: input.novelId,
+      replacementJobId: input.replacementJobId,
+      supersededJobIds: supersededIds,
+    });
   }
 
   async findActivePipelineJobForRange(
@@ -309,8 +349,9 @@ export class NovelCorePipelineService {
         issuePolicySnapshot: payload.issuePolicySnapshot,
         workflowTaskId: payload.workflowTaskId,
         taskStyleProfileId: payload.taskStyleProfileId,
-        maxRetries: clampPipelineMaxRetries(job.maxRetries),
+        maxRetries: clampPipelineMaxRetries(job.maxRetries, payload.chapterScope),
         runMode: job.runMode ?? payload.runMode,
+        chapterScope: payload.chapterScope,
         autoReview: job.autoReview ?? payload.autoReview,
         autoRepair: job.autoRepair ?? payload.autoRepair,
         skipCompleted: job.skipCompleted ?? payload.skipCompleted,
@@ -324,22 +365,25 @@ export class NovelCorePipelineService {
   }
 
   async startPipelineJob(novelId: string, options: PipelineRunOptions) {
-    const rangeKey = this.buildRangeKey(novelId, options.startOrder, options.endOrder);
+    const chapterScope = resolvePipelineChapterScope(options.chapterScope);
+    const rangeKey = this.buildRangeKey(novelId, options.startOrder, options.endOrder, chapterScope);
     return this.withStartLock(rangeKey, async () => {
-      const maxRetries = clampPipelineMaxRetries(options.maxRetries);
+      const maxRetries = clampPipelineMaxRetries(options.maxRetries, chapterScope);
       const issuePolicySnapshot = await this.resolveIssuePolicySnapshot(novelId, options);
       const runtimeOptions: PipelineRunOptions = {
         ...options,
         maxRetries,
+        chapterScope,
         issueGovernanceVersion: DIRECTOR_ISSUE_GOVERNANCE_VERSION,
         issuePolicySnapshot,
       };
-      await ensureNovelCharacters(novelId, "启动批量章节流水");
+      await ensureNovelCharacters(novelId, chapterScope === "quality_debt" ? "启动质量债自动修复" : "启动批量章节流水");
 
       const existingActiveJob = await this.reconcileActivePipelineJobsForRange({
         novelId,
         startOrder: options.startOrder,
         endOrder: options.endOrder,
+        chapterScope,
       });
       if (existingActiveJob) {
         logPipelineWarn("检测到同区间已有活跃批量任务，复用现有任务", {
@@ -347,6 +391,12 @@ export class NovelCorePipelineService {
           range: `${options.startOrder}-${options.endOrder}`,
           reusedJobId: existingActiveJob.id,
         });
+        if (chapterScope === "quality_debt") {
+          await this.supersedePausedQualityDebtRepairJobs({
+            novelId,
+            replacementJobId: existingActiveJob.id,
+          });
+        }
         this.schedulePipelineExecution(existingActiveJob.id, novelId, runtimeOptions);
         return this.decoratePipelineJob(existingActiveJob);
       }
@@ -361,26 +411,29 @@ export class NovelCorePipelineService {
         throw new Error("当前小说还没有章节，请先创建章节后再启动流水线。");
       }
 
-      const chapters = await prisma.chapter.findMany({
-        where: {
+      const rawChapters = await prisma.chapter.findMany({
+        where: buildPipelineChapterWhere({
           novelId,
-          order: { gte: options.startOrder, lte: options.endOrder },
-          ...(options.skipCompleted
-            ? buildSkipCompletedChapterWhere()
-            : {}),
-        },
+          startOrder: options.startOrder,
+          endOrder: options.endOrder,
+          chapterScope,
+          skipCompleted: options.skipCompleted,
+        }),
         orderBy: { order: "asc" },
-        select: { id: true },
+        select: { id: true, content: true, riskFlags: true },
       });
+      const chapters = selectPipelineChapters(rawChapters, chapterScope);
       if (chapters.length === 0) {
         const minOrder = chapterStats._min.order ?? 1;
         const maxOrder = chapterStats._max.order ?? 1;
-        throw new Error(`指定区间内没有可生成的章节。当前可用章节范围为第 ${minOrder} 章到第 ${maxOrder} 章。`);
+        throw new Error(chapterScope === "quality_debt"
+          ? "当前没有待跟进的质量项。局部问题出现后，可以在这里一章接一章自动修复。"
+          : `指定区间内没有可生成的章节。当前可用章节范围为第 ${minOrder} 章到第 ${maxOrder} 章。`);
       }
 
       logPipelineInfo("创建批量任务", {
         novelId,
-        range: `${options.startOrder}-${options.endOrder}`,
+        range: `${chapterScope}:${options.startOrder}-${options.endOrder}`,
         matchedChapters: chapters.length,
         availableRange: `${chapterStats._min.order ?? 1}-${chapterStats._max.order ?? 1}`,
         maxRetries,
@@ -415,6 +468,7 @@ export class NovelCorePipelineService {
             taskStyleProfileId: options.taskStyleProfileId?.trim() || undefined,
             maxRetries,
             runMode: options.runMode ?? "fast",
+            chapterScope,
             autoReview: options.autoReview ?? true,
             autoRepair: options.autoRepair ?? true,
             skipCompleted: options.skipCompleted ?? true,
@@ -430,6 +484,13 @@ export class NovelCorePipelineService {
         novelId,
         totalCount: job.totalCount,
       });
+
+      if (chapterScope === "quality_debt") {
+        await this.supersedePausedQualityDebtRepairJobs({
+          novelId,
+          replacementJobId: job.id,
+        });
+      }
 
       this.schedulePipelineExecution(job.id, novelId, runtimeOptions);
       return this.decoratePipelineJob(job);
@@ -468,8 +529,9 @@ export class NovelCorePipelineService {
       taskStyleProfileId: payload.taskStyleProfileId,
       issueGovernanceVersion: payload.issueGovernanceVersion,
       issuePolicySnapshot: payload.issuePolicySnapshot,
-      maxRetries: clampPipelineMaxRetries(job.maxRetries),
+      maxRetries: clampPipelineMaxRetries(job.maxRetries, payload.chapterScope),
       runMode: job.runMode ?? payload.runMode,
+      chapterScope: payload.chapterScope,
       autoReview: job.autoReview ?? payload.autoReview,
       autoRepair: job.autoRepair ?? payload.autoRepair,
       skipCompleted: job.skipCompleted ?? payload.skipCompleted,

@@ -122,6 +122,8 @@ test("production closure owns quality stops and persists manual recovery", () =>
   assert.equal(qualityLoopSource.includes("chapterLifecycleService.applyQualityAssessmentState"), true);
   assert.equal(qualityLoopSource.includes("prisma.chapter.update"), false);
   assert.equal(pipelineSource.includes('applyChapterQualityClosure'), true);
+  assert.equal(pipelineSource.includes('refreshQualityDebtByReview'), true);
+  assert.equal(pipelineSource.includes('this.reviewService.reviewChapter'), true);
   assert.equal(pipelineSource.includes('pendingManualRecovery: true'), true);
   assert.equal(pipelineSource.indexOf('pendingManualRecovery: true') < pipelineSource.indexOf('const finalStatus: "succeeded"'), true);
   assert.equal(pipelineSource.includes('chapterRetryCountUsed < chapterRetryBudget'), true);

@@ -72,6 +72,35 @@ function buildNovelCoverAsset(overrides = {}) {
   };
 }
 
+test("image routes list novel cover tasks for the source page", async () => {
+  const originalListSceneTasks = imageGenerationService.listSceneTasks;
+  const httpFetch = global.fetch.bind(global);
+  let listed = null;
+  imageGenerationService.listSceneTasks = async (input) => {
+    listed = input;
+    return [buildNovelCoverTask({ status: "failed", error: "image provider unavailable" })];
+  };
+
+  const app = createApp();
+  const server = http.createServer(app);
+  const port = await listen(server);
+  try {
+    const response = await httpFetch(`http://127.0.0.1:${port}/api/images/tasks?sceneType=novel_cover&sceneId=novel-cover-1`);
+    assert.equal(response.status, 200);
+    const payload = await response.json();
+    assert.equal(payload.success, true);
+    assert.equal(payload.data[0].sceneType, "novel_cover");
+    assert.equal(payload.data[0].status, "failed");
+    assert.deepEqual(listed, {
+      sceneType: "novel_cover",
+      sceneId: "novel-cover-1",
+    });
+  } finally {
+    imageGenerationService.listSceneTasks = originalListSceneTasks;
+    await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+  }
+});
+
 test("image routes accept and return novel_cover payloads", async () => {
   const originalCreateNovelCoverTask = imageGenerationService.createNovelCoverTask;
   const originalListNovelCoverAssets = imageGenerationService.listNovelCoverAssets;

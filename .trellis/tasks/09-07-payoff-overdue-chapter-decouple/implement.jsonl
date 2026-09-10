@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "逾期从账本经 runtime、质量环、投影到书架，必须在仍持有 issue code 的层过滤，不能在无 code 的 ReviewIssue 上猜测。"}
+{"file": "docs/wiki/workflows/chapter-production-chain.md", "reason": "现行合同已写逾期是章节职责或质量债且不得停全书；本刀要把逾期从章节质量债里拿出去，实施时必须对照这条边界。"}
+{"file": "docs/wiki/workflows/payoff-ledger-contract.md", "reason": "Payoff Ledger 所有权与 Replan Gate：逾期是账本风险，不是单章留存失败。"}
+{"file": "docs/wiki/workflows/quality-debt-attribution.md", "reason": "质量债归因字段是存量仅逾期债的唯一可靠识别面，读路径收敛依赖它。"}

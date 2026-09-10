@@ -34,6 +34,7 @@ import type {
   CharacterImageGenerationRequest,
   NovelCoverImageGenerationRequest,
 } from "./types";
+import { getArchivedTaskIds } from "../task/taskArchive";
 
 type SupportedImageSceneType = "character" | "novel_cover" | "book_analysis_character";
 
@@ -297,6 +298,26 @@ export class ImageGenerationService {
       where: { id: taskId },
     });
     return toImageTask(task);
+  }
+
+  async listSceneTasks(input: {
+    sceneType: SupportedImageSceneType;
+    sceneId: string;
+  }): Promise<ImageGenerationTask[]> {
+    const archivedIds = await getArchivedTaskIds("image_generation");
+    const rows = await prisma.imageGenerationTask.findMany({
+      where: {
+        ...(input.sceneType === "novel_cover"
+          ? { sceneType: "novel_cover", novelId: input.sceneId }
+          : input.sceneType === "book_analysis_character"
+            ? { sceneType: "book_analysis_character", bookAnalysisCharacterId: input.sceneId }
+            : { sceneType: "character", baseCharacterId: input.sceneId }),
+        ...(archivedIds.length > 0 ? { id: { notIn: archivedIds } } : {}),
+      },
+      orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
+      take: 20,
+    });
+    return rows.map((row) => toImageTask(row));
   }
 
   async retryTask(taskId: string): Promise<ImageGenerationTask> {

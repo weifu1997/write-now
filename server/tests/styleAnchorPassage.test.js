@@ -5,6 +5,9 @@ const {
   StyleAnchorPassageService,
   computeStyleAnchorContentHash,
 } = require("../dist/services/styleEngine/StyleAnchorPassageService.js");
+const { STYLE_ANCHOR_STORED_MAX_CHARS } = require("../../shared/dist/types/styleEngine.js");
+const { styleAnchorCreateSchema } = require("../dist/modules/novel/production/http/novelStyleAnchorRoutes.js");
+const { resolveChapterIntakeMaxChars } = require("../../shared/dist/types/chapterLengthControl.js");
 
 function buildFakeStore() {
   const rows = [];
@@ -97,8 +100,21 @@ test("style anchor create dedupes by content hash and truncates long text", asyn
   const stored = await store.styleAnchorPassage.findMany({ where: { novelId: "n1" } });
   const longRow = stored.find((row) => row.text.startsWith("夜"));
   assert.ok(longRow);
-  assert.ok(longRow.text.length <= 800);
+  assert.ok(longRow.text.length <= STYLE_ANCHOR_STORED_MAX_CHARS);
   assert.equal(longRow.source, "adopted");
+});
+
+test("style anchor HTTP intake follows chapter length hard max instead of a fixed 4000", () => {
+  const chapterLengthText = "字".repeat(4100);
+  const parsed = styleAnchorCreateSchema.parse({ text: chapterLengthText, source: "adopted" });
+  assert.equal(parsed.text.length, 4100);
+
+  const intakeMax = resolveChapterIntakeMaxChars();
+  assert.ok(intakeMax > 4000);
+  assert.throws(() => styleAnchorCreateSchema.parse({
+    text: "字".repeat(intakeMax + 1),
+    source: "adopted",
+  }));
 });
 
 test("style anchor listForGeneration prefers confirmed passages then degrades silently", async () => {

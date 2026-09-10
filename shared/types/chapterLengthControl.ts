@@ -10,6 +10,9 @@ import {
 const SCENE_COUNT_MIN = 3;
 const SCENE_COUNT_MAX = 8;
 
+export const CHAPTER_TARGET_WORD_COUNT_MIN = 200;
+export const CHAPTER_TARGET_WORD_COUNT_MAX = 20000;
+
 export type ChapterScenePlanNormalizationFailureCode =
   | "target_word_count_missing"
   | "scene_count_below_minimum"
@@ -275,6 +278,15 @@ export function resolveLengthBudgetContract(targetWordCount: number | null | und
     softMaxWordCount: Math.ceil(normalizedTarget * 1.15),
     hardMaxWordCount: Math.ceil(normalizedTarget * 1.25),
   };
+}
+
+export function resolveChapterIntakeMaxChars(targetWordCount?: number | null): number {
+  const budget = resolveLengthBudgetContract(
+    typeof targetWordCount === "number" && targetWordCount > 0
+      ? targetWordCount
+      : CHAPTER_TARGET_WORD_COUNT_MAX,
+  );
+  return budget?.hardMaxWordCount ?? Math.ceil(CHAPTER_TARGET_WORD_COUNT_MAX * 1.25);
 }
 
 export function normalizeChapterScenePlan(

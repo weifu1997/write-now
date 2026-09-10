@@ -12,6 +12,7 @@ import {
   getTargetVolume,
   mergeBeatSheet,
 } from "./volumeGenerationHelpers";
+import { isClosingVolume } from "./volumeChapterListGeneration";
 import type {
   VolumeGenerateOptions,
   VolumeGenerationPhase,
@@ -83,6 +84,12 @@ export async function generateBeatSheet(params: {
     targetVolume,
     targetChapterCount,
     guidance: options.guidance,
+    isClosingVolume: isClosingVolume({
+      completionProfile: novel.completionProfile,
+      targetVolumeIndex: targetIndex,
+      volumeCount: document.volumes.length,
+      chapterBudgets,
+    }),
   };
   const generated = await runStructuredPrompt({
     asset: volumeBeatSheetPrompt,

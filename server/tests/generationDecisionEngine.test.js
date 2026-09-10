@@ -6,6 +6,7 @@ const {
 } = require("../dist/services/novel/production/GenerationDecisionEngine.js");
 
 function createSnapshot(overrides = {}) {
+  const { narrative: narrativeOverrides, ...snapshotOverrides } = overrides;
   return {
     novelId: "novel-1",
     sourceSnapshotId: "snapshot-1",
@@ -56,11 +57,11 @@ function createSnapshot(overrides = {}) {
       publicKnowledge: [],
       hiddenKnowledge: [],
       suspenseThreads: [],
-      ...overrides.narrative,
+      ...narrativeOverrides,
     },
     timeline: [],
     createdAt: new Date().toISOString(),
-    ...overrides,
+    ...snapshotOverrides,
   };
 }
 
@@ -100,6 +101,17 @@ test("GenerationDecisionEngine auto-repairs pending proposals during full-book a
   assert.equal(action, "repair_existing_chapter");
 });
 
+test("GenerationDecisionEngine auto-repairs pending proposals during quality-debt repair", () => {
+  const engine = new GenerationDecisionEngine();
+  const action = engine.decideNextAction({
+    snapshot: createSnapshot(),
+    chapterScope: "quality_debt",
+    pendingReviewProposalCount: 12,
+    hasRepairableDraft: true,
+  });
+  assert.equal(action, "repair_existing_chapter");
+});
+
 test("GenerationDecisionEngine keeps writing when pending proposals belong to a blank chapter", () => {
   const engine = new GenerationDecisionEngine();
   const action = engine.decideNextAction({
@@ -110,32 +122,53 @@ test("GenerationDecisionEngine keeps writing when pending proposals belong to a 
   assert.equal(action, "write_chapter");
 });
 
-test("GenerationDecisionEngine escalates overdue payoff pressure to replan", () => {
+function createOverduePayoff() {
+  return {
+    id: "payoff-1",
+    ledgerKey: "payoff-1",
+    title: "first counterattack",
+    summary: "still not paid off",
+    scopeType: "chapter",
+    currentStatus: "overdue",
+    targetStartChapterOrder: 4,
+    targetEndChapterOrder: 5,
+    firstSeenChapterOrder: 2,
+    lastTouchedChapterOrder: 4,
+    lastTouchedChapterId: "chapter-4",
+    setupChapterId: "chapter-2",
+    payoffChapterId: null,
+    statusReason: "reader payoff overdue",
+    confidence: 0.9,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+test("GenerationDecisionEngine keeps writing when only overdue payoffs remain", () => {
   const engine = new GenerationDecisionEngine();
   const action = engine.decideNextAction({
     snapshot: createSnapshot({
       narrative: {
-        overduePayoffs: [{
-          id: "payoff-1",
-          ledgerKey: "payoff-1",
-          title: "first counterattack",
-          summary: "still not paid off",
-          scopeType: "chapter",
-          currentStatus: "overdue",
-          targetStartChapterOrder: 4,
-          targetEndChapterOrder: 5,
-          firstSeenChapterOrder: 2,
-          lastTouchedChapterOrder: 4,
-          lastTouchedChapterId: "chapter-4",
-          setupChapterId: "chapter-2",
-          payoffChapterId: null,
-          statusReason: "reader payoff overdue",
-          confidence: 0.9,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }],
+        overduePayoffs: [createOverduePayoff()],
       },
     }),
   });
-  assert.equal(action, "replan");
+  assert.equal(action, "write_chapter");
+});
+
+test("GenerationDecisionEngine does not hold stage review solely for overdue payoffs", () => {
+  const engine = new GenerationDecisionEngine();
+  const action = engine.decideNextAction({
+    snapshot: createSnapshot({
+      narrative: {
+        overduePayoffs: [createOverduePayoff()],
+      },
+    }),
+    policy: {
+      kickoffMode: "director_start",
+      advanceMode: "stage_review",
+      reviewCheckpoints: [],
+    },
+  });
+  assert.equal(action, "write_chapter");
 });

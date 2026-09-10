@@ -119,6 +119,15 @@ test("incomplete persisted contracts are regenerated instead of reused", () => {
       targetWordCount: null,
     },
   }), false);
+
+  assert.equal(canReuseChapterExecutionContract({
+    novelId: complete.novelId,
+    volumeId: complete.volumeId,
+    chapter: {
+      ...chapter,
+      conflictLevel: null,
+    },
+  }), false);
 });
 
 test("chapter execution contract does not retry a semantic quality warning", () => {

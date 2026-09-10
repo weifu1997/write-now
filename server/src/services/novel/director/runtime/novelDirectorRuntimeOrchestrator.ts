@@ -451,12 +451,48 @@ export class NovelDirectorRuntimeOrchestrator {
     }
 
     for (const adapter of projectionAdapters) {
-      const artifacts = await this.waitForProjectionFacts({
+      const { artifacts, factsReady } = await this.waitForProjectionFacts({
         module: adapter,
         taskId: input.taskId,
         novelId: input.novelId,
         targetId: input.novelId,
       });
+      if (
+        !factsReady
+        && isExecutableWorkflowStepModule(adapter)
+        && BACKGROUND_ARTIFACT_PROJECTION_STEP_IDS.has(adapter.id)
+      ) {
+        const recheckContext: WorkflowStepExecutionContext = {
+          taskId: input.taskId,
+          novelId: input.novelId,
+          targetType: adapter.targetType,
+          targetId: input.novelId,
+          artifacts,
+        };
+        const recheckCompletion = await adapter.inspectCompletion(recheckContext).catch(() => null);
+        if (!recheckCompletion?.completed) {
+          // 投影等待超时且事实仍未落库：执行该 fact-only 节点必然触发 validateOutput 判负，
+          // 其普通 Error 会穿透外层调度把整个收官任务打成 failed。模块 recover 声明恒可恢复，
+          // 这里把超时收敛为既有 readiness 门禁同构的可恢复 gate，等待事实落库后可续跑收口。
+          const reason = `${adapter.id} 异步投影事实尚未落库，等待补齐后可续跑收口。`;
+          if (adapter.defaultWaitingState) {
+            await this.deps.workflowService.markTaskWaitingApproval(input.taskId, {
+              stage: adapter.defaultWaitingState.stage,
+              itemKey: adapter.defaultWaitingState.itemKey ?? adapter.nodeKey,
+              itemLabel: adapter.defaultWaitingState.itemLabel ?? reason,
+              progress: adapter.defaultWaitingState.progress,
+              checkpointSummary: reason,
+            });
+          }
+          await this.stateCommitter.markRuntimeWaitingGate({
+            runtimeId: null,
+            taskId: input.taskId,
+            novelId: input.novelId,
+            message: reason,
+          });
+          throw new DirectorRuntimeGateError(reason);
+        }
+      }
       await this.runStepModule({
         module: adapter,
         taskId: input.taskId,
@@ -476,7 +512,7 @@ export class NovelDirectorRuntimeOrchestrator {
     taskId: string;
     novelId: string;
     targetId?: string | null;
-  }): Promise<DirectorArtifactRef[]> {
+  }): Promise<{ artifacts: DirectorArtifactRef[]; factsReady: boolean }> {
     let artifacts = await this.collectArtifactsAfterNode({
       taskId: input.taskId,
       novelId: input.novelId,
@@ -485,7 +521,7 @@ export class NovelDirectorRuntimeOrchestrator {
       !isExecutableWorkflowStepModule(input.module)
       || !BACKGROUND_ARTIFACT_PROJECTION_STEP_IDS.has(input.module.id)
     ) {
-      return artifacts;
+      return { artifacts, factsReady: true };
     }
 
     const timeoutMs = Math.max(0, this.deps.projectionFactWaitTimeoutMs ?? DEFAULT_PROJECTION_FACT_WAIT_TIMEOUT_MS);
@@ -502,7 +538,7 @@ export class NovelDirectorRuntimeOrchestrator {
       };
       const completion = await input.module.inspectCompletion(context).catch(() => null);
       if (completion?.completed || Date.now() - startedAt >= timeoutMs) {
-        return artifacts;
+        return { artifacts, factsReady: Boolean(completion?.completed) };
       }
       await sleep(Math.min(intervalMs, Math.max(1, timeoutMs - (Date.now() - startedAt))));
       artifacts = await this.collectArtifactsAfterNode({

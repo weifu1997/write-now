@@ -288,9 +288,26 @@ function createHarness(task = createTask()) {
     }
     return { count };
   };
-  prisma.novelWorkflowTask.findUnique = async ({ where }) => where.id === task.id
-    ? { novelId: task.novelId, seedPayloadJson: task.seedPayloadJson ?? null }
-    : null;
+  prisma.novelWorkflowTask.findUnique = async ({ where, select }) => {
+    if (where.id !== task.id) return null;
+    const full = {
+      novelId: task.novelId,
+      seedPayloadJson: task.seedPayloadJson ?? null,
+      pendingManualRecovery: task.pendingManualRecovery === true,
+      status: task.status,
+      lastError: task.lastError ?? null,
+    };
+    if (!select) {
+      return { novelId: full.novelId, seedPayloadJson: full.seedPayloadJson };
+    }
+    const picked = {};
+    for (const key of Object.keys(select)) {
+      if (select[key]) {
+        picked[key] = full[key];
+      }
+    }
+    return picked;
+  };
   prisma.novelWorkflowTask.updateMany = async (args) => {
     taskUpdates.push(args);
     if (args?.where?.id) {
@@ -784,6 +801,58 @@ test("director command service auto requeues first stale continue lease", async 
     assert.equal(harness.task.pendingManualRecovery, false);
     assert.equal(harness.task.lastError, null);
   } finally {
+    harness.restore();
+  }
+});
+
+test("director command stale recovery preserves quality-policy pendingManualRecovery", async () => {
+  const qualityPauseMessage = "质量策略要求人工确认后继续。";
+  const harness = createHarness(createTask({
+    status: "running",
+    pendingManualRecovery: true,
+    lastError: qualityPauseMessage,
+    seedPayloadJson: JSON.stringify({
+      issueGovernanceVersion: 1,
+      issuePolicy: {
+        maxAutomaticRetries: 1,
+        issueActions: { "runtime.worker_stale": "auto_retry" },
+      },
+      issuePolicySource: "novel",
+      runMode: "full_book_autopilot",
+    }),
+  }));
+  const originalReportIssue = directorIssueService.reportIssue;
+  directorIssueService.reportIssue = async (input) => {
+    await input.applyAction({
+      issueCode: input.issueCode,
+      action: "auto_retry",
+      reason: "stale lease auto retry",
+      locked: false,
+      policySource: "novel",
+      retryExhaustedAction: "pause_for_manual",
+    });
+  };
+  try {
+    await harness.service.enqueueContinueCommand("task-1");
+    harness.commands[0].status = "running";
+    harness.commands[0].leaseOwner = "worker-a";
+    harness.commands[0].attempt = 1;
+    harness.commands[0].leaseExpiresAt = new Date("2026-04-29T12:00:00.000Z");
+    harness.task.status = "running";
+    harness.task.pendingManualRecovery = true;
+    harness.task.lastError = qualityPauseMessage;
+
+    const count = await harness.service.recoverStaleLeases(new Date("2026-04-29T12:01:00.000Z"));
+
+    assert.equal(count, 1);
+    assert.equal(harness.commands[0].status, "stale");
+    assert.equal(harness.task.pendingManualRecovery, true);
+    assert.equal(harness.task.lastError, qualityPauseMessage);
+    assert.equal(harness.task.status, "running");
+    assert.equal(harness.requeued.length, 0);
+    assert.equal(harness.stepUpdates.length, 1);
+  } finally {
+    directorIssueService.reportIssue = originalReportIssue;
     harness.restore();
   }
 });

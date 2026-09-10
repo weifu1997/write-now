@@ -47,6 +47,7 @@ export interface VolumeBeatSheetPromptInput {
   targetVolume: VolumePlan;
   targetChapterCount: number;
   guidance?: string;
+  isClosingVolume?: boolean;
 }
 
 export interface VolumeChapterListPromptInput {
@@ -82,6 +83,7 @@ export interface VolumeChapterDetailPromptInput {
   targetChapter: VolumePlan["chapters"][number];
   guidance?: string;
   detailMode: ChapterDetailMode;
+  isBookFinale?: boolean;
 }
 
 export interface VolumeRebalancePromptInput {
@@ -127,7 +129,7 @@ export function buildCommonNovelContext(novel: VolumeGenerationNovel): string {
     : "first 30 chapter promise";
   const structureLine = completion?.mode === "compact_book"
     ? `compact book structure: three acts; target ${completion.targetChapterCount} chapters; closure required by chapter ${completion.endingRequiredBy}; up to ${completion.maxChapterCount} chapters may be used for closing.`
-    : "serial structure: staged continuation; preserve the next-stage reading pull.";
+    : `serial structure: staged continuation until chapter ${completion?.endingRequiredBy ?? completion?.targetChapterCount ?? "the target"}; the target chapter is a visible mini-ending with stage climax and payoff; aftertaste is allowed, but do not open a new mainline that must continue.`;
   return [
     `title: ${novel.title}`,
     `genre: ${novel.genre?.name ?? "unset"}`,

@@ -133,6 +133,16 @@ export async function getImageTask(taskId: string) {
   return data;
 }
 
+export async function listImageTasks(params: {
+  sceneType: Extract<ImageSceneType, "character" | "novel_cover" | "book_analysis_character">;
+  sceneId: string;
+}) {
+  const { data } = await apiClient.get<ApiResponse<ImageGenerationTask[]>>("/images/tasks", {
+    params,
+  });
+  return data;
+}
+
 export async function listImageAssets(params: { sceneType: Extract<ImageSceneType, "character" | "novel_cover" | "book_analysis_character">; sceneId: string }) {
   const { data } = await apiClient.get<ApiResponse<ImageAsset[]>>("/images/assets", {
     params,

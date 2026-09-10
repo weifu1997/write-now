@@ -51,20 +51,76 @@ interface FullVolumeResumeState {
   isAlreadyComplete: boolean;
 }
 
+export function resolveAbsoluteChapterOrder(params: {
+  targetVolumeIndex: number;
+  chapterBudgets: number[];
+  volumeLocalChapterOrder: number;
+}): number {
+  if (params.targetVolumeIndex < 0) {
+    return params.volumeLocalChapterOrder;
+  }
+  const chaptersBeforeCurrentVolume = params.chapterBudgets
+    .slice(0, params.targetVolumeIndex)
+    .reduce((total, chapterCount) => total + chapterCount, 0);
+  return chaptersBeforeCurrentVolume + params.volumeLocalChapterOrder;
+}
+
+export function isTargetSpanFinaleBeat(params: {
+  completionProfile: VolumeGenerationNovel["completionProfile"];
+  targetVolumeIndex: number;
+  chapterBudgets: number[];
+  beatChapterEndOrder: number;
+}): boolean {
+  if (!params.completionProfile || params.targetVolumeIndex < 0) {
+    return false;
+  }
+  return resolveAbsoluteChapterOrder({
+    targetVolumeIndex: params.targetVolumeIndex,
+    chapterBudgets: params.chapterBudgets,
+    volumeLocalChapterOrder: params.beatChapterEndOrder,
+  }) >= params.completionProfile.endingRequiredBy;
+}
+
 export function isCompactBookFinaleBeat(params: {
   completionProfile: VolumeGenerationNovel["completionProfile"];
   targetVolumeIndex: number;
   chapterBudgets: number[];
   beatChapterEndOrder: number;
 }): boolean {
-  if (params.completionProfile?.mode !== "compact_book" || params.targetVolumeIndex < 0) {
+  if (params.completionProfile?.mode !== "compact_book") {
     return false;
   }
-  const chaptersBeforeCurrentVolume = params.chapterBudgets
-    .slice(0, params.targetVolumeIndex)
-    .reduce((total, chapterCount) => total + chapterCount, 0);
-  return chaptersBeforeCurrentVolume + params.beatChapterEndOrder
-    >= params.completionProfile.endingRequiredBy;
+  return isTargetSpanFinaleBeat(params);
+}
+
+export function isBookFinaleBeat(params: {
+  completionProfile: VolumeGenerationNovel["completionProfile"];
+  targetVolumeIndex: number;
+  chapterBudgets: number[];
+  beatChapterEndOrder: number;
+}): boolean {
+  return isTargetSpanFinaleBeat(params);
+}
+
+export function isClosingVolume(params: {
+  completionProfile: VolumeGenerationNovel["completionProfile"];
+  targetVolumeIndex: number;
+  volumeCount: number;
+  chapterBudgets: number[];
+}): boolean {
+  if (params.targetVolumeIndex < 0 || params.volumeCount <= 0) {
+    return false;
+  }
+  if (params.targetVolumeIndex === params.volumeCount - 1) {
+    return true;
+  }
+  const thisVolumeBudget = params.chapterBudgets[params.targetVolumeIndex] ?? 0;
+  return isTargetSpanFinaleBeat({
+    completionProfile: params.completionProfile,
+    targetVolumeIndex: params.targetVolumeIndex,
+    chapterBudgets: params.chapterBudgets,
+    beatChapterEndOrder: thisVolumeBudget,
+  });
 }
 
 function buildBeatGenerationPlans(beatSheet: VolumeBeatSheet): BeatGenerationPlan[] {
@@ -265,7 +321,7 @@ async function generateBeatChapterBlock(params: {
       targetChapterCount: params.beatPlan.chapterCount,
       targetBeatKey: params.beatPlan.beat.key,
       targetBeatLabel: params.beatPlan.beat.label,
-      isBookFinale: isCompactBookFinaleBeat({
+      isBookFinale: isBookFinaleBeat({
         completionProfile: params.novel.completionProfile,
         targetVolumeIndex: targetIndex,
         chapterBudgets: params.chapterBudgets,

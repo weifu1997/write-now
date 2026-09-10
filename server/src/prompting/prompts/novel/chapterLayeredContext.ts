@@ -31,6 +31,7 @@ import {
   buildPendingCandidateGuardText,
   buildRelationStageText,
   compactText,
+  buildConflictPacingHint,
   renderBookContractText,
   renderStoryMacroText,
   resolveTargetWordRange,
@@ -267,9 +268,12 @@ export function buildNarrativeProgressHint(
     return `【叙事进度】第 ${currentOrder} 章 / 预计共 ${estimatedTotal} 章（${Math.round(progress * 100)}%）\n发展阶段：推进既有线索，谨慎开新支线，保持伏笔密度。`;
   }
   if (progress < 0.90) {
-    return `【叙事进度】第 ${currentOrder} 章 / 预计共 ${estimatedTotal} 章（${Math.round(progress * 100)}%）\n收敛阶段：优先兑现已埋伏笔，避免新开主线，距结束还有约 ${remaining} 章。`;
+    return `【叙事进度】第 ${currentOrder} 章 / 预计共 ${estimatedTotal} 章（${Math.round(progress * 100)}%）\n收敛阶段：优先兑现已埋伏笔，避免新开必须续写的主线，距目标章还有约 ${remaining} 章。`;
   }
-  return `【叙事进度】第 ${currentOrder} 章 / 预计共 ${estimatedTotal} 章（${Math.round(progress * 100)}%）\n尾声阶段：收束所有主线，为全书收尾，禁止开新支线。`;
+  if (currentOrder >= estimatedTotal) {
+    return `【叙事进度】第 ${currentOrder} 章 / 预计共 ${estimatedTotal} 章（${Math.round(progress * 100)}%）\n目标跨度收官：写成可见小结局，完成本阶段高潮与兑现；可以留余味，禁止开启必须续写的新主线。`;
+  }
+  return `【叙事进度】第 ${currentOrder} 章 / 预计共 ${estimatedTotal} 章（${Math.round(progress * 100)}%）\n尾声阶段：收束本目标跨度的主线与回报，为可见小结局收尾，禁止开新支线。`;
 }
 
 function buildChapterBoundaryContract(
@@ -351,6 +355,10 @@ export function buildChapterWriteContext(input: {
     macroConstraints: input.macroConstraints,
     volumeWindow: input.volumeWindow,
     narrativeProgressHint: input.contextPackage.narrativeProgressHint ?? null,
+    conflictPacingHint: buildConflictPacingHint(
+      input.contextPackage.chapter.conflictLevel,
+      input.contextPackage.previousConflictLevel,
+    ),
     chapterMission,
     nextAction: input.contextPackage.nextAction,
     chapterStateGoal: input.contextPackage.chapterStateGoal ?? null,

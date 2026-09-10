@@ -9,6 +9,12 @@ import type { AutoDirectorFollowUpSection } from "@write-now/shared/types/autoDi
 import type { WorkspaceTone } from "@/components/workspace";
 import type { TaskQueueSeverity } from "@/components/taskQueue";
 
+export function resolveFollowUpBadgeCount(
+  overview: Pick<AutoDirectorFollowUpOverview, "actionableCount" | "totalCount"> | null | undefined,
+): number {
+  return Math.max(0, overview?.actionableCount ?? 0);
+}
+
 export function resolveFollowUpOverviewPresentation(
   overview: AutoDirectorFollowUpOverview | null,
 ): {
@@ -145,6 +151,9 @@ export function getFollowUpActionConsequence(action: AutoDirectorAction): string
   }
   if (action.code === "auto_backfill_structured_outline") {
     return "补齐校验确认缺失的拆章资产，再继续当前导演任务。";
+  }
+  if (action.code === "dismiss_history") {
+    return "不再出现在导演跟进和角标里。不会删除小说，也不会改已保存章节。";
   }
   return "只执行校验声明为低风险的状态修复，不替用户确认候选或重写正文。";
 }

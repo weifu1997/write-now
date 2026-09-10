@@ -225,6 +225,51 @@ test("buildChapterQualityLoopAssessment includes prose quality risk as local pat
   assert.equal(assessment.rootCauseCode, "none");
 });
 
+test("buildChapterQualityLoopAssessment ignores ledger overdue reports in rolling-window risk", () => {
+  const assessment = buildChapterQualityLoopAssessment({
+    chapterId: "chapter-74",
+    chapterOrder: 74,
+    score: score(),
+    issues: [],
+    runtimePackage: {
+      context: {
+        chapter: { order: 74 },
+      },
+      audit: {
+        reports: [{
+          auditType: "plot",
+          issues: [{
+            severity: "high",
+            code: "payoff_overdue",
+            description: "已超过第3章合同兑现窗口。",
+            evidence: "目标窗口截止第3章。",
+            fixSuggestion: "由全书账本跟进，不在本章局部修补。",
+            status: "open",
+          }],
+        }],
+        openIssues: [{
+          auditType: "plot",
+          severity: "high",
+          code: "payoff_overdue",
+        }],
+      },
+      failureClassification: {
+        code: "none",
+        summary: "未触发全局重规划。",
+        decisionReason: null,
+        blockingObligations: [],
+      },
+    },
+    evaluatedAt: "2026-09-07T00:00:00.000Z",
+  });
+
+  const rollingWindow = assessment.signals.find((signal) => signal.artifactType === "rolling_window_review");
+  const retention = assessment.signals.find((signal) => signal.artifactType === "chapter_retention_contract");
+  assert.equal(rollingWindow.status, "valid");
+  assert.equal(retention.status, "valid");
+  assert.equal(assessment.recommendedAction, "continue");
+});
+
 test("buildChapterQualityLoopAssessment keeps advisory prose findings non-blocking", () => {
   const assessment = buildChapterQualityLoopAssessment({
     chapterId: "chapter-prose-advisory",
@@ -428,6 +473,53 @@ test("quality debt details read source, current repair attempts, reason and unre
   });
 });
 
+test("quality debt details hide overdue-only ledger debt from chapter follow-up", () => {
+  const details = readChapterQualityDebtDetails(JSON.stringify({
+    qualityLoop: {
+      terminalAction: "defer_and_continue",
+      source: "pipeline_review",
+      overallStatus: "risk",
+      recommendedAction: "patch_repair",
+      qualityDebtAttribution: {
+        firstFailureIssueCodes: ["payoff_overdue"],
+        secondFailureIssueCodes: ["payoff_overdue"],
+      },
+      signals: [{
+        artifactType: "chapter_retention_contract",
+        status: "risk",
+        reason: "章节留存信号不足。",
+        issueCodes: ["payoff_overdue"],
+      }],
+    },
+  }));
+
+  assert.equal(details, null);
+});
+
+test("quality debt details keep mixed or missing-progress debt visible", () => {
+  const mixed = readChapterQualityDebtDetails(JSON.stringify({
+    qualityLoop: {
+      terminalAction: "defer_and_continue",
+      recommendedAction: "patch_repair",
+      qualityDebtAttribution: {
+        firstFailureIssueCodes: ["payoff_overdue", "prose_negative_flip"],
+      },
+    },
+  }));
+  const missingProgress = readChapterQualityDebtDetails(JSON.stringify({
+    qualityLoop: {
+      terminalAction: "defer_and_continue",
+      recommendedAction: "patch_repair",
+      qualityDebtAttribution: {
+        firstFailureIssueCodes: ["payoff_overdue", "payoff_missing_progress"],
+      },
+    },
+  }));
+
+  assert.deepEqual(mixed?.issueCodes, ["payoff_overdue", "prose_negative_flip"]);
+  assert.deepEqual(missingProgress?.issueCodes, ["payoff_overdue", "payoff_missing_progress"]);
+});
+
 test("quality debt details keep unknown historical repair attempts explicit", () => {
   const details = readChapterQualityDebtDetails(JSON.stringify({
     qualityLoop: {
@@ -441,6 +533,22 @@ test("quality debt details keep unknown historical repair attempts explicit", ()
   assert.equal(details?.repairAttemptsAllowed, 1);
   assert.equal(details?.source, null);
   assert.equal(readChapterQualityDebtDetails("{}"), null);
+});
+
+test("quality debt details keep a two-attempt quality-debt budget", () => {
+  const details = readChapterQualityDebtDetails(JSON.stringify({
+    qualityLoop: {
+      terminalAction: "defer_and_continue",
+      overallStatus: "invalid",
+      recommendedAction: "patch_repair",
+      qualityDebtAttribution: {
+        repairAttemptsUsed: 2,
+        repairAttemptsAllowed: 2,
+      },
+    },
+  }));
+  assert.equal(details?.repairAttemptsUsed, 2);
+  assert.equal(details?.repairAttemptsAllowed, 2);
 });
 
 test("quality debt details exclude cleared reviews and explicit replanning", () => {

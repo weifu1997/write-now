@@ -44,6 +44,26 @@ test("chapter layered context keeps full book promise and volume reader rewards"
   assert.equal(volume.coreReward, "让主角从被动求生转为掌握反击入口。");
 });
 
+test("serial target-span narrative hint asks for a mini-ending instead of a new mainline", () => {
+  const serialHint = buildNarrativeProgressHint(150, 150);
+  const midHint = buildNarrativeProgressHint(80, 150);
+  const compactHint = buildNarrativeProgressHint(60, 60);
+  assert.match(serialHint, /目标跨度收官/);
+  assert.match(serialHint, /可见小结局/);
+  assert.match(serialHint, /禁止开启必须续写的新主线/);
+  assert.match(midHint, /发展阶段/);
+  assert.match(compactHint, /目标跨度收官|可见小结局|收束本目标跨度/);
+  const serialContract = buildBookContractContext({
+    title: "连载测试",
+    completionMode: "serial_book",
+    targetChapterCount: 150,
+    endingRequiredBy: 150,
+  });
+  const { renderBookContractText } = require("../dist/prompting/prompts/novel/chapterLayeredContextShared.js");
+  assert.match(renderBookContractText(serialContract), /连载目标跨度合同/);
+  assert.match(renderBookContractText(serialContract), /可见小结局/);
+});
+
 function createContextPackage() {
   const now = new Date().toISOString();
   return {
@@ -54,6 +74,7 @@ function createContextPackage() {
       content: null,
       expectation: "完成第一次明确反压",
       targetWordCount: 3000,
+      conflictLevel: 68,
       revealLevel: 2,
       mustAvoid: "不要提前揭露幕后黑手",
       hook: "下一章才展开幕后黑手反击",
@@ -399,6 +420,7 @@ function createContextPackage() {
       softFutureSummary: "第二卷会引出更高层势力。",
     },
     narrativeProgressHint: buildNarrativeProgressHint(5, 20),
+    previousConflictLevel: 40,
     ledgerPendingItems: [{
       id: "ledger-1",
       novelId: "novel-1",
@@ -726,6 +748,8 @@ test("chapter layered contexts carry volume mission, character duties and repair
   assert.ok(writeContext.characterBehaviorGuides.some((item) => item.visibleProfileSummary?.includes("登场印象=沉默克制")));
   assert.ok(writeContext.obligationContract.requiredCharacterAppearances.includes("女二（已缺席 3 章，宜自然带出）"));
   assert.match(writeContext.narrativeProgressHint, /第 5 章 \/ 预计共 20 章/);
+  assert.match(writeContext.conflictPacingHint, /冲突强度 68 \/ 100/);
+  assert.match(writeContext.conflictPacingHint, /相对上一章上升/);
   assert.ok(writeContext.pendingCandidateGuards.some((item) => item.proposedName === "林策"));
   assert.ok(writeContext.openConflictSummaries.some((item) => item.includes("第一次反压仍未落地")));
   assert.equal(writeContext.ledgerSummary.overdueCount, 1);
@@ -759,6 +783,10 @@ test("chapter layered contexts carry volume mission, character duties and repair
   assert.ok(repairContext.allowedEditBoundaries.some((item) => item.includes("Patch resource continuity before using 旧通行证")));
 
   const writerBlocks = buildChapterWriterContextBlocks(writeContext);
+  const conflictPacingBlock = writerBlocks.find((block) => block.id === "conflict_pacing_hint");
+  assert.ok(conflictPacingBlock);
+  assert.match(conflictPacingBlock.content, /冲突强度 68 \/ 100/);
+  assert.match(conflictPacingBlock.content, /相对上一章上升/);
   const reviewBlocks = buildChapterReviewContextBlocks(reviewContext);
   const repairBlocks = buildChapterRepairContextBlocks(repairContext);
 

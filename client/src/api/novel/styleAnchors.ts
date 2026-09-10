@@ -1,4 +1,5 @@
 import type { ApiResponse } from "@write-now/shared/types/api";
+import { clipStyleAnchorText } from "@write-now/shared/types/styleEngine";
 import { apiClient } from "../client";
 
 export interface StyleAnchorPassageView {
@@ -14,10 +15,20 @@ export async function createStyleAnchor(
   novelId: string,
   chapterId: string,
   payload: { text: string; source: "adopted" | "manual" },
+  options?: { silent?: boolean },
 ) {
+  const text = clipStyleAnchorText(payload.text);
+  if (!text) {
+    return {
+      success: true,
+      data: { created: false, anchor: null },
+      message: "范文内容为空。",
+    };
+  }
   const { data } = await apiClient.post<ApiResponse<{ created: boolean; anchor: { id: string } | null }>>(
     `/novels/${novelId}/chapters/${chapterId}/style-anchors`,
-    payload,
+    { text, source: payload.source },
+    options?.silent ? { silentErrorStatuses: [400] } : undefined,
   );
   return data;
 }

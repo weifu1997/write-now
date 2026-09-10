@@ -69,6 +69,7 @@ export function normalizeChapterWriteContext(writeContext: ChapterWriteContext):
       }
       : null,
     narrativeProgressHint: writeContext.narrativeProgressHint ?? null,
+    conflictPacingHint: writeContext.conflictPacingHint ?? null,
     obligationContract: {
       mustHitNow: obligationContract.mustHitNow ?? EMPTY_OBLIGATION_CONTRACT.mustHitNow,
       mustPreserve: obligationContract.mustPreserve ?? EMPTY_OBLIGATION_CONTRACT.mustPreserve,

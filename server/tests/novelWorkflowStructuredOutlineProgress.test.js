@@ -334,6 +334,33 @@ test("resolveStructuredOutlineRecoveryCursor treats incomplete execution contrac
   assert.equal(cursor.completedDetailSteps, 1);
 });
 
+test("JIT skipChapterDetail advances to chapter_sync without task sheets", () => {
+  const workspace = createWorkspace({
+    chapters: [
+      createEmptyChapter("chapter-1", 1, { beatKey: "open_hook" }),
+      createEmptyChapter("chapter-2", 2, { beatKey: "midpoint_turn" }),
+    ],
+    beatSheets: createBeatSheet(),
+  });
+
+  const withoutSkip = resolveStructuredOutlineRecoveryCursor({
+    workspace,
+    plan: { mode: "volume", volumeOrder: 1 },
+  });
+  assert.equal(withoutSkip.step, "chapter_detail_bundle");
+
+  const withSkip = resolveStructuredOutlineRecoveryCursor({
+    workspace,
+    plan: { mode: "volume", volumeOrder: 1 },
+    skipChapterDetail: true,
+  });
+  assert.equal(withSkip.step, "chapter_sync");
+  assert.equal(withSkip.beatChapterListReady, true);
+  assert.equal(withSkip.selectedChapters.length, 2);
+  assert.equal(withSkip.chapterId, null);
+  assert.equal(withSkip.detailMode, null);
+});
+
 test("resolveStructuredOutlineRecoveryCursor returns chapter_sync after all selected chapter details are complete", () => {
   const cursor = resolveStructuredOutlineRecoveryCursor({
     workspace: createWorkspace({

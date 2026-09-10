@@ -2,6 +2,7 @@ import type { ChapterRuntimePackage, GenerationContextPackage } from "@write-now
 import type { ContentProvenance } from "@write-now/shared/types/canonicalState";
 import type { LLMProvider } from "@write-now/shared/types/llm";
 import type { QualityScore, ReviewIssue } from "@write-now/shared/types/novel";
+import { isLedgerOverdueIssueCode } from "@write-now/shared/types/chapterCreativeContract";
 import type { ChapterRuntimeRequestInput } from "./chapterRuntimeSchema";
 import { detectForbiddenStyleEntities } from "../../styleEngine/styleGenerationSanitizer";
 import {
@@ -11,6 +12,12 @@ import {
 } from "./chapterEmptyContentError";
 import { runChapterRepairText } from "./repair/chapterRepairRuntime";
 import { ChapterPatchRepairFailedError } from "../chapterPatchRepairService";
+import {
+  clampRepairAttemptBudget,
+  resolveQualityDebtRepairMode,
+  shouldEscalateFailedQualityDebtPatch,
+  shouldSkipAutomaticRepair,
+} from "../production/qualityDebtRepairPolicy";
 
 export interface PipelineRuntimeHooks {
   onCheckCancelled?: () => Promise<void>;
@@ -42,7 +49,7 @@ export interface PipelineRuntimeInput extends ChapterRuntimeRequestInput {
 export interface QualityDebtAttribution {
   /** 本章实际发起的自动修复次数；修复返回可恢复失败也计入。 */
   repairAttemptsUsed: number;
-  /** 本次章节执行允许的自动修复次数，当前合同只允许 0 或 1。 */
+  /** 本次章节执行允许的自动修复次数。普通写作入口 0 或 1；质量债批次最多 2。 */
   repairAttemptsAllowed: number;
   /** 首次验收失败的 issue code 列表（来自 runtimePackage.audit.openIssues） */
   firstFailureIssueCodes: string[];
@@ -169,9 +176,14 @@ export async function runPipelineChapterWithRuntime(
     artifactSyncMode = "adaptive",
     ...requestInput
   } = options;
-  const effectiveMaxRetries = Math.max(0, Math.min(maxRetries, 1));
-  const repairAttemptsAllowed = autoRepair && repairMode !== "detect_only" ? effectiveMaxRetries : 0;
   const request = deps.validateRequest(requestInput);
+  const effectiveMaxRetries = autoRepair && repairMode !== "detect_only"
+    ? clampRepairAttemptBudget({
+      chapterScope: request.chapterScope,
+      requestedMaxRetries: maxRetries,
+    })
+    : 0;
+  const repairAttemptsAllowed = effectiveMaxRetries;
   await deps.ensureNovelCharacters(novelId, "run chapter pipeline");
 
   const assembled = await deps.assemble(novelId, chapterId, request);
@@ -276,7 +288,16 @@ export async function runPipelineChapterWithRuntime(
         .filter((kind) => kind.trim().length > 0);
     }
 
-    if (shouldPauseForAcceptance || !autoRepair || repairMode === "detect_only" || attempt >= effectiveMaxRetries) {
+    if (shouldSkipAutomaticRepair({
+      chapterScope: request.chapterScope,
+      autoRepair,
+      repairMode,
+      attempt,
+      repairAttemptBudget: effectiveMaxRetries,
+      continuePolicy,
+      acceptanceStatus,
+      repairability: latestResult.runtimePackage.meta?.repairability,
+    })) {
       // 若是 attempt >= effectiveMaxRetries，这是第二次失败，记录二次 codes
       if (attempt > 0) {
         secondFailureIssueCodes = extractIssueCodes(latestResult.runtimePackage);
@@ -284,22 +305,57 @@ export async function runPipelineChapterWithRuntime(
       break;
     }
 
+    const activeRepairMode = resolveQualityDebtRepairMode({
+      chapterScope: request.chapterScope,
+      requestedMode: repairMode,
+      repairability: latestResult.runtimePackage.meta?.repairability,
+      acceptanceStatus,
+      repairDirectives: latestResult.runtimePackage.meta?.repairDirectives,
+      repairAttemptsUsed: retryCountUsed,
+    });
+
     await hooks.onStageChange?.("repairing");
-    const repairResult = await repairDraftContent({
+    const repairOptions = {
+      provider: request.provider,
+      model: request.model,
+      temperature: request.temperature,
+      repairMode: activeRepairMode,
+    };
+    let repairResult = await repairDraftContent({
       novelTitle: assembled.novel.title,
       chapterTitle: assembled.chapter.title,
       content,
       issues: latestIssues,
       runtimePackage: latestResult.runtimePackage,
-      options: {
-        provider: request.provider,
-        model: request.model,
-        temperature: request.temperature,
-        repairMode,
-      },
+      options: repairOptions,
     });
     retryCountUsed += 1;
     await hooks.onRetryConsumed?.("quality_repair");
+    if (
+      repairResult.recoverableFailure
+      && shouldEscalateFailedQualityDebtPatch({
+        chapterScope: request.chapterScope,
+        activeRepairMode,
+        repairability: latestResult.runtimePackage.meta?.repairability,
+        failureTypes: repairResult.recoverableFailure.failureTypes,
+        remainingRepairBudget: effectiveMaxRetries - retryCountUsed,
+      })
+    ) {
+      await hooks.onStageChange?.("repairing");
+      repairResult = await repairDraftContent({
+        novelTitle: assembled.novel.title,
+        chapterTitle: assembled.chapter.title,
+        content,
+        issues: latestIssues,
+        runtimePackage: latestResult.runtimePackage,
+        options: {
+          ...repairOptions,
+          repairMode: "heavy_repair",
+        },
+      });
+      retryCountUsed += 1;
+      await hooks.onRetryConsumed?.("quality_repair");
+    }
     if (repairResult.recoverableFailure) {
       recoverableRepairFailure = repairResult.recoverableFailure;
       await deps.markChapterNeedsRepair(chapterId);
@@ -432,20 +488,26 @@ function isQualityPass(score: QualityScore, qualityThreshold: number): boolean {
 }
 
 function toReviewIssues(runtimePackage: ChapterRuntimePackage): ReviewIssue[] {
-  const issues = runtimePackage.audit.openIssues.map((issue) => ({
-    severity: issue.severity,
-    category: AUDIT_CATEGORY_MAP[issue.auditType],
-    evidence: issue.evidence,
-    fixSuggestion: issue.fixSuggestion,
-  }));
-  return issues.length > 0
-    ? issues
-    : runtimePackage.audit.reports.flatMap((report) => report.issues.map((issue) => ({
+  const issues = runtimePackage.audit.openIssues
+    .filter((issue) => !isLedgerOverdueIssueCode(issue.code))
+    .map((issue) => ({
       severity: issue.severity,
-      category: AUDIT_CATEGORY_MAP[report.auditType],
+      category: AUDIT_CATEGORY_MAP[issue.auditType],
       evidence: issue.evidence,
       fixSuggestion: issue.fixSuggestion,
-    })));
+    }));
+  return issues.length > 0
+    ? issues
+    : runtimePackage.audit.reports.flatMap((report) => (
+      report.issues
+        .filter((issue) => !isLedgerOverdueIssueCode(issue.code))
+        .map((issue) => ({
+          severity: issue.severity,
+          category: AUDIT_CATEGORY_MAP[report.auditType],
+          evidence: issue.evidence,
+          fixSuggestion: issue.fixSuggestion,
+        }))
+    ));
 }
 
 function toAcceptanceDirectiveIssues(runtimePackage: ChapterRuntimePackage): ReviewIssue[] {

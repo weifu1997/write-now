@@ -512,6 +512,52 @@ test("validateAutoDirectorAction marks safe follow-up continue with required che
   assert.equal(result.nextAction, "continue_auto_execution");
 });
 
+test("validateAutoDirectorAction allows dismiss only for completed failed or cancelled history", () => {
+  const cancelled = validateAutoDirectorAction({
+    source: "web",
+    actionCode: "dismiss_history",
+    task: {
+      id: "task-cancelled",
+      lane: "auto_director",
+      status: "cancelled",
+      checkpointType: "chapter_batch_ready",
+      pendingManualRecovery: false,
+      novelId: "novel-1",
+    },
+  });
+  assert.equal(cancelled.allowed, true);
+  assert.equal(cancelled.nextAction, "dismiss_history");
+
+  const running = validateAutoDirectorAction({
+    source: "web",
+    actionCode: "dismiss_history",
+    task: {
+      id: "task-running",
+      lane: "auto_director",
+      status: "running",
+      checkpointType: null,
+      pendingManualRecovery: false,
+      novelId: "novel-1",
+    },
+  });
+  assert.equal(running.allowed, false);
+  assert.match(running.blockingReasons.join("\n"), /不能收起/);
+
+  const recovering = validateAutoDirectorAction({
+    source: "web",
+    actionCode: "dismiss_history",
+    task: {
+      id: "task-recovering",
+      lane: "auto_director",
+      status: "failed",
+      checkpointType: "chapter_batch_ready",
+      pendingManualRecovery: true,
+      novelId: "novel-1",
+    },
+  });
+  assert.equal(recovering.allowed, false);
+});
+
 test("resolveAutoDirectorFollowUpSection gives validation issues top priority over actionable waiting state", () => {
   const section = resolveAutoDirectorFollowUpSection({
     status: "waiting_approval",

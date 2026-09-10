@@ -7,6 +7,7 @@ import {
   getFollowUpLevelLabel,
   getFollowUpPriorityLabel,
   getFollowUpTone,
+  resolveFollowUpBadgeCount,
   resolveFollowUpOverviewPresentation,
 } from "./followUpPresentation.ts";
 
@@ -74,6 +75,25 @@ test("follow-up action consequences are driven by structured action codes", () =
     riskLevel: "medium",
     requiresConfirm: true,
   }), /需要确认/);
+  assert.match(getFollowUpActionConsequence({
+    code: "dismiss_history",
+    kind: "mutation",
+    label: "收起这条记录",
+    riskLevel: "low",
+    requiresConfirm: false,
+  }), /不会删除小说/);
+});
+
+test("follow-up sidebar badge uses actionableCount not totalCount", () => {
+  assert.equal(resolveFollowUpBadgeCount({
+    totalCount: 9,
+    actionableCount: 2,
+  }), 2);
+  assert.equal(resolveFollowUpBadgeCount({
+    totalCount: 4,
+    actionableCount: 0,
+  }), 0);
+  assert.equal(resolveFollowUpBadgeCount(null), 0);
 });
 
 test("follow-up priorities are presented as user actions instead of raw enum values", () => {

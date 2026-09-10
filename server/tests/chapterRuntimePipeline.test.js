@@ -293,6 +293,143 @@ test("runPipelineChapterWithRuntime does not approve when timeline check fails",
   assert.equal(result.qualityDebtAttribution.repairAttemptsAllowed, 0);
 });
 
+test("runPipelineChapterWithRuntime passes when the only open issue is ledger overdue", async () => {
+  const result = await runPipelineChapterWithRuntime(
+    {
+      validateRequest(input) {
+        return input;
+      },
+      async ensureNovelCharacters() {},
+      async assemble() {
+        return {
+          novel: { id: "novel-1", title: "测试小说" },
+          chapter: {
+            id: "chapter-74",
+            title: "第74章",
+            order: 74,
+            content: "本章细纲已完成。",
+            expectation: null,
+          },
+          contextPackage: {},
+        };
+      },
+      async generateDraftFromWriter() {
+        throw new Error("existing content should not be regenerated");
+      },
+      async saveDraftAndArtifacts() {},
+      async syncFinalChapterArtifacts() {},
+      async finalizeChapterContent({ content }) {
+        return {
+          finalContent: content,
+          runtimePackage: {
+            ...createRuntimePackage(90),
+            audit: {
+              score: {
+                coherence: 90,
+                pacing: 90,
+                repetition: 90,
+                engagement: 90,
+                voice: 90,
+                overall: 90,
+              },
+              openIssues: [{
+                auditType: "plot",
+                severity: "high",
+                evidence: "已超过第3章合同兑现窗口。",
+                fixSuggestion: "在当前章节兑现或解释延期。",
+                code: "payoff_overdue",
+              }],
+              reports: [],
+              hasBlockingIssues: false,
+            },
+            meta: {
+              acceptanceStatus: "accepted",
+              continuePolicy: "continue",
+            },
+            timelineCheck: {
+              status: "passed",
+            },
+          },
+        };
+      },
+      async markChapterGenerationState() {},
+      async markChapterNeedsRepair() {},
+    },
+    "novel-1",
+    "chapter-74",
+    {
+      autoReview: true,
+      autoRepair: true,
+    },
+  );
+
+  assert.equal(result.pass, true);
+  assert.deepEqual(result.issues, []);
+  assert.equal(result.qualityDebtAttribution, null);
+});
+
+test("runPipelineChapterWithRuntime still fails local high-severity issues beside overdue payoffs", async () => {
+  const result = await runPipelineChapterWithRuntime(
+    {
+      validateRequest(input) {
+        return input;
+      },
+      async ensureNovelCharacters() {},
+      async assemble() {
+        return {
+          novel: { id: "novel-1", title: "测试小说" },
+          chapter: {
+            id: "chapter-74",
+            title: "第74章",
+            order: 74,
+            content: "本章细纲已完成。",
+            expectation: null,
+          },
+          contextPackage: {},
+        };
+      },
+      async generateDraftFromWriter() {
+        throw new Error("existing content should not be regenerated");
+      },
+      async saveDraftAndArtifacts() {},
+      async syncFinalChapterArtifacts() {},
+      async finalizeChapterContent({ content }) {
+        return {
+          finalContent: content,
+          runtimePackage: {
+            ...createProseRiskRuntimePackage(90),
+            audit: {
+              ...createProseRiskRuntimePackage(90).audit,
+              openIssues: [
+                ...createProseRiskRuntimePackage(90).audit.openIssues,
+                {
+                  auditType: "plot",
+                  severity: "high",
+                  evidence: "已超过第3章合同兑现窗口。",
+                  fixSuggestion: "在当前章节兑现或解释延期。",
+                  code: "payoff_overdue",
+                },
+              ],
+            },
+          },
+        };
+      },
+      async markChapterGenerationState() {},
+      async markChapterNeedsRepair() {},
+    },
+    "novel-1",
+    "chapter-74",
+    {
+      autoReview: true,
+      autoRepair: false,
+    },
+  );
+
+  assert.equal(result.pass, false);
+  assert.equal(result.issues.some((issue) => issue.evidence.includes("不是害怕")), true);
+  assert.equal(result.issues.some((issue) => issue.evidence.includes("第3章合同")), false);
+});
+
 test("runPipelineChapterWithRuntime passes confirmed provenance for approved final artifact sync", async () => {
   const finalSyncs = [];
 
@@ -1321,5 +1458,425 @@ test("runPipelineChapterWithRuntime clamps maxRetries to a single repair pass", 
     assert.equal(finalSyncs.length, 1);
   } finally {
     promptRunner.runStructuredPrompt = originalRunStructuredPrompt;
+  }
+});
+
+function createPausedRuntimePackage(overallScore, extraMeta = {}) {
+  const base = createRuntimePackage(overallScore);
+  return {
+    ...base,
+    audit: {
+      ...base.audit,
+      hasBlockingIssues: true,
+    },
+    meta: {
+      acceptanceStatus: "needs_manual_review",
+      continuePolicy: "pause",
+      repairability: "rewrite_needed",
+      repairDirectives: [{
+        mode: "rewrite",
+        target: "plot",
+        instruction: "重写崩坏段落，去掉机械复读和提示词泄漏。",
+      }],
+      ...extraMeta,
+    },
+  };
+}
+
+function createAcceptedRuntimePackage(overallScore = 90) {
+  const base = createRuntimePackage(overallScore);
+  return {
+    ...base,
+    audit: {
+      ...base.audit,
+      openIssues: [],
+      hasBlockingIssues: false,
+    },
+    meta: {
+      acceptanceStatus: "accepted",
+      continuePolicy: "continue",
+      repairability: "none",
+      repairDirectives: [],
+    },
+  };
+}
+
+function createPatchableRuntimePackage(overallScore = 72) {
+  return {
+    ...createRuntimePackage(overallScore),
+    meta: {
+      acceptanceStatus: "repairable",
+      continuePolicy: "repair_once",
+      repairability: "patchable_obligation_gap",
+      repairDirectives: [{
+        mode: "patch",
+        target: "plot",
+        instruction: "补上本章未兑现的局部义务。",
+      }],
+    },
+  };
+}
+
+function createPipelineDeps(overrides = {}) {
+  return {
+    validateRequest(input) {
+      return input;
+    },
+    async ensureNovelCharacters() {},
+    async assemble() {
+      return {
+        novel: { id: "novel-1", title: "测试小说" },
+        chapter: {
+          id: "chapter-1",
+          title: "第一章",
+          order: 1,
+          content: "已保存的崩坏正文。",
+          expectation: null,
+        },
+        contextPackage: {},
+      };
+    },
+    async generateDraftFromWriter() {
+      throw new Error("existing content should not be regenerated");
+    },
+    async saveDraftAndArtifacts() {},
+    async syncFinalChapterArtifacts() {},
+    async finalizeChapterContent({ content }) {
+      return {
+        finalContent: content,
+        runtimePackage: createPausedRuntimePackage(30),
+      };
+    },
+    async markChapterGenerationState() {},
+    async markChapterNeedsRepair() {},
+    ...overrides,
+  };
+}
+
+test("writable pipeline still skips repair when acceptance pauses for manual review", async () => {
+  const originalRunStructuredPrompt = promptRunner.runStructuredPrompt;
+  let patchRepairCalled = false;
+  let heavyRewriteCalls = 0;
+  promptRunner.runStructuredPrompt = async () => {
+    patchRepairCalled = true;
+    throw new Error("writable pause must not start patch repair");
+  };
+  promptRunner.setPromptRunnerLLMFactoryForTests(async () => ({
+    stream: async () => {
+      heavyRewriteCalls += 1;
+      throw new Error("writable pause must not start heavy rewrite");
+    },
+  }));
+
+  try {
+    const result = await runPipelineChapterWithRuntime(
+      createPipelineDeps(),
+      "novel-1",
+      "chapter-1",
+      {
+        autoReview: true,
+        autoRepair: true,
+        repairMode: "light_repair",
+      },
+    );
+    assert.equal(result.pass, false);
+    assert.equal(result.retryCountUsed, 0);
+    assert.equal(result.qualityDebtAttribution.repairAttemptsUsed, 0);
+    assert.equal(patchRepairCalled, false);
+    assert.equal(heavyRewriteCalls, 0);
+  } finally {
+    promptRunner.runStructuredPrompt = originalRunStructuredPrompt;
+    promptRunner.setPromptRunnerLLMFactoryForTests();
+  }
+});
+
+test("quality-debt batch rewrites paused unreadable chapters instead of skipping repair", async () => {
+  const originalRunStructuredPrompt = promptRunner.runStructuredPrompt;
+  let patchRepairCalled = false;
+  let heavyRewriteCalls = 0;
+  let reviewCount = 0;
+  promptRunner.runStructuredPrompt = async () => {
+    patchRepairCalled = true;
+    throw new Error("unreadable quality-debt chapters must not use light patch");
+  };
+  promptRunner.setPromptRunnerLLMFactoryForTests(async () => {
+    heavyRewriteCalls += 1;
+    return createTextStreamLLM("改写后的可读正文。");
+  });
+
+  try {
+    const result = await runPipelineChapterWithRuntime(
+      createPipelineDeps({
+        async saveDraftAndArtifacts() {},
+        async finalizeChapterContent({ content }) {
+          reviewCount += 1;
+          if (content.includes("改写后的可读正文")) {
+            return {
+              finalContent: content,
+              runtimePackage: createAcceptedRuntimePackage(90),
+            };
+          }
+          return {
+            finalContent: content,
+            runtimePackage: createPausedRuntimePackage(30),
+          };
+        },
+      }),
+      "novel-1",
+      "chapter-1",
+      {
+        chapterScope: "quality_debt",
+        autoReview: true,
+        autoRepair: true,
+        repairMode: "light_repair",
+      },
+    );
+    assert.equal(patchRepairCalled, false);
+    assert.equal(heavyRewriteCalls, 1);
+    assert.equal(result.retryCountUsed, 1);
+    assert.equal(result.pass, true);
+    assert.equal(reviewCount, 2);
+  } finally {
+    promptRunner.runStructuredPrompt = originalRunStructuredPrompt;
+    promptRunner.setPromptRunnerLLMFactoryForTests();
+  }
+});
+
+test("quality-debt batch still skips rewrite when acceptance reports plan misalignment", async () => {
+  const originalRunStructuredPrompt = promptRunner.runStructuredPrompt;
+  let patchRepairCalled = false;
+  let heavyRewriteCalls = 0;
+  promptRunner.runStructuredPrompt = async () => {
+    patchRepairCalled = true;
+    throw new Error("plan misalignment must not start patch repair");
+  };
+  promptRunner.setPromptRunnerLLMFactoryForTests(async () => ({
+    stream: async () => {
+      heavyRewriteCalls += 1;
+      throw new Error("plan misalignment must not start heavy rewrite");
+    },
+  }));
+
+  try {
+    const result = await runPipelineChapterWithRuntime(
+      createPipelineDeps({
+        async finalizeChapterContent({ content }) {
+          return {
+            finalContent: content,
+            runtimePackage: createPausedRuntimePackage(40, { repairability: "plan_misalignment" }),
+          };
+        },
+      }),
+      "novel-1",
+      "chapter-1",
+      {
+        chapterScope: "quality_debt",
+        autoReview: true,
+        autoRepair: true,
+        repairMode: "light_repair",
+      },
+    );
+    assert.equal(result.retryCountUsed, 0);
+    assert.equal(result.qualityDebtAttribution.repairAttemptsUsed, 0);
+    assert.equal(patchRepairCalled, false);
+    assert.equal(heavyRewriteCalls, 0);
+  } finally {
+    promptRunner.runStructuredPrompt = originalRunStructuredPrompt;
+    promptRunner.setPromptRunnerLLMFactoryForTests();
+  }
+});
+
+test("quality-debt batch keeps light repair for patchable chapters", async () => {
+  const originalRunStructuredPrompt = promptRunner.runStructuredPrompt;
+  let patchRepairCalled = false;
+  let heavyRewriteCalls = 0;
+  promptRunner.runStructuredPrompt = async () => {
+    patchRepairCalled = true;
+    return {
+      output: {
+        strategy: "patch_first",
+        summary: "补足承接。",
+        patches: [{
+          id: "patch-gap",
+          targetExcerpt: "已保存的崩坏正文。",
+          replacement: "已保存的正文并补上承接。",
+          reason: "补足局部义务。",
+          issueIds: [],
+        }],
+        requiresFullRewrite: false,
+        escalationReason: null,
+      },
+    };
+  };
+  promptRunner.setPromptRunnerLLMFactoryForTests(async () => ({
+    stream: async () => {
+      heavyRewriteCalls += 1;
+      throw new Error("patchable quality-debt chapters must stay on light repair");
+    },
+  }));
+
+  try {
+    const result = await runPipelineChapterWithRuntime(
+      createPipelineDeps({
+        async finalizeChapterContent({ content }) {
+          if (content.includes("已保存的正文并补上承接")) {
+            return {
+              finalContent: content,
+              runtimePackage: createAcceptedRuntimePackage(90),
+            };
+          }
+          return {
+            finalContent: content,
+            runtimePackage: createPatchableRuntimePackage(72),
+          };
+        },
+      }),
+      "novel-1",
+      "chapter-1",
+      {
+        chapterScope: "quality_debt",
+        autoReview: true,
+        autoRepair: true,
+        repairMode: "light_repair",
+      },
+    );
+    assert.equal(patchRepairCalled, true);
+    assert.equal(heavyRewriteCalls, 0);
+    assert.equal(result.retryCountUsed, 1);
+    assert.equal(result.pass, true);
+  } finally {
+    promptRunner.runStructuredPrompt = originalRunStructuredPrompt;
+    promptRunner.setPromptRunnerLLMFactoryForTests();
+  }
+});
+
+test("quality-debt batch escalates a failed light patch to rewrite in the same chapter", async () => {
+  const originalRunStructuredPrompt = promptRunner.runStructuredPrompt;
+  let patchRepairCalled = false;
+  let heavyRewriteCalls = 0;
+  let reviewCount = 0;
+  promptRunner.runStructuredPrompt = async () => {
+    patchRepairCalled = true;
+    return {
+      output: {
+        strategy: "patch_first",
+        summary: "补足承接。",
+        patches: [{
+          id: "patch-missing",
+          targetExcerpt: "模型认为存在但正文里没有的片段。",
+          replacement: "替换后的片段。",
+          reason: "目标片段不存在。",
+          issueIds: [],
+        }],
+        requiresFullRewrite: false,
+        escalationReason: null,
+      },
+    };
+  };
+  promptRunner.setPromptRunnerLLMFactoryForTests(async () => {
+    heavyRewriteCalls += 1;
+    return createTextStreamLLM("改写后的可读正文。");
+  });
+
+  try {
+    const result = await runPipelineChapterWithRuntime(
+      createPipelineDeps({
+        async finalizeChapterContent({ content }) {
+          reviewCount += 1;
+          if (content.includes("改写后的可读正文")) {
+            return {
+              finalContent: content,
+              runtimePackage: createAcceptedRuntimePackage(90),
+            };
+          }
+          return {
+            finalContent: content,
+            runtimePackage: createPatchableRuntimePackage(72),
+          };
+        },
+      }),
+      "novel-1",
+      "chapter-1",
+      {
+        chapterScope: "quality_debt",
+        autoReview: true,
+        autoRepair: true,
+        repairMode: "light_repair",
+      },
+    );
+    assert.equal(patchRepairCalled, true);
+    assert.equal(heavyRewriteCalls, 1);
+    assert.equal(result.retryCountUsed, 2);
+    assert.equal(result.pass, true);
+    assert.equal(reviewCount, 2);
+    assert.equal(result.recoverableRepairFailure, null);
+  } finally {
+    promptRunner.runStructuredPrompt = originalRunStructuredPrompt;
+    promptRunner.setPromptRunnerLLMFactoryForTests();
+  }
+});
+
+test("quality-debt batch rewrites after a light repair still fails recheck", async () => {
+  const originalRunStructuredPrompt = promptRunner.runStructuredPrompt;
+  let patchRepairCalled = false;
+  let heavyRewriteCalls = 0;
+  let reviewCount = 0;
+  promptRunner.runStructuredPrompt = async () => {
+    patchRepairCalled = true;
+    return {
+      output: {
+        strategy: "patch_first",
+        summary: "压缩超长段落。",
+        patches: [{
+          id: "patch-gap",
+          targetExcerpt: "已保存的崩坏正文。",
+          replacement: "已保存的正文并补上承接。",
+          reason: "先做局部压缩。",
+          issueIds: [],
+        }],
+        requiresFullRewrite: false,
+        escalationReason: null,
+      },
+    };
+  };
+  promptRunner.setPromptRunnerLLMFactoryForTests(async () => {
+    heavyRewriteCalls += 1;
+    return createTextStreamLLM("改写后的可读正文。");
+  });
+
+  try {
+    const result = await runPipelineChapterWithRuntime(
+      createPipelineDeps({
+        async finalizeChapterContent({ content }) {
+          reviewCount += 1;
+          if (content.includes("改写后的可读正文")) {
+            return {
+              finalContent: content,
+              runtimePackage: createAcceptedRuntimePackage(90),
+            };
+          }
+          return {
+            finalContent: content,
+            runtimePackage: createPatchableRuntimePackage(72),
+          };
+        },
+      }),
+      "novel-1",
+      "chapter-1",
+      {
+        chapterScope: "quality_debt",
+        autoReview: true,
+        autoRepair: true,
+        repairMode: "light_repair",
+      },
+    );
+    assert.equal(patchRepairCalled, true);
+    assert.equal(heavyRewriteCalls, 1);
+    assert.equal(result.retryCountUsed, 2);
+    assert.equal(result.pass, true);
+    assert.equal(reviewCount, 3);
+  } finally {
+    promptRunner.runStructuredPrompt = originalRunStructuredPrompt;
+    promptRunner.setPromptRunnerLLMFactoryForTests();
   }
 });

@@ -83,6 +83,21 @@ const taskParamsSchema = z.object({
   taskId: z.string().trim().min(1),
 });
 
+const sceneTaskQuerySchema = z.discriminatedUnion("sceneType", [
+  z.object({
+    sceneType: z.literal("character"),
+    sceneId: z.string().trim().min(1),
+  }),
+  z.object({
+    sceneType: z.literal("novel_cover"),
+    sceneId: z.string().trim().min(1),
+  }),
+  z.object({
+    sceneType: z.literal("book_analysis_character"),
+    sceneId: z.string().trim().min(1),
+  }),
+]);
+
 const assetQuerySchema = z.discriminatedUnion("sceneType", [
   z.object({
     sceneType: z.literal("character"),
@@ -210,6 +225,23 @@ router.post("/prompt-assist", validate({ body: promptAssistSchema }), async (req
       success: true,
       data,
       message: body.action === "optimize" ? "Image prompt optimized." : "Image prompt explained.",
+    } satisfies ApiResponse<typeof data>);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/tasks", validate({ query: sceneTaskQuerySchema }), async (req, res, next) => {
+  try {
+    const query = req.query as z.infer<typeof sceneTaskQuerySchema>;
+    const data = await imageGenerationService.listSceneTasks({
+      sceneType: query.sceneType,
+      sceneId: query.sceneId,
+    });
+    res.status(200).json({
+      success: true,
+      data,
+      message: "Tasks fetched.",
     } satisfies ApiResponse<typeof data>);
   } catch (error) {
     next(error);

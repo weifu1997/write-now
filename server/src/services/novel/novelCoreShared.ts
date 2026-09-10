@@ -192,6 +192,7 @@ export interface PipelineRunOptions extends LLMGenerateOptions {
   taskStyleProfileId?: string;
   maxRetries?: number;
   runMode?: "fast" | "polish";
+  chapterScope?: "writable" | "quality_debt";
   autoReview?: boolean;
   autoRepair?: boolean;
   skipCompleted?: boolean;
@@ -227,6 +228,7 @@ export interface PipelinePayload extends LLMGenerateOptions {
   taskStyleProfileId?: string;
   maxRetries?: number;
   runMode?: "fast" | "polish";
+  chapterScope?: "writable" | "quality_debt";
   autoReview?: boolean;
   autoRepair?: boolean;
   skipCompleted?: boolean;

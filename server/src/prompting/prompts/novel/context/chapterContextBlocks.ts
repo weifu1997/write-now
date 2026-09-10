@@ -431,6 +431,15 @@ export function buildChapterWriterContextBlocks(
         content: writeContext.narrativeProgressHint,
       })
       : null,
+    writeContext.conflictPacingHint
+      ? createContextBlock({
+        id: "conflict_pacing_hint",
+        group: "narrative_progress_hint",
+        priority: 97,
+        required: false,
+        content: writeContext.conflictPacingHint,
+      })
+      : null,
     includePayoffLedger
       ? createContextBlock({
         id: "payoff_ledger",
