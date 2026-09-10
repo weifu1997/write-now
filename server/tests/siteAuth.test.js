@@ -39,6 +39,28 @@ function listen(server) {
   });
 }
 
+function rawGet(port, requestPath) {
+  return new Promise((resolve, reject) => {
+    const request = http.request({
+      hostname: "127.0.0.1",
+      port,
+      path: requestPath,
+      method: "GET",
+    }, (response) => {
+      let body = "";
+      response.setEncoding("utf8");
+      response.on("data", (chunk) => {
+        body += chunk;
+      });
+      response.on("end", () => {
+        resolve({ status: response.statusCode ?? 0, body });
+      });
+    });
+    request.on("error", reject);
+    request.end();
+  });
+}
+
 function cookieHeader(response) {
   const cookies = typeof response.headers.getSetCookie === "function"
     ? response.headers.getSetCookie()
@@ -84,10 +106,14 @@ test("site auth defaults skip desktop production and require other production", 
 
 test("site auth public paths keep health, login and channel callbacks open", () => {
   assert.equal(isSiteAuthPublicPath("/api/health"), true);
+  assert.equal(isSiteAuthPublicPath("/api/health/"), true);
   assert.equal(isSiteAuthPublicPath("/api/auth/login"), true);
   assert.equal(isSiteAuthPublicPath("/api/auto-director/channel-callbacks/dingtalk"), true);
   assert.equal(isSiteAuthPublicPath("/api/market-radar/sources"), false);
   assert.equal(isSiteAuthPublicPath("/api/drama/projects"), false);
+  assert.equal(isSiteAuthPublicPath("/api/health/../market-radar/sources"), false);
+  assert.equal(isSiteAuthPublicPath("/api/auth/login/../../novels"), false);
+  assert.equal(isSiteAuthPublicPath("/api/auto-director/channel-callbackss"), false);
 });
 
 test("site auth session token verifies expiry", () => {
@@ -123,6 +149,9 @@ test("unconfigured production site auth rejects business APIs but keeps health o
 
       const drama = await fetch(`http://127.0.0.1:${port}/api/drama/projects`);
       assert.equal(drama.status, 503);
+
+      const traversal = await rawGet(port, "/api/health/../market-radar/sources");
+      assert.equal(traversal.status, 503);
     });
   } finally {
     restoreEnv(snapshot);

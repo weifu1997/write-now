@@ -37,6 +37,7 @@
 
 ## 失败模式
 
+- 公开路径必须先规范化再判断，禁止用原始 URL 前缀放行 `/api/health/../novels` 这类路径。
 - 打开页面能进工作台、直接请求 API 也能拿到数据：先查全局 `/api` 中间件是否生效，再查 cookie 是否随请求发送。
 - 桌面端启动后要求登录：查 `AI_NOVEL_RUNTIME` 是否为 `desktop`，以及是否被 `SITE_AUTH_REQUIRED=true` 覆盖。
 - 登录后流式生成失败：查对应 `fetch` 是否带 `credentials: "include"`。
