@@ -1,6 +1,7 @@
 import { prisma } from "../../../db/prisma";
 import { withSqliteRetry } from "../../../db/sqliteRetry";
 import type { DirectorWorkflowSeedPayload } from "../director/runtime/novelDirectorHelpers";
+import { resolveDirectorMaxChapterCountFromSources } from "@write-now/shared/types/directorCompletion";
 import type { DirectorAutoExecutionState } from "@write-now/shared/types/novelDirector";
 import {
   buildDirectorAutoExecutionCompletedLabel,
@@ -106,7 +107,13 @@ export async function resolveActiveAutoDirectorAutoExecution(input: {
     })
     : [];
   const range = nextAutoExecution.mode === "book"
-    ? resolveDirectorAutoExecutionBookRange(chapters)
+    ? resolveDirectorAutoExecutionBookRange(
+      chapters,
+      resolveDirectorMaxChapterCountFromSources({
+        completionProfile: nextAutoExecution.completionProfile,
+        estimatedChapterCount: seedPayload?.estimatedChapterCount,
+      }),
+    )
     : resolveDirectorAutoExecutionRangeFromState(nextAutoExecution);
   if (!range) {
     return null;
@@ -212,7 +219,12 @@ export function reconcileAutoDirectorChapterBatchState(input: {
   failureMessage?: string | null;
 }): AutoDirectorChapterBatchReconciliation | null {
   const range = input.autoExecutionState?.mode === "book"
-    ? resolveDirectorAutoExecutionBookRange(input.chapters)
+    ? resolveDirectorAutoExecutionBookRange(
+      input.chapters,
+      resolveDirectorMaxChapterCountFromSources({
+        completionProfile: input.autoExecutionState.completionProfile,
+      }),
+    )
     : resolveDirectorAutoExecutionRangeFromState(input.autoExecutionState);
   if (!range) {
     return null;

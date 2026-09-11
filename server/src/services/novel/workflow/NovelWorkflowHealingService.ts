@@ -1,4 +1,5 @@
 import { prisma } from "../../../db/prisma";
+import { resolveDirectorMaxChapterCountFromSources } from "@write-now/shared/types/directorCompletion";
 import {
   isDirectorAutoExecutionRunMode,
   isFullBookAutopilotRunMode,
@@ -511,7 +512,13 @@ export class NovelWorkflowHealingService {
         })
       : [];
     const range = autoExecution.mode === "book"
-      ? resolveDirectorAutoExecutionBookRange(chapters)
+      ? resolveDirectorAutoExecutionBookRange(
+        chapters,
+        resolveDirectorMaxChapterCountFromSources({
+          completionProfile: autoExecution.completionProfile,
+          estimatedChapterCount: seedPayload?.estimatedChapterCount,
+        }),
+      )
       : resolveDirectorAutoExecutionRangeFromState(autoExecution);
     if (!range) {
       return false;

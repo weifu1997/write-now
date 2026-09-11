@@ -56,6 +56,8 @@ chapter_execution 阶段
 
 `ChapterPlanJITService` 在自动成书模式下先调用 `ChapterRouteWindowService` 检查路线窗口，再细化当前章。未写路线少于 3 章时补齐到目标 5 章；补齐按节拍块增量生成并复用现有卷文档与章节同步，不重建已完成路线，也不触发无变化的 Payoff Ledger 同步。
 
+滚动窗口必须受 `completionProfile.maxChapterCount` 截断。连载上限等于用户目标章数，紧凑全书才允许目标加 5 章。当前章已经到达上限后不再扩骨架、节奏板或拆章。窗口的最少 3、目标 5 要和剩余章数取小。收官卷拍已经覆盖满、只剩很少章时，余章接到最后一拍，不要新建终局卷。
+
 核心方法：`ensureExecutionReady(novelId, chapterId)`
 
 | 场景 | 行为 |

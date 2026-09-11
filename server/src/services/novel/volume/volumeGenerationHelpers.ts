@@ -16,6 +16,7 @@ import type {
 } from "./volumeModels";
 export {
   allocateChapterBudgets,
+  countPlannedChaptersBeforeVolume,
   deriveChapterBudget,
   resolveVolumePlannedChapterBudget,
 } from "./volumeChapterBudgetAllocation";

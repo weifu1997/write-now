@@ -8,6 +8,7 @@ const {
   isDirectorAutoExecutionChapterProcessed,
   normalizeDirectorAutoExecutionPlan,
   resolveDirectorAutoExecutionRange,
+  resolveDirectorAutoExecutionBookRange,
   resolveDirectorAutoExecutionWorkflowState,
 } = require("../dist/services/novel/director/automation/novelDirectorAutoExecution.js");
 
@@ -71,6 +72,19 @@ test("resolveDirectorAutoExecutionRange sorts chapters and limits to the selecte
     totalChapterCount: 10,
     firstChapterId: "chapter-1",
   });
+});
+
+test("book auto execution range stops at maxChapterCount even if extra titles exist", () => {
+  const chapters = Array.from({ length: 226 }, (_, index) => ({
+    id: `chapter-${index + 1}`,
+    order: index + 1,
+  }));
+  const range = resolveDirectorAutoExecutionBookRange(chapters, 213);
+
+  assert.equal(range.startOrder, 1);
+  assert.equal(range.endOrder, 213);
+  assert.equal(range.totalChapterCount, 213);
+  assert.equal(range.firstChapterId, "chapter-1");
 });
 
 test("buildDirectorAutoExecutionPipelineOptions uses chapter_range-safe defaults", () => {

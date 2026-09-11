@@ -2,7 +2,10 @@ import type {
   DirectorAutoExecutionState,
   DirectorConfirmRequest,
 } from "@write-now/shared/types/novelDirector";
-import { buildDirectorCompletionProfile } from "@write-now/shared/types/directorCompletion";
+import {
+  buildDirectorCompletionProfile,
+  resolveDirectorMaxChapterCountFromSources,
+} from "@write-now/shared/types/directorCompletion";
 import type { PipelineJobStatus, VolumePlanDocument } from "@write-now/shared/types/novel";
 import {
   buildDirectorAutoExecutionScopeLabelFromState,
@@ -36,6 +39,7 @@ interface DirectorAutoExecutionResolvedScope {
 export interface AutoExecutionScopeRuntimeDeps {
   listChapters(novelId: string): Promise<DirectorAutoExecutionChapterRef[]>;
   getVolumes?: (novelId: string) => Promise<VolumePlanDocument>;
+  getEstimatedChapterCount?: (novelId: string) => Promise<number | null>;
 }
 
 function findMissingChapterOrders(
@@ -268,6 +272,15 @@ export async function resolveAutoExecutionRangeAndState(input: {
   autoExecution: DirectorAutoExecutionState;
 }> {
   const chapters = await input.deps.listChapters(input.novelId);
+  const estimatedChapterCount = await input.deps.getEstimatedChapterCount?.(input.novelId) ?? null;
+  const completionProfile = input.existingState?.completionProfile
+    ?? (typeof estimatedChapterCount === "number" && estimatedChapterCount > 0
+      ? buildDirectorCompletionProfile(estimatedChapterCount)
+      : undefined);
+  const maxChapterCount = resolveDirectorMaxChapterCountFromSources({
+    completionProfile,
+    estimatedChapterCount,
+  });
   const normalizedPlan = normalizeDirectorAutoExecutionPlan(input.existingState);
   let range: DirectorAutoExecutionRange | null = null;
   let scopeLabel = input.existingState?.scopeLabel ?? null;
@@ -276,7 +289,7 @@ export async function resolveAutoExecutionRangeAndState(input: {
   let beatChapterListReady = input.existingState?.beatChapterListReady;
   let volumeChapterListComplete = input.existingState?.volumeChapterListComplete;
   if (normalizedPlan.mode === "book" && input.existingState?.enabled) {
-    range = resolveDirectorAutoExecutionBookRange(chapters);
+    range = resolveDirectorAutoExecutionBookRange(chapters, maxChapterCount);
     if (input.deps.getVolumes) {
       const workspace = await input.deps.getVolumes(input.novelId).catch(() => null);
       if (workspace) {
@@ -344,8 +357,7 @@ export async function resolveAutoExecutionRangeAndState(input: {
       preparedVolumeIds,
       beatChapterListReady,
       volumeChapterListComplete,
-      completionProfile: input.existingState?.completionProfile
-        ?? buildDirectorCompletionProfile(range.totalChapterCount),
+      completionProfile,
       pipelineJobId: input.pipelineJobId ?? input.existingState?.pipelineJobId ?? null,
       pipelineStatus: input.pipelineStatus ?? input.existingState?.pipelineStatus ?? null,
     }),

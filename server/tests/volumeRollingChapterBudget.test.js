@@ -89,6 +89,42 @@ test("completed volume planned budget stays on the weighted allocation", () => {
   assert.equal(plannedBudget, 49);
 });
 
+test("empty follow-on volume is capped to remaining chapters instead of even share", () => {
+  const existingVolumes = [
+    createVolume("volume-1", 54),
+    createVolume("volume-2", 50),
+    createVolume("volume-3", 53),
+    createVolume("volume-4", 53),
+    createVolume("volume-5", 0),
+  ];
+  const chapterBudget = 213;
+  const chapterBudgets = allocateChapterBudgets({
+    volumeCount: 5,
+    chapterBudget,
+    existingVolumes,
+  });
+  const plannedBudget = resolveVolumePlannedChapterBudget({
+    chapterBudget,
+    chapterBudgets,
+    targetVolumeIndex: 4,
+    volumeCount: 5,
+    maxChapterCount: 213,
+    chaptersBeforeCurrentVolume: 210,
+  });
+  assert.equal(plannedBudget, 3);
+
+  const beatSheetTarget = resolveBeatSheetTargetChapterCount({
+    targetVolumeChapterCount: 0,
+    targetVolumeIndex: 4,
+    volumeCount: 5,
+    chapterBudget,
+    chapterBudgets,
+    maxChapterCount: 213,
+    chaptersBeforeCurrentVolume: 210,
+  });
+  assert.equal(beatSheetTarget, 3);
+});
+
 test("skeleton-extended future volumes keep the in-progress volume trusted", () => {
   const existingVolumes = [
     createVolume("volume-1", 38),

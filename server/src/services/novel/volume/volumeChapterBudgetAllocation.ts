@@ -90,17 +90,37 @@ export function allocateChapterBudgets(params: {
  * 进度值，进而让同一张按全书均分尺度生成的节奏板在拆章校验中被误判为跨度异常。
  * 这里取加权分摊与全书均分中的较大者：均分正是节奏板生成时的兜底尺度，校验与
  * 生成因此自洽；加权分摊保证已完成卷的口径不会被本函数抬高。
+ * 滚动补路线时再与全书上限相减：空的后续卷只能拿到剩余章数，不能按均分扩成完整一卷。
  */
+export function countPlannedChaptersBeforeVolume(
+  volumes: Array<{ chapters?: unknown[] | null }>,
+  targetVolumeIndex: number,
+): number {
+  return volumes
+    .slice(0, Math.max(0, targetVolumeIndex))
+    .reduce((sum, volume) => sum + (Array.isArray(volume.chapters) ? volume.chapters.length : 0), 0);
+}
+
 export function resolveVolumePlannedChapterBudget(input: {
   chapterBudget: number;
   chapterBudgets: number[];
   targetVolumeIndex: number;
   volumeCount: number;
+  maxChapterCount?: number | null;
+  chaptersBeforeCurrentVolume?: number;
 }): number {
   const weightedBudget = input.chapterBudgets[input.targetVolumeIndex];
   const evenShareBudget = Math.max(
     3,
     Math.floor(Math.max(input.chapterBudget, 0) / Math.max(input.volumeCount, 1)),
   );
-  return Math.max(weightedBudget ?? 0, evenShareBudget);
+  const planned = Math.max(weightedBudget ?? 0, evenShareBudget);
+  if (typeof input.maxChapterCount !== "number" || !Number.isFinite(input.maxChapterCount) || input.maxChapterCount <= 0) {
+    return planned;
+  }
+  const remaining = Math.round(input.maxChapterCount) - Math.max(0, input.chaptersBeforeCurrentVolume ?? 0);
+  if (remaining <= 0) {
+    return 0;
+  }
+  return Math.max(1, Math.min(planned, remaining));
 }

@@ -3,8 +3,10 @@ import { runStructuredPrompt } from "../../../prompting/core/promptRunner";
 import { volumeBeatSheetPrompt } from "../../../prompting/prompts/novel/volume/beatSheet.prompts";
 import { buildVolumeBeatSheetContextBlocks } from "../../../prompting/prompts/novel/volume/contextBlocks";
 import type { StoryMacroPlanService } from "../storyMacro/StoryMacroPlanService";
+import { resolveDirectorMaxChapterCount } from "@write-now/shared/types/directorCompletion";
 import {
   allocateChapterBudgets,
+  countPlannedChaptersBeforeVolume,
   deriveChapterBudget,
   resolveVolumePlannedChapterBudget,
 } from "./volumeChapterBudgetAllocation";
@@ -28,6 +30,8 @@ export function resolveBeatSheetTargetChapterCount(input: {
   volumeCount: number;
   chapterBudget: number;
   chapterBudgets: number[];
+  maxChapterCount?: number | null;
+  chaptersBeforeCurrentVolume?: number;
 }): number {
   // 与拆章校验共用"规划尺度"口径，滚动生产期重生成节奏板不会把在产卷压缩到当前进度。
   const fallbackTargetChapterCount = resolveVolumePlannedChapterBudget({
@@ -35,8 +39,18 @@ export function resolveBeatSheetTargetChapterCount(input: {
     chapterBudgets: input.chapterBudgets,
     targetVolumeIndex: input.targetVolumeIndex,
     volumeCount: input.volumeCount,
+    maxChapterCount: input.maxChapterCount,
+    chaptersBeforeCurrentVolume: input.chaptersBeforeCurrentVolume,
   });
-  return Math.max(input.targetVolumeChapterCount, fallbackTargetChapterCount);
+  const planned = Math.max(input.targetVolumeChapterCount, fallbackTargetChapterCount);
+  if (typeof input.maxChapterCount !== "number" || !Number.isFinite(input.maxChapterCount) || input.maxChapterCount <= 0) {
+    return planned;
+  }
+  const remaining = Math.round(input.maxChapterCount) - Math.max(0, input.chaptersBeforeCurrentVolume ?? 0);
+  if (remaining <= 0) {
+    return Math.max(0, input.targetVolumeChapterCount);
+  }
+  return Math.min(planned, remaining);
 }
 
 export async function generateBeatSheet(params: {
@@ -62,13 +76,20 @@ export async function generateBeatSheet(params: {
     existingVolumes: document.volumes,
   });
   const targetIndex = document.volumes.findIndex((volume) => volume.id === targetVolume.id);
+  const chaptersBeforeCurrentVolume = countPlannedChaptersBeforeVolume(document.volumes, targetIndex);
+  const maxChapterCount = resolveDirectorMaxChapterCount(novel.completionProfile);
   const targetChapterCount = resolveBeatSheetTargetChapterCount({
     targetVolumeChapterCount: targetVolume.chapters.length,
     targetVolumeIndex: targetIndex,
     volumeCount: document.volumes.length,
     chapterBudget,
     chapterBudgets,
+    maxChapterCount,
+    chaptersBeforeCurrentVolume,
   });
+  if (targetChapterCount <= 0) {
+    return document;
+  }
   await params.notifyVolumeGenerationPhase({
     novelId: document.novelId,
     scope: "beat_sheet",

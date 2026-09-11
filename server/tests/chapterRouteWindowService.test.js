@@ -129,3 +129,106 @@ test("route window adds a future skeleton before planning the next beat and chap
     prisma.chapter.count = originalCount;
   }
 });
+
+test("route window stops at maxChapterCount without creating a new volume", async () => {
+  const firstVolume = createVolume("volume-1", 1, [
+    createChapter("chapter-1", "volume-1", 1),
+    createChapter("chapter-2", "volume-1", 2),
+  ]);
+  const firstBeatSheet = {
+    volumeId: "volume-1",
+    volumeSortOrder: 1,
+    status: "generated",
+    beats: [{
+      key: "end_hook",
+      label: "卷尾钩子",
+      summary: "收束",
+      chapterSpanHint: "1-2章",
+      mustDeliver: ["收束"],
+    }],
+  };
+  let workspace = buildWorkspace([firstVolume], [firstBeatSheet]);
+  const scopes = [];
+  const volumeService = {
+    getVolumes: async () => workspace,
+    generateVolumes: async (_novelId, options) => {
+      scopes.push(options.scope);
+      if (options.scope === "skeleton") {
+        throw new Error("should not create a follow-on volume");
+      }
+      const extra = [
+        createChapter("chapter-3", "volume-1", 3),
+        createChapter("chapter-4", "volume-1", 4),
+        createChapter("chapter-5", "volume-1", 5),
+      ];
+      workspace = buildWorkspace([{
+        ...firstVolume,
+        chapters: [...firstVolume.chapters, ...extra],
+      }], [{
+        ...firstBeatSheet,
+        beats: [{
+          ...firstBeatSheet.beats[0],
+          chapterSpanHint: "1-5章",
+        }],
+      }]);
+      return workspace;
+    },
+    updateVolumesWithOptions: async (_novelId, input) => {
+      workspace = buildWorkspace(input.volumes, input.beatSheets);
+      return workspace;
+    },
+    syncVolumeChaptersWithOptions: async () => {
+      persisted = Math.min(5, workspace.volumes[0].chapters.length);
+    },
+  };
+  const originalCount = prisma.chapter.count;
+  let persisted = 2;
+  prisma.chapter.count = async () => persisted;
+
+  try {
+    const result = await new ChapterRouteWindowService(volumeService).ensureRouteWindow("novel-1", 3, {
+      min: 3,
+      target: 5,
+      completionProfile: {
+        mode: "serial_book",
+        targetChapterCount: 5,
+        maxChapterCount: 5,
+        promiseScope: "first_30_chapters",
+        structure: "serial_staged",
+        endingRequiredBy: 5,
+      },
+    });
+    assert.equal(scopes.includes("skeleton"), false);
+    assert.deepEqual(scopes, ["chapter_list"]);
+    assert.equal(result.extended, true);
+    assert.equal(persisted, 5);
+  } finally {
+    prisma.chapter.count = originalCount;
+  }
+});
+
+test("route window does not extend after the book chapter cap", async () => {
+  const originalCount = prisma.chapter.count;
+  prisma.chapter.count = async () => 1;
+  try {
+    const result = await new ChapterRouteWindowService({
+      getVolumes: async () => {
+        throw new Error("should not load volumes after the cap");
+      },
+    }).ensureRouteWindow("novel-1", 214, {
+      min: 3,
+      target: 5,
+      completionProfile: {
+        mode: "serial_book",
+        targetChapterCount: 213,
+        maxChapterCount: 213,
+        promiseScope: "first_30_chapters",
+        structure: "serial_staged",
+        endingRequiredBy: 213,
+      },
+    });
+    assert.equal(result.extended, false);
+  } finally {
+    prisma.chapter.count = originalCount;
+  }
+});

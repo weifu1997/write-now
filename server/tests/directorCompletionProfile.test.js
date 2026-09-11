@@ -3,6 +3,8 @@ const assert = require("node:assert/strict");
 const {
   buildDirectorCompletionProfile,
   normalizeDirectorCompletionProfile,
+  resolveDirectorMaxChapterCount,
+  resolveDirectorMaxChapterCountFromSources,
 } = require("@write-now/shared/types/directorCompletion");
 const { listRegisteredPromptAssets } = require("../dist/prompting/registry.js");
 
@@ -28,6 +30,18 @@ test("61 chapters keep serial compatibility and legacy payloads normalize determ
   assert.equal(buildDirectorCompletionProfile(150).maxChapterCount, 150);
   assert.equal(normalizeDirectorCompletionProfile(null, 40).maxChapterCount, 45);
   assert.equal(normalizeDirectorCompletionProfile({ targetChapterCount: 61, mode: "compact_book" }).mode, "serial_book");
+});
+
+test("max chapter count prefers completion profile then estimated chapter count", () => {
+  assert.equal(resolveDirectorMaxChapterCount({ targetChapterCount: 213 }), 213);
+  assert.equal(resolveDirectorMaxChapterCount({ targetChapterCount: 40 }), 45);
+  assert.equal(resolveDirectorMaxChapterCountFromSources({
+    estimatedChapterCount: 213,
+  }), 213);
+  assert.equal(resolveDirectorMaxChapterCountFromSources({
+    completionProfile: { maxChapterCount: 213, targetChapterCount: 213 },
+    estimatedChapterCount: 226,
+  }), 213);
 });
 
 test("compact planning and ending audit prompts are registered", () => {

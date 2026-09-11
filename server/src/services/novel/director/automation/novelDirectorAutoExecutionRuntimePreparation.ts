@@ -1,3 +1,4 @@
+import { prisma } from "../../../../db/prisma";
 import type { PipelineJobStatus, VolumePlanDocument } from "@write-now/shared/types/novel";
 import type {
   DirectorAutoExecutionState,
@@ -33,6 +34,13 @@ export async function resolveAutoExecutionRuntimeRangeAndState(
       getVolumes: deps.volumeWorkspaceService
         ? (novelId) => deps.volumeWorkspaceService?.getVolumes(novelId) as Promise<VolumePlanDocument>
         : undefined,
+      getEstimatedChapterCount: async (novelId) => {
+        const novel = await prisma.novel.findUnique({
+          where: { id: novelId },
+          select: { estimatedChapterCount: true },
+        });
+        return novel?.estimatedChapterCount ?? null;
+      },
     },
     existingState: input.existingState,
     pipelineJobId: input.pipelineJobId,

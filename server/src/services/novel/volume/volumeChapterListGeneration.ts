@@ -9,6 +9,7 @@ import { runStructuredPrompt } from "../../../prompting/core/promptRunner";
 import { logMemoryUsage } from "../../../runtime/memoryTelemetry";
 import { createVolumeChapterListPrompt } from "../../../prompting/prompts/novel/volume/chapterList.prompts";
 import { buildVolumeChapterListContextBlocks } from "../../../prompting/prompts/novel/volume/contextBlocks";
+import { resolveDirectorMaxChapterCount } from "@write-now/shared/types/directorCompletion";
 import {
   inferRequiredChapterCountFromBeatSheet,
   resolveTargetChapterCount,
@@ -16,6 +17,7 @@ import {
 } from "./volumeBeatSheetChapterBudget";
 import {
   allocateChapterBudgets,
+  countPlannedChaptersBeforeVolume,
   deriveChapterBudget,
   resolveVolumePlannedChapterBudget,
   GeneratedVolumeChapterBlock,
@@ -138,6 +140,39 @@ function buildBeatGenerationPlans(beatSheet: VolumeBeatSheet): BeatGenerationPla
   });
 }
 
+function capBeatGenerationPlans(params: {
+  beatPlans: BeatGenerationPlan[];
+  chaptersBeforeCurrentVolume: number;
+  maxChapterCount?: number | null;
+}): BeatGenerationPlan[] {
+  if (typeof params.maxChapterCount !== "number" || !Number.isFinite(params.maxChapterCount) || params.maxChapterCount <= 0) {
+    return params.beatPlans;
+  }
+  const remaining = Math.round(params.maxChapterCount) - Math.max(0, params.chaptersBeforeCurrentVolume);
+  if (remaining <= 0) {
+    return [];
+  }
+  const capped: BeatGenerationPlan[] = [];
+  let nextChapterOrder = 1;
+  for (const plan of params.beatPlans) {
+    if (nextChapterOrder > remaining) {
+      break;
+    }
+    const chapterCount = Math.min(plan.chapterCount, remaining - nextChapterOrder + 1);
+    if (chapterCount <= 0) {
+      break;
+    }
+    capped.push({
+      beat: plan.beat,
+      chapterCount,
+      chapterStartOrder: nextChapterOrder,
+      chapterEndOrder: nextChapterOrder + chapterCount - 1,
+    });
+    nextChapterOrder += chapterCount;
+  }
+  return capped;
+}
+
 function resolveFullVolumeResumeState(params: {
   beatPlans: BeatGenerationPlan[];
   existingBeatBlocks: GeneratedVolumeChapterBlock[];
@@ -237,16 +272,24 @@ function assertMergedVolumeChapterList(params: {
   beatSheet: VolumeBeatSheet;
   generationMode: "full_volume" | "single_beat";
   targetBeatKey?: string | null;
+  beatPlans?: BeatGenerationPlan[];
 }): void {
   const sortedChapters = params.volume.chapters
     .slice()
     .sort((left, right) => left.chapterOrder - right.chapterOrder);
+  const expectedByBeatKey = params.beatPlans
+    ? new Map(params.beatPlans.map((plan) => [plan.beat.key, plan.chapterCount]))
+    : null;
 
   for (const beat of params.beatSheet.beats) {
     if (params.generationMode === "single_beat" && beat.key !== params.targetBeatKey) {
       continue;
     }
-    const expectedChapterCount = Math.max(1, getBeatExpectedChapterCount(beat));
+    if (expectedByBeatKey && !expectedByBeatKey.has(beat.key)) {
+      continue;
+    }
+    const expectedChapterCount = expectedByBeatKey?.get(beat.key)
+      ?? Math.max(1, getBeatExpectedChapterCount(beat));
     const matchedChapters = sortedChapters.filter((chapter) => resolveVolumeChapterBeatKey({
       chapter,
       volume: params.volume,
@@ -261,13 +304,21 @@ function assertMergedVolumeChapterList(params: {
 function isMergedVolumeChapterListComplete(params: {
   volume: VolumePlan;
   beatSheet: VolumeBeatSheet;
+  beatPlans?: BeatGenerationPlan[];
 }): boolean {
   const sortedChapters = params.volume.chapters
     .slice()
     .sort((left, right) => left.chapterOrder - right.chapterOrder);
+  const expectedByBeatKey = params.beatPlans
+    ? new Map(params.beatPlans.map((plan) => [plan.beat.key, plan.chapterCount]))
+    : null;
 
   return params.beatSheet.beats.every((beat) => {
-    const expectedChapterCount = Math.max(1, getBeatExpectedChapterCount(beat));
+    if (expectedByBeatKey && !expectedByBeatKey.has(beat.key)) {
+      return true;
+    }
+    const expectedChapterCount = expectedByBeatKey?.get(beat.key)
+      ?? Math.max(1, getBeatExpectedChapterCount(beat));
     const matchedChapterCount = sortedChapters.filter((chapter) => resolveVolumeChapterBeatKey({
       chapter,
       volume: params.volume,
@@ -392,6 +443,8 @@ export async function generateBeatChunkedChapterList(params: {
     existingVolumes: document.volumes,
   });
   const targetIndex = document.volumes.findIndex((volume) => volume.id === targetVolume.id);
+  const chaptersBeforeCurrentVolume = countPlannedChaptersBeforeVolume(document.volumes, targetIndex);
+  const maxChapterCount = resolveDirectorMaxChapterCount(novel.completionProfile);
   const beatSheetRequiredChapterCount = inferRequiredChapterCountFromBeatSheet(targetBeatSheet);
   // 滚动生产期不能用"已有章节数加权"的口径当可信预算，否则在产卷会被自己的节奏板卡死。
   const fallbackTargetChapterCount = resolveVolumePlannedChapterBudget({
@@ -399,18 +452,28 @@ export async function generateBeatChunkedChapterList(params: {
     chapterBudgets,
     targetVolumeIndex: targetIndex,
     volumeCount: document.volumes.length,
+    maxChapterCount,
+    chaptersBeforeCurrentVolume,
   });
   // Legacy or partially generated workspaces may only carry a few seed chapters for the opening beat.
   // Those placeholders should not shrink the trusted chapter budget below the planned volume size.
-  const budgetedTargetChapterCount = Math.max(targetVolume.chapters.length, fallbackTargetChapterCount);
+  const remainingToCap = maxChapterCount == null
+    ? null
+    : Math.round(maxChapterCount) - chaptersBeforeCurrentVolume;
+  const cappedByBookLimit = remainingToCap != null
+    && remainingToCap > 0
+    && remainingToCap < beatSheetRequiredChapterCount;
+  const budgetedTargetChapterCount = cappedByBookLimit && remainingToCap != null
+    ? remainingToCap
+    : Math.max(targetVolume.chapters.length, fallbackTargetChapterCount);
   const resolvedTargetChapterCount = resolveTargetChapterCount({
     budgetedChapterCount: budgetedTargetChapterCount,
-    beatSheetRequiredChapterCount,
+    beatSheetRequiredChapterCount: cappedByBookLimit ? budgetedTargetChapterCount : beatSheetRequiredChapterCount,
   });
-  if (!resolvedTargetChapterCount.beatSheetCountAccepted && beatSheetRequiredChapterCount > 0) {
+  if (!cappedByBookLimit && !resolvedTargetChapterCount.beatSheetCountAccepted && beatSheetRequiredChapterCount > 0) {
     throw new Error("当前卷节奏板的章节跨度异常，建议先重生成节奏板，再继续生成章节标题。");
   }
-  if (resolvedTargetChapterCount.targetChapterCount >= 20) {
+  if (!cappedByBookLimit && resolvedTargetChapterCount.targetChapterCount >= 20) {
     const beatSheetCoverage = validateBeatSheetChapterCoverage({
       beatSheet: targetBeatSheet,
       targetChapterCount: resolvedTargetChapterCount.targetChapterCount,
@@ -421,7 +484,20 @@ export async function generateBeatChunkedChapterList(params: {
   }
 
   const generationMode = options.generationMode ?? "full_volume";
-  const beatPlans = buildBeatGenerationPlans(targetBeatSheet);
+  const beatPlans = capBeatGenerationPlans({
+    beatPlans: buildBeatGenerationPlans(targetBeatSheet),
+    chaptersBeforeCurrentVolume,
+    maxChapterCount,
+  });
+  if (beatPlans.length === 0) {
+    return {
+      mergedDocument: document,
+      mergedWorkspace: {
+        ...workspace,
+        ...document,
+      },
+    };
+  }
   const existingBeatBlocks = buildExistingBeatBlocks({
     volume: targetVolume,
     beatSheet: targetBeatSheet,
@@ -557,10 +633,12 @@ export async function generateBeatChunkedChapterList(params: {
     beatSheet: targetBeatSheet,
     generationMode,
     targetBeatKey: options.targetBeatKey,
+    beatPlans,
   });
   const mergedDocument = isMergedVolumeChapterListComplete({
     volume: rawMergedVolume,
     beatSheet: targetBeatSheet,
+    beatPlans,
   })
     ? setVolumeChapterListPartialStatus(rawMergedDocument, targetVolume.id, false)
     : setVolumeChapterListPartialStatus(rawMergedDocument, targetVolume.id, true);

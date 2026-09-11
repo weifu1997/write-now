@@ -26,6 +26,32 @@ export function buildDirectorCompletionProfile(targetChapterCount: number): Dire
   };
 }
 
+export function resolveDirectorMaxChapterCount(
+  profile: Partial<DirectorCompletionProfile> | null | undefined,
+): number | null {
+  if (typeof profile?.maxChapterCount === "number" && Number.isFinite(profile.maxChapterCount) && profile.maxChapterCount > 0) {
+    return Math.round(profile.maxChapterCount);
+  }
+  if (typeof profile?.targetChapterCount === "number" && Number.isFinite(profile.targetChapterCount) && profile.targetChapterCount > 0) {
+    return buildDirectorCompletionProfile(profile.targetChapterCount).maxChapterCount;
+  }
+  return null;
+}
+
+export function resolveDirectorMaxChapterCountFromSources(input: {
+  completionProfile?: Partial<DirectorCompletionProfile> | null;
+  estimatedChapterCount?: unknown;
+}): number | null {
+  const fromProfile = resolveDirectorMaxChapterCount(input.completionProfile);
+  if (fromProfile != null) {
+    return fromProfile;
+  }
+  if (typeof input.estimatedChapterCount === "number" && Number.isFinite(input.estimatedChapterCount) && input.estimatedChapterCount > 0) {
+    return buildDirectorCompletionProfile(input.estimatedChapterCount).maxChapterCount;
+  }
+  return null;
+}
+
 export function normalizeDirectorCompletionProfile(
   profile: Partial<DirectorCompletionProfile> | null | undefined,
   fallbackTargetChapterCount = 80,

@@ -157,10 +157,15 @@ export function buildDirectorAutoExecutionScopeLabel(
 
 export function resolveDirectorAutoExecutionBookRange(
   chapters: DirectorAutoExecutionChapterRef[],
+  maxChapterCount?: number | null,
 ): DirectorAutoExecutionRange | null {
+  const cap = typeof maxChapterCount === "number" && Number.isFinite(maxChapterCount) && maxChapterCount > 0
+    ? Math.round(maxChapterCount)
+    : null;
   const selected = chapters
     .slice()
     .filter((chapter) => chapter.order >= DIRECTOR_DEFAULT_RANGE_START_ORDER)
+    .filter((chapter) => cap == null || chapter.order <= cap)
     .sort((left, right) => left.order - right.order);
   if (selected.length === 0) {
     return null;
