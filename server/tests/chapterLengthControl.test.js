@@ -96,6 +96,30 @@ test("chapter length control can recover the target budget from the generated pl
   assert.equal(plan.scenes.length, 3);
 });
 
+test("platform length budget keeps fanqie hard max at 2500 even when target is 2000", () => {
+  const { resolveLengthBudgetFromSnapshot } = require("../../shared/dist/types/chapterLengthControl.js");
+  const { FANQIE_LONG_NOVEL_EXPERIENCE } = require("../../shared/dist/types/writingPlatform.js");
+  const budget = resolveLengthBudgetFromSnapshot(2000, {
+    platform: "fanqie_free",
+    label: "番茄免费网文",
+    narrativeForm: "long_novel",
+    profileVersion: 2,
+    source: "official",
+    guidance: {
+      positioning: "p",
+      planning: "plan",
+      drafting: "draft",
+      auditing: "audit",
+      repairing: "repair",
+    },
+    experience: FANQIE_LONG_NOVEL_EXPERIENCE,
+  });
+  assert.equal(budget.targetWordCount, 2000);
+  assert.equal(budget.softMinWordCount, 1800);
+  assert.equal(budget.softMaxWordCount, 2200);
+  assert.equal(budget.hardMaxWordCount, 2500);
+});
+
 test("chapter length control serializer preserves canonical scene plan shape", () => {
   const budget = resolveLengthBudgetContract(3000);
   const serialized = serializeChapterScenePlan({

@@ -137,7 +137,7 @@ function createGraph(saved) {
   });
 }
 
-function stubPromptRunner({ draft, textOutputs }) {
+function stubPromptRunner({ draft, textOutputs, novelRow = null }) {
   const runTextCalls = [];
   const originalStreamTextPrompt = promptRunner.streamTextPrompt;
   const originalRunTextPrompt = promptRunner.runTextPrompt;
@@ -158,7 +158,7 @@ function stubPromptRunner({ draft, textOutputs }) {
     blocks: input.fallbackBlocks ?? [],
     brokerResolution: { blocks: [], decisions: [] },
   });
-  prisma.novel.findUnique = async () => null;
+  prisma.novel.findUnique = async () => novelRow;
 
   return {
     runTextCalls,
@@ -310,6 +310,60 @@ test("extends condensed draft when compression cuts below soft min", async () =>
     assert.equal(stub.runTextCalls[1].promptInput.mode, "continue");
     assert.equal(stub.runTextCalls[1].promptInput.missingWordGap, 800);
     assert.equal(saved[0].content, `${overCondensed}\n\n${appended}`);
+  } finally {
+    stub.restore();
+  }
+});
+
+test("recondenses after continue when the merged draft exceeds hard max", async () => {
+  const draft = "短".repeat(2000);
+  const appended = "补".repeat(2000);
+  const recompressed = "压".repeat(2800);
+  const saved = [];
+  const graph = createGraph(saved);
+  const stub = stubPromptRunner({ draft, textOutputs: [appended, recompressed] });
+
+  try {
+    await runDraft(graph, buildContextPackage(), draft);
+
+    assert.equal(stub.runTextCalls.length, 2);
+    assert.equal(stub.runTextCalls[0].promptInput.mode, "continue");
+    assert.equal(stub.runTextCalls[1].promptInput.mode, "condense");
+    assert.equal(saved[0].content, recompressed);
+    assert.ok(saved[0].content.replace(/\s+/g, "").length <= HARD_MAX);
+  } finally {
+    stub.restore();
+  }
+});
+
+test("uses book default chapter length when chapter target is missing", async () => {
+  const draft = "正".repeat(3000);
+  const saved = [];
+  const graph = createGraph(saved);
+  const contextPackage = buildContextPackage();
+  contextPackage.chapter.targetWordCount = null;
+  contextPackage.chapterWriteContext.chapterMission.targetWordCount = null;
+  contextPackage.chapterWriteContext.lengthBudget = null;
+  const stub = stubPromptRunner({
+    draft,
+    textOutputs: [],
+    novelRow: { defaultChapterLength: 2800, writingPlatformSnapshotJson: null },
+  });
+
+  try {
+    const { stream, onDone } = await graph.createChapterStream({
+      novelId: "novel-1",
+      novelTitle: "测试小说",
+      chapter: { id: "chapter-1", title: "第一章", order: 1, targetWordCount: null },
+      contextPackage,
+      options: {},
+    });
+    for await (const _chunk of stream) {
+      void _chunk;
+    }
+    await onDone(draft);
+    assert.equal(saved[0].content, draft);
+    assert.equal(stub.runTextCalls.length, 0);
   } finally {
     stub.restore();
   }

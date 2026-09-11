@@ -520,7 +520,7 @@ export function buildWorkflowSeedPayload(
     emotionIntensity: input.emotionIntensity ?? "medium",
     aiFreedom: input.aiFreedom ?? "medium",
     postGenerationStyleReviewEnabled: input.postGenerationStyleReviewEnabled ?? true,
-    defaultChapterLength: input.defaultChapterLength ?? 2800,
+    defaultChapterLength: typeof input.defaultChapterLength === "number" ? input.defaultChapterLength : undefined,
     estimatedChapterCount: input.estimatedChapterCount ?? null,
     projectStatus: input.projectStatus ?? "not_started",
     storylineStatus: input.storylineStatus ?? "not_started",

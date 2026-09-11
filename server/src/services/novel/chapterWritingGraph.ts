@@ -4,7 +4,7 @@ import type {
   GenerationContextPackage,
 } from "@write-now/shared/types/chapterRuntime";
 import type { LengthBudgetContract } from "@write-now/shared/types/chapterLengthControl";
-import { resolveLengthBudgetContract } from "@write-now/shared/types/chapterLengthControl";
+import { resolveLengthBudgetFromSnapshot } from "@write-now/shared/types/chapterLengthControl";
 import type { LLMProvider } from "@write-now/shared/types/llm";
 import type { TaskType } from "../../llm/modelRouter";
 import { createContextBlock } from "../../prompting/core/contextBudget";
@@ -12,7 +12,6 @@ import { runTextPrompt, streamTextPrompt } from "../../prompting/core/promptRunn
 import { resolvePromptContextBlocksForAsset } from "../../prompting/context/promptContextResolution";
 import {
   buildChapterWriterContextBlocks,
-  resolveTargetWordRange,
   sanitizeWriterContextBlocks,
 } from "../../prompting/prompts/novel/chapterLayeredContext";
 import { chapterWriterPrompt } from "../../prompting/prompts/novel/chapterWriter.prompts";
@@ -20,21 +19,73 @@ import { NOVEL_PROMPT_BUDGETS } from "../../prompting/prompts/novel/promptBudget
 import { NovelContinuationService } from "./NovelContinuationService";
 import { assertChapterContentNotEmpty } from "./runtime/chapterEmptyContentError";
 import { prisma } from "../../db/prisma";
-import type { WritingPlatformSnapshot } from "@write-now/shared/types/writingPlatform";
+import {
+  compactOpeningExplainContext,
+  formatOpeningPlatformConstraintText,
+  formatWritingPlatformDraftingText,
+  parseWritingPlatformSnapshotJson,
+  resolveChapterTargetWordCount,
+  type WritingPlatformSnapshot,
+} from "@write-now/shared/types/writingPlatform";
 
-async function loadWritingPlatformBlock(novelId: string) {
-  const novel = await prisma.novel.findUnique({
-    where: { id: novelId },
-    select: { writingPlatformSnapshotJson: true },
-  });
-  let content = "沿用通用中文商业网文写法，保持情节推进、人物主动、因果清晰和章节回报。";
-  if (novel?.writingPlatformSnapshotJson) {
-    try {
-      const snapshot = JSON.parse(novel.writingPlatformSnapshotJson) as WritingPlatformSnapshot;
-      content = `${snapshot.label}（配置版本 ${snapshot.profileVersion}）：${snapshot.guidance.drafting}`;
-    } catch { /* 旧数据继续使用通用合同。 */ }
+interface LoadedPlatformContext {
+  snapshot: WritingPlatformSnapshot | null;
+  defaultChapterLength: number | null;
+}
+
+const platformContextCache = new Map<string, Promise<LoadedPlatformContext>>();
+
+function loadPlatformContext(novelId: string): Promise<LoadedPlatformContext> {
+  const cached = platformContextCache.get(novelId);
+  if (cached) {
+    return cached;
   }
-  return createContextBlock({ id: "writing_platform", group: "writing_platform", priority: 105, required: true, content });
+  const pending = prisma.novel.findUnique({
+    where: { id: novelId },
+    select: {
+      writingPlatformSnapshotJson: true,
+      defaultChapterLength: true,
+    },
+  }).then((novel) => ({
+    snapshot: parseWritingPlatformSnapshotJson(novel?.writingPlatformSnapshotJson),
+    defaultChapterLength: novel?.defaultChapterLength ?? null,
+  })).finally(() => {
+    platformContextCache.delete(novelId);
+  });
+  platformContextCache.set(novelId, pending);
+  return pending;
+}
+
+function compactOpeningRagContext(
+  ragContext: string,
+  chapterOrder: number,
+  snapshot: WritingPlatformSnapshot | null,
+): string {
+  return compactOpeningExplainContext(ragContext, chapterOrder, snapshot);
+}
+
+async function loadWritingPlatformBlocks(novelId: string, chapterOrder: number) {
+  const { snapshot } = await loadPlatformContext(novelId);
+  const drafting = formatWritingPlatformDraftingText(snapshot);
+  const opening = formatOpeningPlatformConstraintText({ snapshot, chapterOrder });
+  return [
+    createContextBlock({
+      id: "writing_platform",
+      group: "writing_platform",
+      priority: 105,
+      required: true,
+      content: drafting,
+    }),
+    opening
+      ? createContextBlock({
+        id: "opening_platform_contract",
+        group: "opening_constraints",
+        priority: 103,
+        required: true,
+        content: opening,
+      })
+      : null,
+  ].filter((block): block is ReturnType<typeof createContextBlock> => Boolean(block));
 }
 
 export interface ChapterGraphLLMOptions {
@@ -93,23 +144,23 @@ function countChapterCharacters(content: string): number {
   return content.replace(/\s+/g, "").trim().length;
 }
 
-function buildLengthInstruction(targetWordCount?: number | null): {
-  targetWordCount: number | null;
-  minWordCount: number | null;
-  maxWordCount: number | null;
-  instruction: string;
-} {
-  const range = resolveTargetWordRange(targetWordCount);
-  if (range.targetWordCount == null) {
-    return {
-      ...range,
-      instruction: "Write a complete readable chapter with enough concrete events and scene substance; do not end abruptly or obviously too short.",
-    };
-  }
-  return {
-    ...range,
-    instruction: `Write about ${range.targetWordCount} Chinese characters. Acceptable range: ${range.minWordCount}-${range.maxWordCount}. Do not end clearly below the minimum.`,
-  };
+function resolveChapterLengthBudget(input: {
+  writeContext?: GenerationContextPackage["chapterWriteContext"];
+  contextPackage: GenerationContextPackage;
+  chapter: ChapterRef;
+  snapshot: WritingPlatformSnapshot | null;
+  defaultChapterLength: number | null;
+}): LengthBudgetContract | null {
+  const targetWordCount = resolveChapterTargetWordCount({
+    chapterTargetWordCount: input.writeContext?.chapterMission.targetWordCount
+      ?? input.contextPackage.chapter.targetWordCount
+      ?? input.chapter.targetWordCount
+      ?? null,
+    defaultChapterLength: input.defaultChapterLength,
+    snapshot: input.snapshot,
+    narrativeForm: "long_novel",
+  });
+  return resolveLengthBudgetFromSnapshot(targetWordCount, input.snapshot);
 }
 
 function buildDraftContinuationBlock(content: string, targetWordCount: number, minWordCount: number): string {
@@ -182,16 +233,18 @@ export class ChapterWritingGraph {
     content: string;
     contextPackage: GenerationContextPackage;
     options: ChapterGraphLLMOptions;
+    snapshot: WritingPlatformSnapshot | null;
+    defaultChapterLength: number | null;
   }): Promise<string> {
     const writeContext = input.contextPackage.chapterWriteContext;
-    const lengthGoal = buildLengthInstruction(
-      writeContext?.chapterMission.targetWordCount
-      ?? input.contextPackage.chapter.targetWordCount
-      ?? input.chapter.targetWordCount
-      ?? null,
-    );
-    const budget = resolveLengthBudgetContract(lengthGoal.targetWordCount);
-    if (!writeContext || !budget || lengthGoal.minWordCount == null) {
+    const budget = resolveChapterLengthBudget({
+      writeContext,
+      contextPackage: input.contextPackage,
+      chapter: input.chapter,
+      snapshot: input.snapshot,
+      defaultChapterLength: input.defaultChapterLength,
+    });
+    if (!writeContext || !budget) {
       return input.content;
     }
 
@@ -200,7 +253,10 @@ export class ChapterWritingGraph {
       return input.content;
     }
 
-    const builtBlocks = [await loadWritingPlatformBlock(input.novelId), ...buildChapterWriterContextBlocks(writeContext)];
+    const builtBlocks = [
+      ...await loadWritingPlatformBlocks(input.novelId, input.chapter.order),
+      ...buildChapterWriterContextBlocks(writeContext),
+    ];
     const sanitized = sanitizeWriterContextBlocks([
       createContextBlock({
         id: "current_draft_full",
@@ -238,7 +294,7 @@ export class ChapterWritingGraph {
         metadata: {
           chapterWriteContext: writeContext,
           chapterBlockMode: "full",
-          ragContext: input.contextPackage.ragContext,
+          ragContext: compactOpeningRagContext(input.contextPackage.ragContext, input.chapter.order, input.snapshot),
           extraContextBlocks: sanitized.allowedBlocks.filter((block) => block.group === "current_draft_full"),
         },
       },
@@ -253,8 +309,8 @@ export class ChapterWritingGraph {
         chapterTitle: input.chapter.title,
         mode: "condense",
         targetWordCount: budget.targetWordCount,
-        minWordCount: lengthGoal.minWordCount,
-        maxWordCount: lengthGoal.maxWordCount,
+        minWordCount: budget.softMinWordCount,
+        maxWordCount: budget.softMaxWordCount,
       },
       contextBlocks: resolvedContext.blocks,
       options: {
@@ -304,10 +360,26 @@ export class ChapterWritingGraph {
     contextPackage: GenerationContextPackage;
     options: ChapterGraphLLMOptions;
   }): Promise<string> {
-    const condensed = await this.condenseOverLength(input);
-    return this.enforceTargetLength({
+    const platform = await loadPlatformContext(input.novelId);
+    const condensed = await this.condenseOverLength({
+      ...input,
+      snapshot: platform.snapshot,
+      defaultChapterLength: platform.defaultChapterLength,
+    });
+    const extended = await this.enforceTargetLength({
       ...input,
       content: condensed,
+      snapshot: platform.snapshot,
+      defaultChapterLength: platform.defaultChapterLength,
+    });
+    if (extended === condensed) {
+      return extended;
+    }
+    return this.condenseOverLength({
+      ...input,
+      content: extended,
+      snapshot: platform.snapshot,
+      defaultChapterLength: platform.defaultChapterLength,
     });
   }
 
@@ -318,28 +390,34 @@ export class ChapterWritingGraph {
     content: string;
     contextPackage: GenerationContextPackage;
     options: ChapterGraphLLMOptions;
+    snapshot: WritingPlatformSnapshot | null;
+    defaultChapterLength: number | null;
   }): Promise<string> {
     const writeContext = input.contextPackage.chapterWriteContext;
-    const lengthGoal = buildLengthInstruction(
-      writeContext?.chapterMission.targetWordCount
-      ?? input.contextPackage.chapter.targetWordCount
-      ?? input.chapter.targetWordCount
-      ?? null,
-    );
-    if (!writeContext || lengthGoal.targetWordCount == null || lengthGoal.minWordCount == null) {
+    const budget = resolveChapterLengthBudget({
+      writeContext,
+      contextPackage: input.contextPackage,
+      chapter: input.chapter,
+      snapshot: input.snapshot,
+      defaultChapterLength: input.defaultChapterLength,
+    });
+    if (!writeContext || !budget) {
       return input.content;
     }
 
     const currentLength = countChapterCharacters(input.content);
-    if (currentLength >= lengthGoal.minWordCount) {
+    if (currentLength >= budget.softMinWordCount) {
       return input.content;
     }
 
     const missingWordGap = Math.max(
-      lengthGoal.targetWordCount - currentLength,
-      lengthGoal.minWordCount - currentLength,
+      budget.targetWordCount - currentLength,
+      budget.softMinWordCount - currentLength,
     );
-    const builtBlocks = [await loadWritingPlatformBlock(input.novelId), ...buildChapterWriterContextBlocks(writeContext)];
+    const builtBlocks = [
+      ...await loadWritingPlatformBlocks(input.novelId, input.chapter.order),
+      ...buildChapterWriterContextBlocks(writeContext),
+    ];
     const sanitized = sanitizeWriterContextBlocks([
       createContextBlock({
         id: "current_draft_excerpt",
@@ -348,8 +426,8 @@ export class ChapterWritingGraph {
         required: true,
         content: buildDraftContinuationBlock(
           input.content,
-          lengthGoal.targetWordCount,
-          lengthGoal.minWordCount,
+          budget.targetWordCount,
+          budget.softMinWordCount,
         ),
       }),
       ...builtBlocks,
@@ -369,7 +447,7 @@ export class ChapterWritingGraph {
         metadata: {
           chapterWriteContext: writeContext,
           chapterBlockMode: "full",
-          ragContext: input.contextPackage.ragContext,
+          ragContext: compactOpeningRagContext(input.contextPackage.ragContext, input.chapter.order, input.snapshot),
           extraContextBlocks: sanitized.allowedBlocks.filter((block) => block.group === "current_draft_excerpt"),
         },
       },
@@ -383,9 +461,9 @@ export class ChapterWritingGraph {
         chapterOrder: input.chapter.order,
         chapterTitle: input.chapter.title,
         mode: "continue",
-        targetWordCount: lengthGoal.targetWordCount,
-        minWordCount: lengthGoal.minWordCount,
-        maxWordCount: lengthGoal.maxWordCount,
+        targetWordCount: budget.targetWordCount,
+        minWordCount: budget.softMinWordCount,
+        maxWordCount: budget.softMaxWordCount,
         missingWordGap,
       },
       contextBlocks: resolvedContext.blocks,
@@ -411,8 +489,8 @@ export class ChapterWritingGraph {
       chapterOrder: input.chapter.order,
       beforeLength: currentLength,
       afterLength: countChapterCharacters(merged),
-      targetWordCount: lengthGoal.targetWordCount,
-      minWordCount: lengthGoal.minWordCount,
+      targetWordCount: budget.targetWordCount,
+      minWordCount: budget.softMinWordCount,
     });
     return merged;
   }
@@ -433,8 +511,18 @@ export class ChapterWritingGraph {
       throw new Error("Chapter runtime context is required before chapter generation.");
     }
     const contextPackage = input.contextPackage;
-    const targetRange = resolveTargetWordRange(chapterWriteContext.chapterMission.targetWordCount);
-    const builtBlocks = [await loadWritingPlatformBlock(input.novelId), ...buildChapterWriterContextBlocks(chapterWriteContext)];
+    const platform = await loadPlatformContext(input.novelId);
+    const budget = resolveChapterLengthBudget({
+      writeContext: chapterWriteContext,
+      contextPackage,
+      chapter: input.chapter,
+      snapshot: platform.snapshot,
+      defaultChapterLength: platform.defaultChapterLength,
+    });
+    const builtBlocks = [
+      ...await loadWritingPlatformBlocks(input.novelId, input.chapter.order),
+      ...buildChapterWriterContextBlocks(chapterWriteContext),
+    ];
     const sanitized = sanitizeWriterContextBlocks(builtBlocks);
     if (sanitized.removedBlockIds.length > 0) {
       this.deps.logWarn("Writer context blocks removed by guard", {
@@ -451,7 +539,7 @@ export class ChapterWritingGraph {
         metadata: {
           chapterWriteContext,
           chapterBlockMode: "full",
-          ragContext: contextPackage.ragContext,
+          ragContext: compactOpeningRagContext(contextPackage.ragContext, input.chapter.order, platform.snapshot),
         },
       },
       fallbackBlocks: sanitized.allowedBlocks,
@@ -464,9 +552,9 @@ export class ChapterWritingGraph {
         chapterOrder: input.chapter.order,
         chapterTitle: input.chapter.title,
         mode: "draft",
-        targetWordCount: chapterWriteContext.chapterMission.targetWordCount ?? null,
-        minWordCount: targetRange.minWordCount,
-        maxWordCount: targetRange.maxWordCount,
+        targetWordCount: budget?.targetWordCount ?? null,
+        minWordCount: budget?.softMinWordCount ?? null,
+        maxWordCount: budget?.softMaxWordCount ?? null,
       },
       contextBlocks: resolvedContext.blocks,
       options: {

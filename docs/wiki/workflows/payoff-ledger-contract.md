@@ -12,9 +12,11 @@ Book Contract 的 `chapter3Payoff / chapter10Payoff / chapter30Payoff` 是 Payof
 
 | refId | 目标窗口 |
 | --- | --- |
-| `book_contract.chapter3Payoff` | 1–3 章 |
-| `book_contract.chapter10Payoff` | 4–10 章 |
-| `book_contract.chapter30Payoff` | 11–30 章 |
+| `book_contract.chapter3Payoff` | 抓手窗：默认 1–3 章；番茄新合同仍为 1–3 章 |
+| `book_contract.chapter10Payoff` | 第一阶段：默认 4–10 章；番茄新合同为 4–8 章 |
+| `book_contract.chapter30Payoff` | 开篇弧：默认 11–30 章；番茄新合同为 9–14 章 |
+
+字段名保持 `chapter3Payoff` / `chapter10Payoff` / `chapter30Payoff`，不改数据库列。窗口数字按作品快照的 `earlyPayoffWindows` 投影。旧快照没有该字段时保持 3 / 10 / 30，避免把已有中段承诺标成逾期。
 
 固定窗口是对 Book Contract 结构化字段的确定性投影。语义去重、账项合并、当前状态和兑现证据判断仍由注册 Prompt 的结构化 AI 输出负责。
 

@@ -32,6 +32,7 @@ import { getDirectorConfirmNovelCreateStepModule } from "../workflowStepRuntime/
 import { runStructuredPrompt } from "../../../../prompting/core/promptRunner";
 import { writingPlatformRecommendationPrompt } from "../../../../prompting/prompts/novel/writingPlatformRecommendation.prompts";
 import { writingPlatformProfileService } from "../../../../modules/novel/writing-platform";
+import { resolveDefaultChapterLength } from "@write-now/shared/types/writingPlatform";
 import { prisma } from "../../../../db/prisma";
 import { directorIssuePolicyService } from "../issues/DirectorIssuePolicyService";
 import { novelCreateResourceRecommendationService } from "../../NovelCreateResourceRecommendationService";
@@ -214,6 +215,12 @@ export class NovelDirectorConfirmRuntime {
             },
             })).output.platform;
         const platformSnapshot = await writingPlatformProfileService.snapshot(selectedPlatform, "long_novel");
+        const resolvedChapterLength = resolveDefaultChapterLength({
+          userValue: resolvedDirectorInput.defaultChapterLength,
+          platform: selectedPlatform,
+          narrativeForm: "long_novel",
+          snapshot: platformSnapshot,
+        });
 
         const novelCreateModule = getDirectorConfirmNovelCreateStepModule();
         const createdNovel = await this.deps.runtimeOrchestrator.runStepModule({
@@ -247,7 +254,7 @@ export class NovelDirectorConfirmRuntime {
               emotionIntensity: resolvedInput.emotionIntensity,
               aiFreedom: resolvedInput.aiFreedom,
               postGenerationStyleReviewEnabled: resolvedInput.postGenerationStyleReviewEnabled,
-              defaultChapterLength: resolvedInput.defaultChapterLength,
+              defaultChapterLength: resolvedChapterLength.value,
               estimatedChapterCount: resolvedInput.estimatedChapterCount ?? bookSpec.targetChapterCount,
               projectStatus: resolvedInput.projectStatus,
               storylineStatus: resolvedInput.storylineStatus,

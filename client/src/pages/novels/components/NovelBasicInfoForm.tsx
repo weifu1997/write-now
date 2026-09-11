@@ -27,6 +27,7 @@ import BookPositioningStudio from "./basicInfoForm/BookPositioningStudio";
 import CollapsibleSummary from "./CollapsibleSummary";
 import { ContinuationSourceSection } from "./basicInfoForm/ContinuationSourceSection";
 import SelectControl from "@/components/common/SelectControl";
+import { resolveOfficialWritingPlatformExperience } from "@write-now/shared/types/writingPlatform";
 
 interface WorldOption {
   id: string;
@@ -49,6 +50,24 @@ interface StoryModeOption {
     coreDrive: string;
     readerReward: string;
   };
+}
+
+function resolveDefaultChapterLengthHint(basicForm: NovelBasicFormState): string {
+  const platform = basicForm.writingPlatformPreference;
+  if (platform === "ai_recommend") {
+    return "未手填时会跟目标平台走。番茄免费约 2000 字，起点和晋江约 2800 字。";
+  }
+  const experience = platform === "zhihu_story"
+    ? null
+    : resolveOfficialWritingPlatformExperience(platform, "long_novel");
+  const recommended = experience?.recommendedChapterWordCount;
+  if (!recommended) {
+    return "当前平台不使用长篇单章字数合同，可按短篇阅读节奏自行设定。";
+  }
+  if (basicForm.defaultChapterLength !== recommended) {
+    return `当前填写 ${basicForm.defaultChapterLength} 字，和 ${recommended} 字的平台建议不同；保存后仍按你填的值规划，后续章节也可单独调整。`;
+  }
+  return `当前按 ${recommended} 字的平台建议规划，后续仍可按章节单独调整。`;
 }
 
 interface NovelBasicInfoFormProps {
@@ -181,7 +200,7 @@ export default function NovelBasicInfoForm(props: NovelBasicInfoFormProps) {
               value={basicForm.defaultChapterLength}
               onChange={(event) => onFormChange({ defaultChapterLength: Number(event.target.value || 0) || 2800 })}
             />
-            <div className="text-xs text-muted-foreground">推荐先设为 2500-3500，后续仍可按章节单独调整。</div>
+            <div className="text-xs text-muted-foreground">{resolveDefaultChapterLengthHint(basicForm)}</div>
           </div>
 
           <div className="space-y-2">

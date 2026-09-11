@@ -21,6 +21,7 @@ import {
 } from "./payoffLedgerChapterRefs";
 import { resolveSupersededBookContractLedgerKeys } from "./domain/payoffLedgerSourceLifecycle";
 import { buildBookContractPayoffSources } from "./sources/bookContractPayoffSources";
+import { parseWritingPlatformSnapshotJson } from "@write-now/shared/types/writingPlatform";
 
 interface PayoffLedgerSyncOptions {
   provider?: LLMProvider;
@@ -138,6 +139,7 @@ export class PayoffLedgerSyncService {
         select: {
           id: true,
           title: true,
+          writingPlatformSnapshotJson: true,
           storyMacroPlan: {
             select: {
               decompositionJson: true,
@@ -282,7 +284,10 @@ export class PayoffLedgerSyncService {
       latestSnapshotId: snapshot?.id ?? null,
       promptInput: {
         novelTitle: novel.title,
-        bookContractPayoffs: buildBookContractPayoffSources(novel.bookContract),
+        bookContractPayoffs: buildBookContractPayoffSources(
+          novel.bookContract,
+          parseWritingPlatformSnapshotJson(novel.writingPlatformSnapshotJson),
+        ),
         activeVolumeSummary,
         latestChapterContext,
         majorPayoffsText: formatMajorPayoffs(novel.storyMacroPlan?.decompositionJson),

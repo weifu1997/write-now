@@ -111,6 +111,7 @@ export class WritingPlatformProfileService {
     const resolved = await this.resolve(platform);
     const guidance = resolved.profile.guidance[narrativeForm];
     if (!guidance) throw new Error("平台写法缺少当前作品规模的配置。");
+    const experience = resolved.profile.experience?.[narrativeForm];
     return {
       platform,
       label: resolved.profile.label,
@@ -118,6 +119,7 @@ export class WritingPlatformProfileService {
       profileVersion: resolved.version,
       source: resolved.source,
       guidance,
+      ...(experience ? { experience } : {}),
     };
   }
 }

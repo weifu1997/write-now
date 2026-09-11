@@ -9,6 +9,7 @@ import {
   normalizeChapterScenePlan,
   serializeChapterScenePlan,
 } from "@write-now/shared/types/chapterLengthControl";
+import { resolveChapterTargetWordCount, parseWritingPlatformSnapshotJson } from "@write-now/shared/types/writingPlatform";
 import { runStructuredPrompt } from "../../../../prompting/core/promptRunner";
 import { volumeChapterExecutionContractPrompt } from "../../../../prompting/prompts/novel/volume/chapterDetail.prompts";
 import { buildVolumeChapterDetailContextBlocks } from "../../../../prompting/prompts/novel/volume/contextBlocks";
@@ -137,7 +138,13 @@ export async function generateChapterTaskSheetDetail(params: {
       nextChapterEntryState: existingChapter.nextChapterEntryState?.trim() || existingChapter.endingState?.trim() || "下一章承接本章结果继续推进。",
       conflictLevel: existingChapter.conflictLevel,
       revealLevel: existingChapter.revealLevel ?? 2,
-      targetWordCount: existingChapter.targetWordCount ?? 2200,
+      targetWordCount: resolveChapterTargetWordCount({
+        chapterTargetWordCount: existingChapter.targetWordCount,
+        defaultChapterLength: params.promptInput.novel.defaultChapterLength,
+        snapshot: parseWritingPlatformSnapshotJson(params.promptInput.novel.writingPlatformSnapshotJson),
+        platform: params.promptInput.novel.writingPlatform as "fanqie_free" | "qidian_male" | "jinjiang_female" | "zhihu_story" | null,
+        narrativeForm: "long_novel",
+      }) ?? 2000,
       mustAvoid: existingChapter.mustAvoid?.trim() || "避免偏离本章任务单和卷节奏。",
       payoffRefs: existingChapter.payoffRefs,
       taskSheet: existingChapter.taskSheet?.trim() ?? "",

@@ -15,7 +15,10 @@ import {
 } from "../../modules/novel/short-story/application/shortStoryPromptContext";
 import type { CreationIntentInterpretation, ShortStoryPlanContract } from "@write-now/shared/types/creationStudio";
 import { createContextBlock } from "../core/contextBudget";
-import type { WritingPlatformSnapshot } from "@write-now/shared/types/writingPlatform";
+import {
+  formatWritingPlatformDraftingText,
+  parseWritingPlatformSnapshotJson,
+} from "@write-now/shared/types/writingPlatform";
 
 type UnknownPromptAsset = PromptAsset<unknown, unknown, unknown>;
 export type PromptWorkbenchPreviewDb = Pick<PrismaClient, "novel" | "chapter">;
@@ -218,11 +221,7 @@ export async function prepareWorkbenchPreviewExecutionContext(input: {
           priority: 105,
           required: true,
           content: (() => {
-            if (!novel.writingPlatformSnapshotJson) return "沿用通用中文商业网文写法。";
-            try {
-              const snapshot = JSON.parse(novel.writingPlatformSnapshotJson) as WritingPlatformSnapshot;
-              return `${snapshot.label}（配置版本 ${snapshot.profileVersion}）：${snapshot.guidance.drafting}`;
-            } catch { return "沿用通用中文商业网文写法。"; }
+            return formatWritingPlatformDraftingText(parseWritingPlatformSnapshotJson(novel.writingPlatformSnapshotJson));
           })(),
         })],
       },

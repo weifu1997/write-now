@@ -1,3 +1,10 @@
+import {
+  LEGACY_EARLY_PAYOFF_WINDOWS,
+  hydrateWritingPlatformSnapshot,
+  type WritingPlatformEarlyPayoffWindows,
+  type WritingPlatformSnapshot,
+} from "@write-now/shared/types/writingPlatform";
+
 export interface BookContractPayoffValues {
   chapter3Payoff?: string | null;
   chapter10Payoff?: string | null;
@@ -12,29 +19,38 @@ export interface BookContractPayoffSource {
   targetEndChapterOrder: number;
 }
 
-const BOOK_CONTRACT_PAYOFF_WINDOWS = [
-  {
-    field: "chapter3Payoff",
-    refId: "book_contract.chapter3Payoff",
-    refLabel: "Book Contract 第 3 章阶段回报",
-    targetStartChapterOrder: 1,
-    targetEndChapterOrder: 3,
-  },
-  {
-    field: "chapter10Payoff",
-    refId: "book_contract.chapter10Payoff",
-    refLabel: "Book Contract 第 10 章阶段回报",
-    targetStartChapterOrder: 4,
-    targetEndChapterOrder: 10,
-  },
-  {
-    field: "chapter30Payoff",
-    refId: "book_contract.chapter30Payoff",
-    refLabel: "Book Contract 第 30 章阶段回报",
-    targetStartChapterOrder: 11,
-    targetEndChapterOrder: 30,
-  },
-] as const;
+export function resolveBookContractPayoffWindows(
+  snapshot?: WritingPlatformSnapshot | null,
+): WritingPlatformEarlyPayoffWindows {
+  const hydrated = hydrateWritingPlatformSnapshot(snapshot);
+  return hydrated?.experience?.earlyPayoffWindows ?? LEGACY_EARLY_PAYOFF_WINDOWS;
+}
+
+function buildPayoffWindowDefs(windows: WritingPlatformEarlyPayoffWindows) {
+  return [
+    {
+      field: "chapter3Payoff" as const,
+      refId: "book_contract.chapter3Payoff",
+      refLabel: "Book Contract 第 3 章阶段回报",
+      targetStartChapterOrder: 1,
+      targetEndChapterOrder: windows.hookByChapter,
+    },
+    {
+      field: "chapter10Payoff" as const,
+      refId: "book_contract.chapter10Payoff",
+      refLabel: "Book Contract 第 10 章阶段回报",
+      targetStartChapterOrder: windows.hookByChapter + 1,
+      targetEndChapterOrder: windows.firstStageByChapter,
+    },
+    {
+      field: "chapter30Payoff" as const,
+      refId: "book_contract.chapter30Payoff",
+      refLabel: "Book Contract 第 30 章阶段回报",
+      targetStartChapterOrder: windows.firstStageByChapter + 1,
+      targetEndChapterOrder: windows.openingArcByChapter,
+    },
+  ];
+}
 
 function normalizePayoff(value: string | null | undefined): string {
   return value?.replace(/\s+/g, " ").trim() ?? "";
@@ -42,11 +58,12 @@ function normalizePayoff(value: string | null | undefined): string {
 
 export function buildBookContractPayoffSources(
   values: BookContractPayoffValues | null | undefined,
+  snapshot?: WritingPlatformSnapshot | null,
 ): BookContractPayoffSource[] {
   if (!values) {
     return [];
   }
-  return BOOK_CONTRACT_PAYOFF_WINDOWS.flatMap((window) => {
+  return buildPayoffWindowDefs(resolveBookContractPayoffWindows(snapshot)).flatMap((window) => {
     const payoff = normalizePayoff(values[window.field]);
     return payoff
       ? [{
@@ -67,7 +84,7 @@ export function hasBookContractPayoffChanges(
   if (!previous) {
     return buildBookContractPayoffSources(next).length > 0;
   }
-  return BOOK_CONTRACT_PAYOFF_WINDOWS.some((window) => (
-    normalizePayoff(previous[window.field]) !== normalizePayoff(next[window.field])
+  return (["chapter3Payoff", "chapter10Payoff", "chapter30Payoff"] as const).some((field) => (
+    normalizePayoff(previous[field]) !== normalizePayoff(next[field])
   ));
 }

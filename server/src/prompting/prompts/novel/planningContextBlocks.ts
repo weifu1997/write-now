@@ -7,6 +7,10 @@ import type { StoryMacroPlan } from "@write-now/shared/types/storyMacro";
 import { createContextBlock } from "../../core/contextBudget";
 import type { PromptContextBlock } from "../../core/promptTypes";
 import { buildDirectorCompletionProfile } from "@write-now/shared/types/directorCompletion";
+import {
+  formatWritingPlatformPlanningText,
+  resolveOfficialWritingPlatformExperience,
+} from "@write-now/shared/types/writingPlatform";
 
 function compactText(value: string | null | undefined, fallback = "none"): string {
   return value?.replace(/\s+/g, " ").trim() || fallback;
@@ -257,7 +261,39 @@ export function buildDirectorBookContractContextBlocks(input: {
       priority: 92,
       content: `Story macro summary:\n${formatStoryMacroSummary(input.storyMacroPlan)}`,
     }),
+    createContextBlock({
+      id: "writing_platform",
+      group: "writing_platform",
+      priority: 102,
+      required: true,
+      content: buildDirectorPlatformPlanningText(input.context),
+    }),
   ].filter((block) => block.content.trim().length > 0);
+}
+
+function buildDirectorPlatformPlanningText(context: DirectorProjectContextInput): string {
+  const platform = context.writingPlatformPreference && context.writingPlatformPreference !== "ai_recommend"
+    ? context.writingPlatformPreference
+    : null;
+  if (!platform) {
+    return "沿用通用中文商业网文写法。开书主矛盾必须落在书级早期兑现窗内。";
+  }
+  const experience = resolveOfficialWritingPlatformExperience(platform, "long_novel");
+  return formatWritingPlatformPlanningText({
+    platform,
+    label: platform,
+    narrativeForm: "long_novel",
+    profileVersion: 0,
+    source: "official",
+    guidance: {
+      positioning: "",
+      planning: "开书主矛盾必须落在开篇弧内，不得把开局核心对赌拖到开篇弧之后。",
+      drafting: "",
+      auditing: "",
+      repairing: "",
+    },
+    experience: experience ?? undefined,
+  });
 }
 
 export function buildStoryMacroDecompositionContextBlocks(input: {

@@ -59,6 +59,9 @@ export interface VolumeGenerationNovel {
   first30ChapterPromise: string | null;
   commercialTagsJson: string | null;
   estimatedChapterCount: number | null;
+  defaultChapterLength?: number | null;
+  writingPlatform?: string | null;
+  writingPlatformSnapshotJson?: string | null;
   completionProfile?: DirectorCompletionProfile;
   narrativePov: string | null;
   pacePreference: string | null;

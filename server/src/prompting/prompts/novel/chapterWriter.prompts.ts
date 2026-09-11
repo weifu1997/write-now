@@ -160,7 +160,7 @@ export const chapterWriterPrompt: PromptAsset<ChapterWriterPromptInput, string, 
       key: "writer.wordCountHint",
       label: "全局默认字数提示",
       description: "当章节任务未指定字数时，用作兜底提示（仅描述性文字，不强制限制）。",
-      default: "3000 字左右",
+      default: "按平台推荐章长",
       patternHint: "数字 + 单位（如 2000 字、5000 字左右）",
       maxLength: 30,
     },
@@ -192,7 +192,7 @@ export const chapterWriterPrompt: PromptAsset<ChapterWriterPromptInput, string, 
     const antiClicherEnabled = slots?.enabled("writer.antiCliché") ?? false;
     const antiClicherCopy = slots?.text("writer.antiCliché")
       ?? "避免以下网文套路：秘境/新副本突然出现打断情节、角色当场进行长串系统介绍、主角出场必打脸、每章结尾靠「突破了」作为唯一高潮。";
-    const wordCountHint = slots?.token("writer.wordCountHint") ?? "3000 字左右";
+    const wordCountHint = slots?.token("writer.wordCountHint") ?? "按平台推荐章长";
 
     const hasTarget = typeof input.targetWordCount === "number" && input.targetWordCount > 0;
     const lengthBlock = hasTarget

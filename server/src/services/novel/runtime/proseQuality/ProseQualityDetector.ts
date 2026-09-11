@@ -13,7 +13,9 @@ export type ProseQualityIssueCode =
   | "prose_ai_self_reference"
   | "prose_placeholder_leak"
   | "prose_engineering_term_leak"
-  | "prose_dialogue_sparse";
+  | "prose_dialogue_sparse"
+  | "prose_template_expression"
+  | "prose_voice_contrast";
 
 export interface ProseQualityFinding {
   code: ProseQualityIssueCode;
@@ -52,6 +54,8 @@ const AI_SELF_REFERENCE_PATTERN = /作为(?:一名|一个)?(?:AI|人工智能|�
 const PLACEHOLDER_PATTERN = /TODO|TBD|待补充|此处省略|省略若干|略写|占位|PLACEHOLDER|\{\{[^}]{0,80}\}\}|\[[^\]]{0,40}待补[^\]]{0,40}\]/iu;
 const ENGINEERING_TERM_STRONG_PATTERN = /细纲|情节点|卷纲|功能标签|目标情绪|字数目标|章首钩子|章尾钩子|任务描述|任务单|scene\s*card|prompt|schema|runtime\s*package|上下文包|系统提示词|修复指令/iu;
 const ENGINEERING_TERM_SOFT_PATTERN = /本章|下一章|读者|伏笔|前文|后文|剧情推进|人物弧光|爽点|节奏点|钩子/u;
+const TEMPLATE_EXPRESSION_PATTERN = /嘴角[勾扬]起[一哪怕点微]*[丝抹缕个]*[冷嘲浅怪]*笑|眼[底中神]闪过[一哪怕点微]*[丝抹缕个]/u;
+const VOICE_CONTRAST_PATTERN = /声音不[高大][，,]\s*(却|但)/u;
 
 export function detectProseQuality(content: string): ProseQualityReport {
   const segments = buildTextSegments(content);
@@ -86,6 +90,8 @@ export function detectProseQuality(content: string): ProseQualityReport {
     scanEngineeringTermLeak(segment, addFinding);
     scanPeriodStutter(segment, addFinding);
     scanLongParagraph(segment, addFinding);
+    scanTemplateExpression(segment, addFinding);
+    scanVoiceContrast(segment, addFinding);
   }
 
   scanVerbatimRepeat(segments, addFinding);
@@ -295,7 +301,8 @@ function scanLongParagraph(
   segment: TextSegment,
   addFinding: (finding: ProseQualityFinding) => void,
 ): void {
-  if (visibleLength(segment.text) <= 220) {
+  const sentenceCount = (segment.text.match(/[。！？!?]/g) ?? []).length;
+  if (visibleLength(segment.text) <= 220 && sentenceCount <= 4) {
     return;
   }
   addFinding({
@@ -305,7 +312,45 @@ function scanLongParagraph(
     column: 1,
     message: "正文段落过长，阅读节奏和移动端可读性下降。",
     excerpt: formatExcerpt(segment.text),
-    fixSuggestion: "按动作转折、信息揭示或情绪变化拆成更短段落。",
+    fixSuggestion: "按动作转折、信息揭示或情绪变化拆成更短段落，单段尽量不超过四句。",
+  });
+}
+
+function scanTemplateExpression(
+  segment: TextSegment,
+  addFinding: (finding: ProseQualityFinding) => void,
+): void {
+  const match = segment.text.match(TEMPLATE_EXPRESSION_PATTERN);
+  if (!match || match.index == null) {
+    return;
+  }
+  addFinding({
+    code: "prose_template_expression",
+    severity: "high",
+    line: segment.line,
+    column: match.index + 1,
+    message: "正文出现模板化表情句，容易显得套话。",
+    excerpt: formatExcerpt(segment.text),
+    fixSuggestion: "改成具体动作、视线或当场反应，不要写嘴角勾起一抹、眼中闪过一丝这类套话。",
+  });
+}
+
+function scanVoiceContrast(
+  segment: TextSegment,
+  addFinding: (finding: ProseQualityFinding) => void,
+): void {
+  const match = segment.text.match(VOICE_CONTRAST_PATTERN);
+  if (!match || match.index == null) {
+    return;
+  }
+  addFinding({
+    code: "prose_voice_contrast",
+    severity: "high",
+    line: segment.line,
+    column: match.index + 1,
+    message: "正文出现模板化声音反差句。",
+    excerpt: formatExcerpt(segment.text),
+    fixSuggestion: "直接写声音、语气和当场反应，不要用“声音不高，却……”这类反差套话。",
   });
 }
 

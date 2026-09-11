@@ -1,6 +1,12 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
+const { buildDefaultPlanMetadata } = require("../dist/services/planner/plannerPlanMetadata.js");
+const {
+  applyCriticalReadGate,
+  detectOpeningReadGateIssues,
+  resolveOpeningPressureByChars,
+} = require("../dist/services/novel/runtime/ChapterAcceptanceAssessmentService.js");
 const {
   buildBookContractContext,
   buildVolumeWindowContext,
@@ -42,6 +48,70 @@ test("chapter layered context keeps full book promise and volume reader rewards"
   assert.equal(book.activeMilestonePayoffs[0], "第 10 章：夺下第一个稳定据点。");
   assert.equal(volume.readerRewardLadder, "小反制 -> 稳定收益 -> 卷末翻盘");
   assert.equal(volume.coreReward, "让主角从被动求生转为掌握反击入口。");
+});
+
+test("opening narrative hint asks for pressure instead of free worldbuilding", () => {
+  const hint = buildNarrativeProgressHint(1, 80);
+  assert.match(hint, /尽快进入当前压力、动作和选择/);
+  assert.equal(hint.includes("可自由展开世界与人物"), false);
+  const first = buildDefaultPlanMetadata("chapter", { chapterOrder: 1, totalChapters: 80 });
+  const second = buildDefaultPlanMetadata("chapter", { chapterOrder: 2, totalChapters: 80 });
+  assert.equal(first.planRole, "pressure");
+  assert.equal(first.phaseLabel, "开篇加压");
+  assert.equal(second.phaseLabel, "开篇加压");
+  assert.notEqual(first.phaseLabel, "开篇铺垫");
+});
+
+test("opening read gate uses the platform pressure window from the snapshot", () => {
+  const { FANQIE_LONG_NOVEL_EXPERIENCE, QIDIAN_LONG_NOVEL_EXPERIENCE } = require("../../shared/dist/types/writingPlatform.js");
+  const fanqieChars = resolveOpeningPressureByChars(JSON.stringify({
+    platform: "fanqie_free",
+    label: "番茄免费网文",
+    narrativeForm: "long_novel",
+    profileVersion: 2,
+    source: "official",
+    guidance: { positioning: "p", planning: "plan", drafting: "draft", auditing: "audit", repairing: "repair" },
+    experience: FANQIE_LONG_NOVEL_EXPERIENCE,
+  }));
+  const qidianChars = resolveOpeningPressureByChars(JSON.stringify({
+    platform: "qidian_male",
+    label: "起点男频",
+    narrativeForm: "long_novel",
+    profileVersion: 2,
+    source: "official",
+    guidance: { positioning: "p", planning: "plan", drafting: "draft", auditing: "audit", repairing: "repair" },
+    experience: QIDIAN_LONG_NOVEL_EXPERIENCE,
+  }));
+  assert.equal(fanqieChars, 500);
+  assert.equal(qidianChars, 800);
+  const issues = detectOpeningReadGateIssues("器律清算则例第一条：凡欠债者三日清算。第二条：印令高于人情。", qidianChars);
+  assert.ok(issues.some((issue) => issue.evidence.includes("800")));
+});
+
+test("opening read gate stays repairable and never asks for replan", () => {
+  const issues = detectOpeningReadGateIssues("器律清算则例第一条：凡欠债者三日清算。第二条：印令高于人情。", 500);
+  assert.ok(issues.some((issue) => issue.code === "opening_pressure_missing" || issue.code === "opening_exposition_dump"));
+  const gated = applyCriticalReadGate({
+    status: "accepted",
+    score: { coherence: 90, pacing: 90, repetition: 90, engagement: 90, voice: 90, overall: 90 },
+    summary: "可接收",
+    blockingIssues: [],
+    missingObligations: [],
+    repairDirectives: [],
+    repairability: "none",
+    continuePolicy: "continue",
+    assetSyncRecommendation: { priority: "normal", reason: "ok", requiresFullPayoffReconcile: false },
+    riskTags: [],
+    decisionReason: "ok",
+  }, {
+    readGateTier: "opening",
+    hasDialogueSparse: false,
+    openingIssues: issues,
+  });
+  assert.equal(gated.status, "repairable");
+  assert.equal(gated.continuePolicy, "repair_once");
+  assert.equal(JSON.stringify(gated).includes("PIPELINE_REPLAN_REQUIRED"), false);
+  assert.equal(JSON.stringify(gated).includes("replan"), false);
 });
 
 test("serial target-span narrative hint asks for a mini-ending instead of a new mainline", () => {

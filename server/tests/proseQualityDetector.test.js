@@ -69,6 +69,19 @@ test("detectProseQuality flags dialogue-sparse long chapters", () => {
   assert.equal(report.hasBlockingFindings, false);
 });
 
+test("detectProseQuality flags template expressions and voice contrast without rewriting the source", () => {
+  const source = [
+    "他嘴角勾起一抹冷笑。",
+    "她眼中闪过一丝犹豫。",
+    "声音不高，却压得全场发寒。",
+  ].join("\n");
+  const report = detectProseQuality(source);
+  assert.equal(codes(report).includes("prose_template_expression"), true);
+  assert.equal(codes(report).includes("prose_voice_contrast"), true);
+  assert.equal(source.includes("嘴角勾起一抹冷笑"), true);
+  assert.equal(source.includes("声音不高，却"), true);
+});
+
 test("detectProseQuality does not flag chapters with enough spoken interaction", () => {
   const body = [
     "陆衡抬眼：“这笔账，谁批的？”",

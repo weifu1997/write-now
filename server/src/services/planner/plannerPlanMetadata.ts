@@ -56,8 +56,8 @@ function buildDefaultChapterPlanRole(input: ChapterPlanFallbackInput): StoryPlan
   const total = Math.max(input.totalChapters ?? chapterOrder, chapterOrder, 1);
   const progress = chapterOrder / total;
 
-  if (chapterOrder <= 2 || progress <= 0.15) {
-    return "setup";
+  if (chapterOrder <= 3 || progress <= 0.15) {
+    return "pressure";
   }
   if (progress <= 0.45) {
     return "progress";
@@ -83,8 +83,8 @@ function buildDefaultPhaseLabel(level: StoryPlanLevel, input: ChapterPlanFallbac
   const total = Math.max(input.totalChapters ?? chapterOrder, chapterOrder, 1);
   const progress = chapterOrder / total;
 
-  if (progress <= 0.2) {
-    return "开篇铺垫";
+  if (chapterOrder <= 3 || progress <= 0.2) {
+    return "开篇加压";
   }
   if (progress <= 0.5) {
     return "中段推进";

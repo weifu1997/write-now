@@ -1,4 +1,9 @@
 import { serializeCommercialTagsJson } from "@write-now/shared/types/novelFraming";
+import {
+  findIncompatibleCommercialTags,
+  formatCommercialTagConflictMessage,
+  parseWritingPlatformSnapshotJson,
+} from "@write-now/shared/types/writingPlatform";
 import type { NovelAutoDirectorTaskSummary } from "@write-now/shared/types/novel";
 import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/errorHandler";
@@ -33,6 +38,25 @@ export class NovelCoreCrudService {
     if (primaryStoryModeId && secondaryStoryModeId && primaryStoryModeId === secondaryStoryModeId) {
       throw new AppError("主流派模式和副流派模式不能选择同一项。", 400);
     }
+  }
+
+  private assertCommercialTagCompatibility(input: {
+    commercialTags?: string[] | null;
+    allowIncompatibleCommercialTags?: boolean;
+    writingPlatformSnapshotJson?: string | null;
+  }): void {
+    if (!input.commercialTags || input.allowIncompatibleCommercialTags) {
+      return;
+    }
+    const snapshot = parseWritingPlatformSnapshotJson(input.writingPlatformSnapshotJson);
+    const result = findIncompatibleCommercialTags(input.commercialTags, snapshot?.experience);
+    if (result.conflicts.length === 0) {
+      return;
+    }
+    throw new AppError(formatCommercialTagConflictMessage(result), 400, {
+      conflicts: result.conflicts,
+      suggestedTags: result.suggestedTags,
+    });
   }
 
   private async validateReferenceBookAnalysis(analysisId: string | null | undefined): Promise<void> {
@@ -353,6 +377,10 @@ export class NovelCoreCrudService {
       input.referenceBookAnalysisSections,
     );
     const commercialTagsJson = serializeCommercialTagsJson(input.commercialTags);
+    this.assertCommercialTagCompatibility({
+      commercialTags: input.commercialTags,
+      allowIncompatibleCommercialTags: input.allowIncompatibleCommercialTags,
+    });
     this.validateStoryModeSelection(input.primaryStoryModeId, input.secondaryStoryModeId);
 
     await this.novelContinuationService.validateWritingModeConfig({
@@ -451,6 +479,7 @@ export class NovelCoreCrudService {
         referenceBookAnalysisSections: true,
         primaryStoryModeId: true,
         secondaryStoryModeId: true,
+        writingPlatformSnapshotJson: true,
       },
     });
     if (!existing) {
@@ -488,6 +517,11 @@ export class NovelCoreCrudService {
       ? nextReferenceBookAnalysisId
       : null;
     this.validateStoryModeSelection(nextPrimaryStoryModeId, nextSecondaryStoryModeId);
+    this.assertCommercialTagCompatibility({
+      commercialTags: input.commercialTags,
+      allowIncompatibleCommercialTags: input.allowIncompatibleCommercialTags,
+      writingPlatformSnapshotJson: existing.writingPlatformSnapshotJson,
+    });
 
     await this.novelContinuationService.validateWritingModeConfig({
       novelId: id,
@@ -506,6 +540,7 @@ export class NovelCoreCrudService {
       competingFeel: _ignoreCompetingFeel,
       first30ChapterPromise: _ignoreFirst30ChapterPromise,
       commercialTags: _ignoreCommercialTags,
+      allowIncompatibleCommercialTags: _ignoreAllowIncompatibleCommercialTags,
       ...restInput
     } = input;
 

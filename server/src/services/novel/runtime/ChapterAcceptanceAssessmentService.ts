@@ -18,6 +18,7 @@ import {
 import { openConflictService } from "../../state/OpenConflictService";
 import { normalizeScore, ruleScore } from "../novelP0Utils";
 import { detectProseQuality } from "./proseQuality/ProseQualityDetector";
+import { parseWritingPlatformSnapshotJson } from "@write-now/shared/types/writingPlatform";
 
 export interface ChapterAcceptanceAssessmentInput {
   novelId: string;
@@ -51,28 +52,85 @@ export function resolveChapterReadGateTier(input: {
   return "normal";
 }
 
+export function resolveOpeningPressureByChars(snapshotJson?: string | null): number {
+  const snapshot = parseWritingPlatformSnapshotJson(snapshotJson);
+  return snapshot?.experience?.openingPressureByChars ?? 500;
+}
+
+async function loadOpeningPressureByChars(novelId: string): Promise<number> {
+  const novel = await prisma.novel.findUnique({
+    where: { id: novelId },
+    select: { writingPlatformSnapshotJson: true },
+  }).catch(() => null);
+  return resolveOpeningPressureByChars(novel?.writingPlatformSnapshotJson);
+}
+
+export function detectOpeningReadGateIssues(
+  content: string,
+  openingPressureByChars = 500,
+): Array<{ code: string; evidence: string; fixSuggestion: string; category: "plot" | "voice" }> {
+  const compact = content.replace(/\s+/g, "").trim();
+  if (!compact) {
+    return [];
+  }
+  const openingSlice = compact.slice(0, Math.max(80, openingPressureByChars));
+  const issues: Array<{ code: string; evidence: string; fixSuggestion: string; category: "plot" | "voice" }> = [];
+  const hasActionOrSpeech = /[“"「]|说|道|问|喝|冲|抓|拔|砍|打|逃|跑|踢|撞|摔|压|掀|翻/.test(openingSlice);
+  const hasRuleDump = /第[一二三四五六七八九十\d]+条|则例|系统提示|宿主|说明书|前世记忆|前世回忆/.test(openingSlice);
+  if (!hasActionOrSpeech) {
+    issues.push({
+      code: "opening_pressure_missing",
+      category: "plot",
+      evidence: `开篇前 ${openingPressureByChars} 字缺少可见危机、动作、对话或选择。`,
+      fixSuggestion: "把开篇改成当场压力、动作或对话，不要先交代设定。",
+    });
+  }
+  if (hasRuleDump) {
+    issues.push({
+      code: "opening_exposition_dump",
+      category: "voice",
+      evidence: "开篇出现法条、系统说明书或前世回忆式说明。",
+      fixSuggestion: "删掉说明书开场，用角色行动带出必要约束。",
+    });
+  }
+  return issues;
+}
+
 export function applyCriticalReadGate(
   output: ChapterAcceptanceAssessmentOutput,
   options: {
     readGateTier: ChapterReadGateTier;
     hasDialogueSparse: boolean;
+    openingIssues?: Array<{ code: string; evidence: string; fixSuggestion: string; category: "plot" | "voice" }>;
   },
 ): ChapterAcceptanceAssessmentOutput {
   if (options.readGateTier === "normal") {
     return output;
   }
 
-  const blockingIssues = output.blockingIssues.map((issue) => (
-    issue.code === "prose_dialogue_sparse"
-      ? { ...issue, severity: "high" as const }
-      : issue
-  ));
+  const openingIssues = options.readGateTier === "opening" ? (options.openingIssues ?? []) : [];
+  const blockingIssues = [
+    ...openingIssues.map((issue) => ({
+      severity: "high" as const,
+      category: issue.category,
+      code: issue.code,
+      evidence: issue.evidence,
+      fixSuggestion: issue.fixSuggestion,
+    })),
+    ...output.blockingIssues.map((issue) => (
+      issue.code === "prose_dialogue_sparse"
+        ? { ...issue, severity: "high" as const }
+        : issue
+    )),
+  ];
   const engagementWeak = (output.score?.engagement ?? 100) < 78;
   const voiceWeak = (output.score?.voice ?? 100) < 78;
-  const needsRepair = options.hasDialogueSparse || engagementWeak || voiceWeak
+  const needsRepair = options.hasDialogueSparse || engagementWeak || voiceWeak || openingIssues.length > 0
     || blockingIssues.some((issue) => (
       issue.code === "prose_dialogue_sparse"
       || issue.category === "voice"
+      || issue.code === "opening_pressure_missing"
+      || issue.code === "opening_exposition_dump"
     ));
 
   if (!needsRepair) {
@@ -382,9 +440,15 @@ export class ChapterAcceptanceAssessmentService {
       blockingIssues: [...assessment.blockingIssues, ...proseIssues],
       riskTags: [...assessment.riskTags, ...proseQuality.findings.map((finding) => finding.code)],
     }, input.content, input.targetWordCount);
+    const openingPressureByChars = readGateTier === "opening"
+      ? await loadOpeningPressureByChars(input.novelId)
+      : 500;
     const normalized = applyCriticalReadGate(normalizedBase, {
       readGateTier,
       hasDialogueSparse: proseQuality.findings.some((finding) => finding.code === "prose_dialogue_sparse"),
+      openingIssues: readGateTier === "opening"
+        ? detectOpeningReadGateIssues(input.content, openingPressureByChars)
+        : [],
     });
     const score = normalizeScore(normalized.score);
     const issues = normalized.blockingIssues.map((issue) => ({

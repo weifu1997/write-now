@@ -350,6 +350,7 @@ export const chapterAcceptanceAssessmentPrompt: PromptAsset<
       "16. reader_experience 是本章读者体验合同。检查 promisedReward 是否在正文中可见、主角是否围绕 protagonistWant 主动行动并遭遇 primaryResistance、keyTurn 与 netChange 是否成立、inheritedHookResponsibilities 是否得到回应，以及 endingHook 是否产生追读力。",
       "17. 普通读者体验缺口应输出可执行的 blockingIssues / repairDirectives，并优先使用 repairable 或 continue_with_risk；不得仅因爽点、钩子或情绪强度不足升级为 needs_manual_review 或全局重规划。",
       "18. 若 readGateTier=opening 或 climax：对话过稀、人物互动缺失、engagement/voice 明显偏弱时，必须优先 status=repairable 并给出可执行 repairDirectives，不得直接 accepted；仍不得仅因此升级为全局重规划。",
+      "19. 若 readGateTier=opening：前段必须出现可见危机、动作、对话或选择；大段法条、系统说明书或前世回忆开场应记为可修复的 plot/voice 问题，不得输出重规划。",
       "正文退化检测边界：",
       ...CHAPTER_PROSE_QUALITY_AUDIT_RULES.map((rule, index) => `${index + 1}. ${rule}`),
     ].join("\n")),

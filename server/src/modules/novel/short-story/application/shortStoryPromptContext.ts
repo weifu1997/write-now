@@ -1,5 +1,8 @@
 import type { PromptContextBlock } from "../../../../prompting/core/promptTypes";
-import type { WritingPlatformSnapshot } from "@write-now/shared/types/writingPlatform";
+import {
+  parseWritingPlatformSnapshotJson,
+  type WritingPlatformSnapshot,
+} from "@write-now/shared/types/writingPlatform";
 import type { CreationDirection, ShortStoryPlanContract, ShortStoryPlanSegment } from "@write-now/shared/types/creationStudio";
 import { buildStoryModePromptBlock, parseStoryModeProfileJson } from "../../../../services/storyMode/storyModeProfile";
 
@@ -31,8 +34,7 @@ export function shortStoryProductionFoundationText(novel: ShortStoryFoundationNo
 }
 
 export function parseWritingPlatformSnapshot(raw: string | null | undefined): WritingPlatformSnapshot | null {
-  if (!raw) return null;
-  try { return JSON.parse(raw) as WritingPlatformSnapshot; } catch { return null; }
+  return parseWritingPlatformSnapshotJson(raw);
 }
 
 export function shortStoryPlatformText(snapshot: WritingPlatformSnapshot | null, stage: "planning" | "drafting" | "auditing" | "repairing"): string {

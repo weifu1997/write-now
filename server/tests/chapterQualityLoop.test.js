@@ -3,6 +3,7 @@ const assert = require("node:assert/strict");
 
 const {
   buildChapterQualityLoopAssessment,
+  classifyChapterQualityLoopRisk,
   classifyChapterQualityLoopRiskFlags,
   hasChapterQualityLoopReplanRequiredRiskFlags,
   hasContinuableChapterQualityLoopRiskFlags,
@@ -23,6 +24,21 @@ function score(overrides = {}) {
     ...overrides,
   };
 }
+
+test("prose quality debt still defers and continues instead of blocking the book", () => {
+  const flags = classifyChapterQualityLoopRisk({
+    terminalAction: "defer_and_continue",
+    recommendedAction: "patch",
+    rootCauseCode: "prose_template_expression",
+    signals: [{
+      artifactType: "prose_quality",
+      status: "risk",
+      reason: "模板表情句",
+      issueCodes: ["prose_template_expression"],
+    }],
+  });
+  assert.equal(flags, "non_blocking_quality_debt");
+});
 
 test("buildChapterQualityLoopAssessment continues when quality signals are valid", () => {
   const assessment = buildChapterQualityLoopAssessment({

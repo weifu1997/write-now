@@ -12,6 +12,10 @@ import type {
   VolumeGenerationNovel,
   VolumeWorkspace,
 } from "../../../../services/novel/volume/volumeModels";
+import {
+  formatWritingPlatformPlanningText,
+  parseWritingPlatformSnapshotJson,
+} from "@write-now/shared/types/writingPlatform";
 
 export interface VolumeStrategyPromptInput {
   novel: VolumeGenerationNovel;
@@ -124,6 +128,10 @@ function summarizeCharacters(novel: VolumeGenerationNovel): string {
     .join("\n");
 }
 
+export function buildWritingPlatformPlanningBlock(novel: VolumeGenerationNovel): string {
+  return formatWritingPlatformPlanningText(parseWritingPlatformSnapshotJson(novel.writingPlatformSnapshotJson));
+}
+
 export function buildCommonNovelContext(novel: VolumeGenerationNovel): string {
   const commercialTags = parseCommercialTags(novel.commercialTagsJson);
   const completion = novel.completionProfile;
@@ -146,6 +154,8 @@ export function buildCommonNovelContext(novel: VolumeGenerationNovel): string {
     `pace preference: ${compactText(novel.pacePreference, "unset")}`,
     `emotion intensity: ${compactText(novel.emotionIntensity, "unset")}`,
     `commercial tags: ${commercialTags.join(" | ") || "none"}`,
+    typeof novel.defaultChapterLength === "number" ? `default chapter length: ${novel.defaultChapterLength}` : "",
+    `platform planning:\n${buildWritingPlatformPlanningBlock(novel)}`,
     `character context:\n${summarizeCharacters(novel)}`,
   ].filter(Boolean).join("\n");
 }

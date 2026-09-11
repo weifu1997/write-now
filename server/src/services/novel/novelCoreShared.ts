@@ -23,6 +23,7 @@ export interface CreateNovelInput {
   competingFeel?: string;
   first30ChapterPromise?: string;
   commercialTags?: string[];
+  allowIncompatibleCommercialTags?: boolean;
   genreId?: string;
   primaryStoryModeId?: string;
   secondaryStoryModeId?: string;
@@ -61,6 +62,7 @@ export interface UpdateNovelInput {
   competingFeel?: string | null;
   first30ChapterPromise?: string | null;
   commercialTags?: string[] | null;
+  allowIncompatibleCommercialTags?: boolean;
   status?: "draft" | "published";
   writingMode?: "original" | "continuation";
   projectMode?: "ai_led" | "co_pilot" | "draft_mode" | "auto_pipeline" | null;

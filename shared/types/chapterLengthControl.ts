@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { sanitizeCreativeMustAdvanceItems } from "./chapterCreativeContract.js";
+import type { WritingPlatformExperienceContract, WritingPlatformSnapshot } from "./writingPlatform.js";
+import { hydrateWritingPlatformSnapshot } from "./writingPlatform.js";
 import {
   EMPTY_READER_EXPERIENCE_CONTRACT,
   generatedReaderExperienceContractSchema,
@@ -267,17 +269,40 @@ function rescaleSceneTargets(targetWordCount: number, scenes: ChapterSceneCard[]
   return scaled.map((scene) => chapterSceneCardSchema.parse(scene));
 }
 
-export function resolveLengthBudgetContract(targetWordCount: number | null | undefined): LengthBudgetContract | null {
+export function resolveLengthBudgetContract(
+  targetWordCount: number | null | undefined,
+  experience?: Pick<
+    WritingPlatformExperienceContract,
+    "softMinWordCount" | "softMaxWordCount" | "hardMaxWordCount"
+  > | null,
+): LengthBudgetContract | null {
   if (!Number.isFinite(targetWordCount) || (targetWordCount ?? 0) <= 0) {
     return null;
   }
   const normalizedTarget = Math.round(targetWordCount as number);
+  const platformSoftMin = experience?.softMinWordCount;
+  const platformSoftMax = experience?.softMaxWordCount;
+  const platformHardMax = experience?.hardMaxWordCount;
+  const usesPlatformBounds = typeof platformSoftMin === "number"
+    && typeof platformSoftMax === "number"
+    && typeof platformHardMax === "number"
+    && platformSoftMin > 0
+    && platformSoftMax >= platformSoftMin
+    && platformHardMax >= platformSoftMax;
   return {
     targetWordCount: normalizedTarget,
-    softMinWordCount: Math.floor(normalizedTarget * 0.85),
-    softMaxWordCount: Math.ceil(normalizedTarget * 1.15),
-    hardMaxWordCount: Math.ceil(normalizedTarget * 1.25),
+    softMinWordCount: usesPlatformBounds ? platformSoftMin : Math.floor(normalizedTarget * 0.85),
+    softMaxWordCount: usesPlatformBounds ? platformSoftMax : Math.ceil(normalizedTarget * 1.15),
+    hardMaxWordCount: usesPlatformBounds ? platformHardMax : Math.ceil(normalizedTarget * 1.25),
   };
+}
+
+export function resolveLengthBudgetFromSnapshot(
+  targetWordCount: number | null | undefined,
+  snapshot?: WritingPlatformSnapshot | null,
+): LengthBudgetContract | null {
+  const experience = hydrateWritingPlatformSnapshot(snapshot)?.experience ?? null;
+  return resolveLengthBudgetContract(targetWordCount, experience);
 }
 
 export function resolveChapterIntakeMaxChars(targetWordCount?: number | null): number {

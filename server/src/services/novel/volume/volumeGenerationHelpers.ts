@@ -380,6 +380,7 @@ export function mergeChapterList(
     targetBeatKey?: string;
     resumeFromBeatKey?: string | null;
     markAsPartial?: boolean;
+    defaultChapterLength?: number | null;
   } = {},
 ): VolumePlanDocument {
   const mergedVolumes = document.volumes.map((volume) => {
@@ -435,7 +436,10 @@ export function mergeChapterList(
           nextChapterEntryState: existingChapter?.nextChapterEntryState ?? null,
           ...conflictLevelPatch,
           revealLevel: existingChapter?.revealLevel ?? null,
-          targetWordCount: existingChapter?.targetWordCount ?? null,
+          targetWordCount: existingChapter?.targetWordCount
+            ?? (typeof options.defaultChapterLength === "number" && options.defaultChapterLength > 0
+              ? options.defaultChapterLength
+              : null),
           mustAvoid: existingChapter?.mustAvoid ?? null,
           taskSheet: existingChapter?.taskSheet ?? null,
           sceneCards: existingChapter?.sceneCards ?? null,

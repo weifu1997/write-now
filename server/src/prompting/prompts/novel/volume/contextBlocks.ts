@@ -17,6 +17,7 @@ import {
   buildStoryMacroContext,
   buildStrategyContext,
   buildWindowedVolumeContext,
+  buildWritingPlatformPlanningBlock,
   type VolumeBeatSheetPromptInput,
   type VolumeChapterDetailPromptInput,
   type VolumeChapterListPromptInput,
@@ -25,6 +26,16 @@ import {
   type VolumeStrategyCritiquePromptInput,
   type VolumeStrategyPromptInput,
 } from "./shared";
+
+function writingPlatformBlock(novel: VolumeStrategyPromptInput["novel"]): PromptContextBlock {
+  return createContextBlock({
+    id: "writing_platform",
+    group: "writing_platform",
+    priority: 102,
+    required: true,
+    content: `Writing platform contract:\n${buildWritingPlatformPlanningBlock(novel)}`,
+  });
+}
 
 function guidanceBlock(guidance?: string): PromptContextBlock | null {
   if (!guidance?.trim()) {
@@ -40,6 +51,7 @@ function guidanceBlock(guidance?: string): PromptContextBlock | null {
 
 export function buildVolumeStrategyContextBlocks(input: VolumeStrategyPromptInput): PromptContextBlock[] {
   return [
+    writingPlatformBlock(input.novel),
     createContextBlock({
       id: "book_contract",
       group: "book_contract",
@@ -72,6 +84,7 @@ export function buildVolumeStrategyContextBlocks(input: VolumeStrategyPromptInpu
 
 export function buildVolumeStrategyCritiqueContextBlocks(input: VolumeStrategyCritiquePromptInput): PromptContextBlock[] {
   return [
+    writingPlatformBlock(input.novel),
     createContextBlock({
       id: "book_contract",
       group: "book_contract",
@@ -104,6 +117,7 @@ export function buildVolumeStrategyCritiqueContextBlocks(input: VolumeStrategyCr
 
 export function buildVolumeSkeletonContextBlocks(input: VolumeSkeletonPromptInput): PromptContextBlock[] {
   return [
+    writingPlatformBlock(input.novel),
     createContextBlock({
       id: "book_contract",
       group: "book_contract",
@@ -150,6 +164,7 @@ export function buildVolumeSkeletonContextBlocks(input: VolumeSkeletonPromptInpu
 
 export function buildVolumeBeatSheetContextBlocks(input: VolumeBeatSheetPromptInput): PromptContextBlock[] {
   return [
+    writingPlatformBlock(input.novel),
     createContextBlock({
       id: "book_contract",
       group: "book_contract",
@@ -201,6 +216,7 @@ export function buildVolumeBeatSheetContextBlocks(input: VolumeBeatSheetPromptIn
 
 export function buildVolumeChapterListContextBlocks(input: VolumeChapterListPromptInput): PromptContextBlock[] {
   return [
+    writingPlatformBlock(input.novel),
     createContextBlock({
       id: "book_contract",
       group: "book_contract",
@@ -277,6 +293,7 @@ export function buildVolumeChapterListContextBlocks(input: VolumeChapterListProm
 
 export function buildVolumeChapterDetailContextBlocks(input: VolumeChapterDetailPromptInput): PromptContextBlock[] {
   return [
+    writingPlatformBlock(input.novel),
     createContextBlock({
       id: "book_contract",
       group: "book_contract",
@@ -342,6 +359,7 @@ export function buildVolumeChapterDetailContextBlocks(input: VolumeChapterDetail
 
 export function buildVolumeRebalanceContextBlocks(input: VolumeRebalancePromptInput): PromptContextBlock[] {
   return [
+    writingPlatformBlock(input.novel),
     createContextBlock({
       id: "book_contract",
       group: "book_contract",

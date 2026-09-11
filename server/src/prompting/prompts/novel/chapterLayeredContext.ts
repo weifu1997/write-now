@@ -262,7 +262,7 @@ export function buildNarrativeProgressHint(
   const progress = currentOrder / estimatedTotal;
   const remaining = estimatedTotal - currentOrder;
   if (progress < 0.25) {
-    return `【叙事进度】第 ${currentOrder} 章 / 预计共 ${estimatedTotal} 章（${Math.round(progress * 100)}%）\n开局阶段：可自由展开世界与人物，建立读者期待。`;
+    return `【叙事进度】第 ${currentOrder} 章 / 预计共 ${estimatedTotal} 章（${Math.round(progress * 100)}%）\n开局阶段：尽快进入当前压力、动作和选择；世界规则只作为硬约束，禁止写成说明书。`;
   }
   if (remaining > 8 && progress < 0.75) {
     return `【叙事进度】第 ${currentOrder} 章 / 预计共 ${estimatedTotal} 章（${Math.round(progress * 100)}%）\n发展阶段：推进既有线索，谨慎开新支线，保持伏笔密度。`;

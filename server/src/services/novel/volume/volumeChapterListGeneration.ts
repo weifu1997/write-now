@@ -633,6 +633,7 @@ export async function generateBeatChunkedChapterList(params: {
         targetBeatKey: options.targetBeatKey,
         resumeFromBeatKey: fullVolumeResumeState?.resumeBeatKey,
         markAsPartial: true,
+        defaultChapterLength: params.novel.defaultChapterLength,
       },
     );
     const intermediateVolume = intermediateDocument.volumes.find((volume) => volume.id === targetVolume.id);
@@ -673,6 +674,7 @@ export async function generateBeatChunkedChapterList(params: {
         targetBeatKey: options.targetBeatKey,
         resumeFromBeatKey: fullVolumeResumeState?.resumeBeatKey,
         markAsPartial: false,
+        defaultChapterLength: params.novel.defaultChapterLength,
       },
     )
     : setVolumeChapterListPartialStatus(document, targetVolume.id, false);

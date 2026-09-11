@@ -1,6 +1,11 @@
-import type {
-  WritingPlatform,
-  WritingPlatformProfileDefinition,
+import {
+  FANQIE_LONG_NOVEL_EXPERIENCE,
+  FANQIE_SHORT_STORY_EXPERIENCE,
+  JINJIANG_LONG_NOVEL_EXPERIENCE,
+  QIDIAN_LONG_NOVEL_EXPERIENCE,
+  ZHIHU_SHORT_STORY_EXPERIENCE,
+  type WritingPlatform,
+  type WritingPlatformProfileDefinition,
 } from "@write-now/shared/types/writingPlatform";
 
 export const OFFICIAL_WRITING_PLATFORM_PROFILES: Record<WritingPlatform, WritingPlatformProfileDefinition> = {
@@ -9,11 +14,15 @@ export const OFFICIAL_WRITING_PLATFORM_PROFILES: Record<WritingPlatform, Writing
     label: "番茄免费网文",
     summary: "快速入戏、短段落、高冲突、阶段回报清楚，适合移动端连续阅读。",
     supportedNarrativeForms: ["long_novel", "short_story"],
-    officialVersion: 1,
+    officialVersion: 2,
+    experience: {
+      long_novel: FANQIE_LONG_NOVEL_EXPERIENCE,
+      short_story: FANQIE_SHORT_STORY_EXPERIENCE,
+    },
     guidance: {
       long_novel: {
         positioning: "面向大众移动端读者，用清晰愿望、强处境和稳定回报建立追读。",
-        planning: "开篇尽快给出异常或冲突；每章推进目标、阻力或得失；阶段节点必须有可见回报。",
+        planning: "前 500 字进入可见危机、冲突或选择；单章约 2000 字，阶段回报落在第 3、8、14 章窗口内；每章推进目标、阻力或得失。",
         drafting: "语言直接顺畅，段落以一至四句为主；减少慢热说明，强化动作、选择、对话和章末牵引。",
         auditing: "重点检查开篇进入速度、主角主动性、有效信息增量、冲突/回报密度和移动端段落读感。",
         repairing: "优先压缩解释和同义反复，补足主角行动、局面变化与可感知回报，不改变既定事实。",
@@ -32,11 +41,14 @@ export const OFFICIAL_WRITING_PLATFORM_PROFILES: Record<WritingPlatform, Writing
     label: "起点男频",
     summary: "成长目标明确，能力、资源和局势持续变化，升级与伏笔兑现稳定。",
     supportedNarrativeForms: ["long_novel"],
-    officialVersion: 1,
+    officialVersion: 2,
+    experience: {
+      long_novel: QIDIAN_LONG_NOVEL_EXPERIENCE,
+    },
     guidance: {
       long_novel: {
         positioning: "围绕主角成长与世界探索建立可长期运转的故事引擎，让每阶段都有新目标和新上限。",
-        planning: "明确能力、资源、身份或势力的成长刻度；挑战逐级升级；伏笔按 seed、touch、payoff 有序兑现。",
+        planning: "前 800 字进入压力或明确目标；单章约 2800 字；阶段回报落在第 3、10、30 章窗口。明确能力、资源、身份或势力的成长刻度；挑战逐级升级；伏笔按 seed、touch、payoff 有序兑现。",
         drafting: "重视行动逻辑、规则可信度和解决问题的过程；爽点来自积累后的突破，不靠无铺垫碾压。",
         auditing: "检查成长净变化、规则一致性、资源账、挑战升级、伏笔责任和章末追读问题。",
         repairing: "优先补齐成长因果、代价和策略过程，修正战力或规则冲突，不凭空追加核心能力。",
@@ -48,11 +60,14 @@ export const OFFICIAL_WRITING_PLATFORM_PROFILES: Record<WritingPlatform, Writing
     label: "晋江女频",
     summary: "人物关系与情绪因果清晰，角色声音鲜明，关系状态持续发生变化。",
     supportedNarrativeForms: ["long_novel"],
-    officialVersion: 1,
+    officialVersion: 2,
+    experience: {
+      long_novel: JINJIANG_LONG_NOVEL_EXPERIENCE,
+    },
     guidance: {
       long_novel: {
         positioning: "以鲜明人物、关系张力和情绪回报驱动追读，同时保证外部事件持续推进。",
-        planning: "每章明确人物欲望、误解或立场差；关系变化必须由事件和选择触发，避免原地拉扯。",
+        planning: "前 800 字进入人物压力或关系裂口；单章约 2800 字；阶段回报落在第 3、10、30 章窗口。每章明确人物欲望、误解或立场差；关系变化必须由事件和选择触发，避免原地拉扯。",
         drafting: "保持角色声音差异，用动作、潜台词和具体细节呈现情绪；不以大段内心总结代替互动。",
         auditing: "检查人物动机、情绪因果、关系净变化、角色声音、边界感以及外部剧情推进。",
         repairing: "补足导致情绪与关系变化的事件链，减少强行误会和作者判词，保留人物尊严与既定事实。",
@@ -64,7 +79,10 @@ export const OFFICIAL_WRITING_PLATFORM_PROFILES: Record<WritingPlatform, Writing
     label: "知乎短故事",
     summary: "高概念切入、信息差驱动、连续揭示，最终给出完整而有余味的结局。",
     supportedNarrativeForms: ["short_story"],
-    officialVersion: 1,
+    officialVersion: 2,
+    experience: {
+      short_story: ZHIHU_SHORT_STORY_EXPERIENCE,
+    },
     guidance: {
       short_story: {
         positioning: "用一句可传播的高概念和强处境抓住读者，以真相、选择或关系答案支撑一次读完。",

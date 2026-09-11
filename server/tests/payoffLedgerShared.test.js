@@ -174,6 +174,7 @@ test("buildPayoffLedgerResponse orders items by risk and computes summary counts
       ledgerKey: "overdue",
       title: "黑市账户异常",
       currentStatus: "overdue",
+      targetEndChapterOrder: 4,
       updatedAt: "2026-04-05T10:00:04.000Z",
     }),
   ], 5);
@@ -273,6 +274,88 @@ test("sanitizePayoffLedgerSyncItem downgrades overdue without explicit payoff wi
   assert.equal(item.currentStatus, "pending_payoff");
   assert.equal(item.riskSignals.length, 1);
   assert.equal(item.riskSignals[0].code, "payoff_missing_progress");
+});
+
+test("fanqie snapshots project opening-arc payoff windows to chapter 14", () => {
+  const { FANQIE_LONG_NOVEL_EXPERIENCE } = require("../../shared/dist/types/writingPlatform.js");
+  const sources = buildBookContractPayoffSources({
+    chapter3Payoff: "开书抓手",
+    chapter10Payoff: "第一阶段回报",
+    chapter30Payoff: "开篇弧兑现",
+  }, {
+    platform: "fanqie_free",
+    label: "番茄免费网文",
+    narrativeForm: "long_novel",
+    profileVersion: 2,
+    source: "official",
+    guidance: {
+      positioning: "p",
+      planning: "plan",
+      drafting: "draft",
+      auditing: "audit",
+      repairing: "repair",
+    },
+    experience: FANQIE_LONG_NOVEL_EXPERIENCE,
+  });
+  assert.deepEqual(sources.map((item) => [item.targetStartChapterOrder, item.targetEndChapterOrder]), [
+    [1, 3],
+    [4, 8],
+    [9, 14],
+  ]);
+});
+
+test("legacy snapshots without early payoff windows stay on 3/10/30", () => {
+  const sources = buildBookContractPayoffSources({
+    chapter3Payoff: "开书抓手",
+    chapter10Payoff: "第一阶段回报",
+    chapter30Payoff: "中段承诺",
+  }, {
+    platform: "fanqie_free",
+    label: "番茄免费网文",
+    narrativeForm: "long_novel",
+    profileVersion: 1,
+    source: "official",
+    guidance: {
+      positioning: "p",
+      planning: "plan",
+      drafting: "draft",
+      auditing: "audit",
+      repairing: "repair",
+    },
+  });
+  assert.deepEqual(sources.map((item) => [item.targetStartChapterOrder, item.targetEndChapterOrder]), [
+    [1, 3],
+    [4, 10],
+    [11, 30],
+  ]);
+});
+
+test("payoff ledger postValidate rejects a relaxed book-contract deadline", () => {
+  const { payoffLedgerSyncPrompt } = require("../dist/prompting/prompts/payoff/payoffLedgerSync.prompts.js");
+  assert.throws(() => payoffLedgerSyncPrompt.postValidate({
+    items: [{
+      ledgerKey: "book-contract-30",
+      title: "中段承诺",
+      summary: "承诺",
+      scopeType: "book",
+      currentStatus: "setup",
+      targetStartChapterOrder: 11,
+      targetEndChapterOrder: 40,
+      sourceRefs: [{ kind: "major_payoff", refId: "book_contract.chapter30Payoff" }],
+      evidence: [],
+      riskSignals: [],
+      statusReason: "ok",
+      confidence: 0.9,
+    }],
+  }, {
+    bookContractPayoffs: [{
+      refId: "book_contract.chapter30Payoff",
+      refLabel: "第 30 章阶段回报",
+      payoff: "中段承诺",
+      targetStartChapterOrder: 11,
+      targetEndChapterOrder: 14,
+    }],
+  }), /不晚于第 14 章/);
 });
 
 test("book contract payoff sources keep stable refs and deterministic chapter windows", () => {

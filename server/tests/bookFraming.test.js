@@ -65,6 +65,82 @@ function buildStructuredWorld() {
   };
 }
 
+test("novel update rejects fanqie incompatible commercial tags unless explicitly kept", async () => {
+  const { FANQIE_LONG_NOVEL_EXPERIENCE } = await import("@write-now/shared/types/writingPlatform");
+  const { NovelCoreCrudService } = require("../dist/services/novel/novelCoreCrudService.js");
+  const { prisma } = require("../dist/db/prisma.js");
+  const service = new NovelCoreCrudService();
+  const originalFindUnique = prisma.novel.findUnique;
+  const originalUpdate = prisma.novel.update;
+  let wrote = false;
+  prisma.novel.findUnique = async () => ({
+    id: "novel-1",
+    worldId: null,
+    writingMode: "original",
+    sourceNovelId: null,
+    sourceKnowledgeDocumentId: null,
+    continuationBookAnalysisId: null,
+    continuationBookAnalysisSections: null,
+    referenceBookAnalysisId: null,
+    referenceBookAnalysisSections: null,
+    primaryStoryModeId: null,
+    secondaryStoryModeId: null,
+    writingPlatformSnapshotJson: JSON.stringify({
+      platform: "fanqie_free",
+      label: "番茄免费网文",
+      narrativeForm: "long_novel",
+      profileVersion: 2,
+      source: "official",
+      guidance: {
+        positioning: "p",
+        planning: "plan",
+        drafting: "draft",
+        auditing: "audit",
+        repairing: "repair",
+      },
+      experience: FANQIE_LONG_NOVEL_EXPERIENCE,
+    }),
+  });
+  prisma.novel.update = async () => {
+    wrote = true;
+    return {};
+  };
+  try {
+    await assert.rejects(
+      () => service.updateNovel("novel-1", { commercialTags: ["无限流", "诸天万界", "黑科技"] }),
+      (error) => {
+        assert.match(error.message, /无限流|诸天万界|黑科技/);
+        assert.match(error.message, /穿越|逆袭|神匠/);
+        return true;
+      },
+    );
+    assert.equal(wrote, false);
+
+    wrote = false;
+    prisma.novel.update = async (args) => {
+      wrote = true;
+      assert.ok(String(args.data.commercialTagsJson).includes("无限流"));
+      return {
+        id: "novel-1",
+        worldId: null,
+        commercialTagsJson: args.data.commercialTagsJson,
+        continuationBookAnalysisSections: null,
+        referenceBookAnalysisSections: null,
+        primaryStoryMode: null,
+        secondaryStoryMode: null,
+      };
+    };
+    await service.updateNovel("novel-1", {
+      commercialTags: ["无限流"],
+      allowIncompatibleCommercialTags: true,
+    });
+    assert.equal(wrote, true);
+  } finally {
+    prisma.novel.findUnique = originalFindUnique;
+    prisma.novel.update = originalUpdate;
+  }
+});
+
 test("normalizeCommercialTags dedupes, truncates and limits output", async () => {
   const { formatCommercialTagsInput, normalizeCommercialTags } = await import("@write-now/shared/types/novelFraming");
 
