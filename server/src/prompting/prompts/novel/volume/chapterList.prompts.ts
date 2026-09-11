@@ -35,9 +35,12 @@ function buildRetryDirective(reason?: string | null): string {
   ].join("\n");
 }
 
-function describeBeatConflictGuidance(beatKey: string, isBookFinale: boolean): string {
+function describeBeatConflictGuidance(beatKey: string, isBookFinale: boolean, isFinaleSetup = false): string {
   if (isBookFinale) {
     return "本拍是目标跨度收官：冲突强度应形成可见高潮后允许回落到余味，终章不得整拍贴底或全章持平。";
+  }
+  if (isFinaleSetup) {
+    return "本拍是终局铺垫：冲突应持续加压并收束主线，为即将到来的高潮集齐条件，不要提前把终局高潮写完。";
   }
   const guidanceByBeat: Record<string, string> = {
     open_hook: "开卷抓手整体偏低到中低，建立压迫即可，不要提前顶满高潮。",
@@ -103,6 +106,7 @@ function resolvePromptConfig(
       targetBeatKey?: string;
       targetBeatLabel?: string | null;
       isBookFinale?: boolean;
+      isFinaleSetup?: boolean;
       reservedChapterTitles?: string[];
       },
 ): {
@@ -110,6 +114,7 @@ function resolvePromptConfig(
   targetBeatKey: string;
   targetBeatLabel: string;
   isBookFinale: boolean;
+  isFinaleSetup: boolean;
   reservedChapterTitles: string[];
 } {
   if (typeof input === "number") {
@@ -118,6 +123,7 @@ function resolvePromptConfig(
       targetBeatKey: "target_beat",
       targetBeatLabel: "目标节奏段",
       isBookFinale: false,
+      isFinaleSetup: false,
       reservedChapterTitles: [],
     };
   }
@@ -127,6 +133,7 @@ function resolvePromptConfig(
     targetBeatKey: input.targetBeatKey?.trim() || "target_beat",
     targetBeatLabel: input.targetBeatLabel?.trim() || "目标节奏段",
     isBookFinale: input.isBookFinale === true,
+    isFinaleSetup: input.isFinaleSetup === true,
     reservedChapterTitles: input.reservedChapterTitles ?? [],
   };
 }
@@ -356,18 +363,19 @@ export function createVolumeChapterListPrompt(
         targetBeatKey?: string;
         targetBeatLabel?: string | null;
         isBookFinale?: boolean;
+        isFinaleSetup?: boolean;
         reservedChapterTitles?: string[];
       },
 ): PromptAsset<
   VolumeChapterListPromptInput,
   ReturnType<typeof createVolumeChapterBeatBlockSchema>["_output"]
 > {
-  const { targetChapterCount, targetBeatKey, targetBeatLabel, isBookFinale = false, reservedChapterTitles } =
+  const { targetChapterCount, targetBeatKey, targetBeatLabel, isBookFinale = false, isFinaleSetup = false, reservedChapterTitles } =
     resolvePromptConfig(input);
 
   return {
     id: "novel.volume.chapter_list",
-    version: "v11",
+    version: "v12",
     taskType: "planner",
     mode: "structured",
     language: "zh",
@@ -419,7 +427,9 @@ export function createVolumeChapterListPrompt(
               "12. 摘要必须体现本章造成的局面变化，不得空泛复述标题。",
               isBookFinale
                 ? "13. 目标跨度收官章必须完成可见小结局，不得创建必须续写的新主线或下一 beat 钩子。"
-                : "13. 最后一章必须完成当前 beat 的 mustDeliver，同时留下阅读牵引，但不得提前兑现下一 beat 的核心事件。",
+                : isFinaleSetup
+                  ? "13. 本拍是终局铺垫：收束主线、集齐高潮条件，留下进入终局的压力，但不得提前把终局高潮写完。"
+                  : "13. 最后一章必须完成当前 beat 的 mustDeliver，同时留下阅读牵引，但不得提前兑现下一 beat 的核心事件。",
               "",
               "上一次的 JSON 输出：",
               safeJsonStringify(parsedOutput),
@@ -461,7 +471,7 @@ export function createVolumeChapterListPrompt(
           "7. 不得输出 Markdown、注释、解释或任何额外文本。",
           "8. 每章 summary 控制在 40-120 个汉字，只写核心行动、阻力和造成的新局面；禁止扩写场景、对白或正文。",
           "9. 每章 conflictLevel 必须是 0-100 的整数，表示本章冲突强度；不要输出 1-5 分，也不要用缺省 3 表示未定。",
-          `10. ${describeBeatConflictGuidance(targetBeatKey, isBookFinale)}`,
+          `10. ${describeBeatConflictGuidance(targetBeatKey, isBookFinale, isFinaleSetup)}`,
           "11. 本拍内必须有可见起伏：相邻章不要长期相差 3 以内，高潮拍整体高于开卷拍。",
           "12. 写完指定数量的最后一章后立即结束 JSON，不得追加分析、自检过程或候选版本。",
           "",
@@ -481,7 +491,9 @@ export function createVolumeChapterListPrompt(
           "6. 关键推进可以占更多章节，过渡章要短促有力，不要为了凑数制造低信息密度章节。",
           isBookFinale
             ? "7. 目标跨度收官章必须完成可见小结局：本阶段高潮、核心回报和主题余味都要落地，不得留下必须续写的新主线。"
-            : "7. 最后一章必须完成当前 beat 的 mustDeliver，同时留下进入下一 beat 的阅读牵引，但不得提前兑现下一 beat 的核心事件。",
+            : isFinaleSetup
+              ? "7. 本拍是终局铺垫：必须开始收束主线、集齐终局条件，为即将到来的高潮做铺垫；可以加压、关门、兑现旧伏笔，但不得提前把终局高潮写完，也不得新开必须续写的主线。"
+              : "7. 最后一章必须完成当前 beat 的 mustDeliver，同时留下进入下一 beat 的阅读牵引，但不得提前兑现下一 beat 的核心事件。",
           "",
           "五、章节推进质量要求",
           "1. 每章 summary 都要体现核心视角角色的选择、试探、反击、隐忍、交换、布局、揭穿、妥协或承担代价，避免角色只是旁观外部事件。",
@@ -520,7 +532,9 @@ export function createVolumeChapterListPrompt(
           "3. 中段章节要围绕当前 beat 的核心矛盾持续加压、试探、转折或兑现。",
           isBookFinale
             ? "4. 目标跨度收官章必须完成可见小结局，不再要求下一阶段牵引。"
-            : "4. 结尾章节要把当前 beat 的 mustDeliver 落到位，但不要提前偷跑下一 beat 的核心兑现。",
+            : isFinaleSetup
+              ? "4. 结尾章节要把终局铺垫落到可进入高潮的门口，不得提前兑现终局高潮，也不得再开必须续写的新主线。"
+              : "4. 结尾章节要把当前 beat 的 mustDeliver 落到位，但不要提前偷跑下一 beat 的核心兑现。",
           "",
           "九、质量自检要求",
           "1. 输出前在脑内检查：章节数量是否精确、beatKey 是否一致、是否越界、是否有重复功能章。",

@@ -21,7 +21,7 @@ import type {
   VolumeGenerationNovel,
   VolumeWorkspace,
 } from "../volumeModels";
-import { isBookFinaleBeat } from "../volumeChapterListGeneration";
+import { isBookFinaleBeat, isFinaleSetupBeat } from "../volumeChapterListGeneration";
 
 type StoryMacroPlanResult = Awaited<ReturnType<StoryMacroPlanService["getPlan"]>> | null;
 
@@ -107,6 +107,13 @@ export async function generateChapterTaskSheetDetail(params: {
       completionProfile: params.promptInput.novel.completionProfile,
       targetVolumeIndex: targetIndex,
       chapterBudgets,
+      beatChapterEndOrder: existingChapter.chapterOrder,
+    }),
+    isFinaleSetup: isFinaleSetupBeat({
+      completionProfile: params.promptInput.novel.completionProfile,
+      targetVolumeIndex: targetIndex,
+      chapterBudgets,
+      beatChapterStartOrder: existingChapter.chapterOrder,
       beatChapterEndOrder: existingChapter.chapterOrder,
     }),
   };

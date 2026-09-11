@@ -46,13 +46,17 @@ test("chapter layered context keeps full book promise and volume reader rewards"
 
 test("serial target-span narrative hint asks for a mini-ending instead of a new mainline", () => {
   const serialHint = buildNarrativeProgressHint(150, 150);
+  const setupHint = buildNarrativeProgressHint(143, 150);
+  const landingHint = buildNarrativeProgressHint(148, 150);
   const midHint = buildNarrativeProgressHint(80, 150);
   const compactHint = buildNarrativeProgressHint(60, 60);
   assert.match(serialHint, /目标跨度收官/);
   assert.match(serialHint, /可见小结局/);
   assert.match(serialHint, /禁止开启必须续写的新主线/);
+  assert.match(setupHint, /终局铺垫/);
+  assert.match(landingHint, /终局落地/);
   assert.match(midHint, /发展阶段/);
-  assert.match(compactHint, /目标跨度收官|可见小结局|收束本目标跨度/);
+  assert.match(compactHint, /目标跨度收官|可见小结局|收束本目标跨度|终局落地|终局铺垫/);
   const serialContract = buildBookContractContext({
     title: "连载测试",
     completionMode: "serial_book",

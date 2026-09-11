@@ -264,16 +264,19 @@ export function buildNarrativeProgressHint(
   if (progress < 0.25) {
     return `【叙事进度】第 ${currentOrder} 章 / 预计共 ${estimatedTotal} 章（${Math.round(progress * 100)}%）\n开局阶段：可自由展开世界与人物，建立读者期待。`;
   }
-  if (progress < 0.75) {
+  if (remaining > 8 && progress < 0.75) {
     return `【叙事进度】第 ${currentOrder} 章 / 预计共 ${estimatedTotal} 章（${Math.round(progress * 100)}%）\n发展阶段：推进既有线索，谨慎开新支线，保持伏笔密度。`;
   }
-  if (progress < 0.90) {
+  if (remaining > 8) {
     return `【叙事进度】第 ${currentOrder} 章 / 预计共 ${estimatedTotal} 章（${Math.round(progress * 100)}%）\n收敛阶段：优先兑现已埋伏笔，避免新开必须续写的主线，距目标章还有约 ${remaining} 章。`;
   }
   if (currentOrder >= estimatedTotal) {
     return `【叙事进度】第 ${currentOrder} 章 / 预计共 ${estimatedTotal} 章（${Math.round(progress * 100)}%）\n目标跨度收官：写成可见小结局，完成本阶段高潮与兑现；可以留余味，禁止开启必须续写的新主线。`;
   }
-  return `【叙事进度】第 ${currentOrder} 章 / 预计共 ${estimatedTotal} 章（${Math.round(progress * 100)}%）\n尾声阶段：收束本目标跨度的主线与回报，为可见小结局收尾，禁止开新支线。`;
+  if (remaining <= 3) {
+    return `【叙事进度】第 ${currentOrder} 章 / 预计共 ${estimatedTotal} 章（${Math.round(progress * 100)}%）\n终局落地：距目标章还有约 ${remaining} 章。开始兑现高潮与本阶段回报，为可见小结局收尾，禁止开新支线。`;
+  }
+  return `【叙事进度】第 ${currentOrder} 章 / 预计共 ${estimatedTotal} 章（${Math.round(progress * 100)}%）\n终局铺垫：距目标章还有约 ${remaining} 章。开始收束主线、集齐终局条件，为即将到来的高潮做铺垫，禁止新开必须续写的主线。`;
 }
 
 function buildChapterBoundaryContract(

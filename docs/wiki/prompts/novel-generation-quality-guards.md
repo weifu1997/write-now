@@ -57,7 +57,7 @@ keyMilestoneGuards: z.array(volumeKeyMilestoneGuardSchema).default([])
 
 ### 五、叙事进度与角色缺席信号
 
-**叙事进度字段**：`ChapterWriteContext.narrativeProgressHint` 是可选写作提示，由运行时根据 `chapter.order / novel.estimatedChapterCount` 计算。总章数为空或小于等于 0 时不生成该字段。
+**叙事进度字段**：`ChapterWriteContext.narrativeProgressHint` 是可选写作提示，由运行时根据 `chapter.order / novel.estimatedChapterCount` 计算。总章数为空或小于等于 0 时不生成该字段。距目标章还剩约 8 章时进入终局铺垫，还剩约 3 章时进入终局落地，到达目标章时写成可见小结局。
 
 **渲染位置**：`buildChapterWriterContextBlocks()` 中以 `narrative_progress_hint` block 注入，`priority=98`，`required=false`。它只提示当前处于开局、发展、收敛或尾声阶段，不能替代章节任务、义务契约、时间线约束或角色硬事实。
 

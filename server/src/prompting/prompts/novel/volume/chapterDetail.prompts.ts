@@ -247,7 +247,7 @@ function createVolumeDetailSystemPrompt(detailMode: VolumeChapterDetailPromptInp
   ].join("\n");
 }
 
-function createExecutionContractSystemPrompt(isBookFinale = false): string {
+function createExecutionContractSystemPrompt(isBookFinale = false, isFinaleSetup = false): string {
   return [
     "你是资深网文章节编辑。",
     "当前任务是一次性生成可直接交给写作器的章节执行合同。",
@@ -263,7 +263,9 @@ function createExecutionContractSystemPrompt(isBookFinale = false): string {
     "如果 conflict_level_curve 标出用户锚定的 conflictLevel，该数值是硬约束，不得改写。",
     isBookFinale
       ? "本章是目标跨度收官章：endingState 必须是本阶段稳定收束；nextChapterEntryState 只能保留余味或人物去向，不得要求下一章承接必须续写的新主线。"
-      : "非收官章结尾只能把局面推到下一章入口，不能直接落完下一章标题所承诺的核心里程碑。",
+      : isFinaleSetup
+        ? "本章是终局铺垫章：必须收束主线、集齐高潮条件；endingState 要能进入即将到来的终局，但不得提前把终局高潮写完，也不得新开必须续写的主线。"
+        : "非收官章结尾只能把局面推到下一章入口，不能直接落完下一章标题所承诺的核心里程碑。",
     "如果最近章节已经连续使用相同开场、相同推进路数或同类钩子，本章必须通过 sceneCards 主动做出差异化。",
     "purpose、边界字段和 readerExperience 各字段只写 1 句，单字段不超过 120 个汉字；taskSheet 不超过 300 个汉字。",
     "每个 sceneCard 的文本字段只写执行所需信息，单字段不超过 120 个汉字；不得扩写正文或对白。",
@@ -352,14 +354,14 @@ export const volumeChapterExecutionContractPrompt: PromptAsset<
   ReturnType<typeof createChapterExecutionContractSchema>["_output"]
 > = {
   id: "novel.volume.chapter_execution_contract",
-  version: "v4",
+  version: "v5",
   taskType: "planner",
   mode: "structured",
   language: "zh",
   contextPolicy: baseContextPolicy,
   outputSchema: createChapterExecutionContractSchema(),
   render: (input, context) => [
-    new SystemMessage(createExecutionContractSystemPrompt(input.isBookFinale === true)),
+    new SystemMessage(createExecutionContractSystemPrompt(input.isBookFinale === true, input.isFinaleSetup === true)),
     new HumanMessage(buildChapterDetailPrompt(renderSelectedContextBlocks(context), input.detailMode)),
   ],
   postValidate: (output, input) => {

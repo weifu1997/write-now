@@ -30,7 +30,7 @@ export const volumeBeatSheetPrompt: PromptAsset<
   ReturnType<typeof createVolumeBeatSheetSchema>["_output"]
 > = {
   id: "novel.volume.beat_sheet",
-  version: "v3",
+  version: "v4",
   taskType: "planner",
   mode: "structured",
   language: "zh",
@@ -100,7 +100,7 @@ export const volumeBeatSheetPrompt: PromptAsset<
       "3. midpoint_turn 必须体现 midVolumeRisk 或等价的局面转向，不能只是线性加码。",
       "4. climax 必须承接卷高潮承诺，形成明确兑现。",
       input.isClosingVolume
-        ? "5. 这是目标跨度收官卷：end_hook 必须完成可见小结局或余味收束，不得再要求必须进入下一卷的新主线。"
+        ? "5. 这是目标跨度收官卷：pressure_lock / late_complication 必须开始收束主线、集齐终局条件，为高潮做铺垫；climax 必须兑现本阶段高潮与核心回报；end_hook 必须完成可见小结局或余味收束，不得再要求必须进入下一卷的新主线。"
         : "5. end_hook 必须承接 nextVolumeHook，并通过 resetPoint 或残局重组形成下一卷入口。",
       "",
       "【质量要求】",

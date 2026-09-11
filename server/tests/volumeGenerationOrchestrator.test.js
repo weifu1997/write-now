@@ -9,6 +9,7 @@ const {
   isCompactBookFinaleBeat,
   isBookFinaleBeat,
   isClosingVolume,
+  isFinaleSetupBeat,
 } = require("../dist/services/novel/volume/volumeChapterListGeneration.js");
 const {
   allocateChapterBudgets,
@@ -163,6 +164,20 @@ test("serial target-span finale uses whole-book order and does not treat a mid-v
     volumeCount: 4,
     chapterBudgets,
   }), true);
+  assert.equal(isFinaleSetupBeat({
+    completionProfile,
+    targetVolumeIndex: 3,
+    chapterBudgets,
+    beatChapterStartOrder: 22,
+    beatChapterEndOrder: 27,
+  }), true);
+  assert.equal(isFinaleSetupBeat({
+    completionProfile,
+    targetVolumeIndex: 3,
+    chapterBudgets,
+    beatChapterStartOrder: 30,
+    beatChapterEndOrder: 30,
+  }), false);
 });
 
 test("61-chapter serial last beat is finale while compact 60 stays compact-only", () => {

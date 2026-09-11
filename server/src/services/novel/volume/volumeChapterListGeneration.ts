@@ -104,6 +104,52 @@ export function isBookFinaleBeat(params: {
   return isTargetSpanFinaleBeat(params);
 }
 
+export const FINALE_SETUP_LOOKAHEAD_CHAPTERS = 8;
+export const FINALE_LANDING_LOOKAHEAD_CHAPTERS = 3;
+
+export function resolveAbsoluteRemainingChapters(params: {
+  completionProfile: VolumeGenerationNovel["completionProfile"];
+  targetVolumeIndex: number;
+  chapterBudgets: number[];
+  volumeLocalChapterOrder: number;
+}): number | null {
+  if (!params.completionProfile || params.targetVolumeIndex < 0) {
+    return null;
+  }
+  const absoluteOrder = resolveAbsoluteChapterOrder({
+    targetVolumeIndex: params.targetVolumeIndex,
+    chapterBudgets: params.chapterBudgets,
+    volumeLocalChapterOrder: params.volumeLocalChapterOrder,
+  });
+  return params.completionProfile.endingRequiredBy - absoluteOrder;
+}
+
+export function isFinaleSetupBeat(params: {
+  completionProfile: VolumeGenerationNovel["completionProfile"];
+  targetVolumeIndex: number;
+  chapterBudgets: number[];
+  beatChapterStartOrder: number;
+  beatChapterEndOrder: number;
+}): boolean {
+  if (isBookFinaleBeat({
+    completionProfile: params.completionProfile,
+    targetVolumeIndex: params.targetVolumeIndex,
+    chapterBudgets: params.chapterBudgets,
+    beatChapterEndOrder: params.beatChapterEndOrder,
+  })) {
+    return false;
+  }
+  const remainingAtBeatStart = resolveAbsoluteRemainingChapters({
+    completionProfile: params.completionProfile,
+    targetVolumeIndex: params.targetVolumeIndex,
+    chapterBudgets: params.chapterBudgets,
+    volumeLocalChapterOrder: params.beatChapterStartOrder,
+  });
+  return remainingAtBeatStart != null
+    && remainingAtBeatStart <= FINALE_SETUP_LOOKAHEAD_CHAPTERS
+    && remainingAtBeatStart > 0;
+}
+
 export function isClosingVolume(params: {
   completionProfile: VolumeGenerationNovel["completionProfile"];
   targetVolumeIndex: number;
@@ -376,6 +422,13 @@ async function generateBeatChapterBlock(params: {
         completionProfile: params.novel.completionProfile,
         targetVolumeIndex: targetIndex,
         chapterBudgets: params.chapterBudgets,
+        beatChapterEndOrder: params.beatPlan.chapterEndOrder,
+      }),
+      isFinaleSetup: isFinaleSetupBeat({
+        completionProfile: params.novel.completionProfile,
+        targetVolumeIndex: targetIndex,
+        chapterBudgets: params.chapterBudgets,
+        beatChapterStartOrder: params.beatPlan.chapterStartOrder,
         beatChapterEndOrder: params.beatPlan.chapterEndOrder,
       }),
       reservedChapterTitles: params.targetVolume.chapters

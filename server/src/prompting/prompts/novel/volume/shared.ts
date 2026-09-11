@@ -71,6 +71,8 @@ export interface VolumeChapterListPromptInput {
   preservedBeatChapterSummary?: string | null;
   reservedChapterTitles?: string[];
   retryReason?: string | null;
+  isBookFinale?: boolean;
+  isFinaleSetup?: boolean;
 }
 
 export interface VolumeChapterDetailPromptInput {
@@ -84,6 +86,7 @@ export interface VolumeChapterDetailPromptInput {
   guidance?: string;
   detailMode: ChapterDetailMode;
   isBookFinale?: boolean;
+  isFinaleSetup?: boolean;
 }
 
 export interface VolumeRebalancePromptInput {
