@@ -138,3 +138,22 @@ export async function generateChapterExecutionContract(
   );
   return data;
 }
+
+export async function generateNovelChapterSummary(
+  id: string,
+  chapterId: string,
+  payload?: {
+    provider?: import("@write-now/shared/types/llm").LLMProvider;
+    model?: string;
+    temperature?: number;
+  },
+) {
+  const { data } = await apiClient.post<
+    ApiResponse<{
+      chapterId: string;
+      summary: string;
+      expectation: string;
+    }>
+  >(`/novels/${id}/chapters/${chapterId}/summary/generate`, payload ?? {});
+  return data;
+}
