@@ -12,6 +12,9 @@ interface UseSSEOptions {
 }
 
 export function useSSE(options?: UseSSEOptions) {
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
+
   const [content, setContent] = useState("");
   const [reasoning, setReasoning] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
@@ -44,14 +47,14 @@ export function useSSE(options?: UseSSEOptions) {
 
       if (frame.type === "reasoning") {
         setReasoning((prev) => prev + frame.content);
-        options?.onReasoning?.(frame.content);
+        optionsRef.current?.onReasoning?.(frame.content);
         return;
       }
 
       if (frame.type === "done") {
         setIsStreaming(false);
         setIsDone(true);
-        void options?.onDone?.(frame.fullContent);
+        void optionsRef.current?.onDone?.(frame.fullContent);
         return;
       }
 
@@ -71,7 +74,7 @@ export function useSSE(options?: UseSSEOptions) {
 
       if (frame.type === "run_status") {
         setLatestRun(frame);
-        options?.onRunStatus?.(frame);
+        optionsRef.current?.onRunStatus?.(frame);
         return;
       }
 
@@ -86,7 +89,7 @@ export function useSSE(options?: UseSSEOptions) {
         setError(frame.error);
       }
     },
-    [options],
+    [],
   );
 
   const start = useCallback(
@@ -110,7 +113,7 @@ export function useSSE(options?: UseSSEOptions) {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            ...(options?.headers ?? {}),
+            ...(optionsRef.current?.headers ?? {}),
           },
           body: JSON.stringify(body ?? {}),
           credentials: "include",
@@ -169,7 +172,7 @@ export function useSSE(options?: UseSSEOptions) {
         controllerRef.current = null;
       }
     },
-    [abort, handleFrame, options?.headers],
+    [abort, handleFrame],
   );
 
   useEffect(() => abort, [abort]);

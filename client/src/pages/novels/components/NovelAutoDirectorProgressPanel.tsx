@@ -1,4 +1,4 @@
-﻿import type {
+import type {
   NovelWorkflowMilestone,
   NovelWorkflowMilestoneType,
 } from "@write-now/shared/types/novelWorkflow";
@@ -399,9 +399,9 @@ export default function NovelAutoDirectorProgressPanel({
       || (visualMode === "execution_failed"
         ? "任务已停在最近一步，可以从当前进度恢复。"
         : chapterTitleWarning
-          ? "章节列表已经保留，这是一条可直接处理的结构提醒。你可以快速修复标题，再决定是否继续后续导演流程。"
+          ? "章节列表已保留，存在待确认的标题结构提醒。可快速修复标题后再继续导演流程。"
           : task?.status === "waiting_approval"
-            ? "当前导演流程已经停在审核点，你可以先检查产物，再决定是否继续自动推进。"
+            ? "导演流程当前暂停在审核节点，请检查生成产物并确认后续推进。"
             : "可离开当前页面，任务会继续运行；回来后可在 AI 驾驶舱查看进度。")
     );
   const resolveDashboardAction = (dashboardAction: DirectorDashboardAction) => {

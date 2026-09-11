@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { bootstrapNovelWorkflow } from "@/api/novelWorkflow";
@@ -11,6 +11,7 @@ import {
 
 export function useNovelEditWorkflow(novelId: string) {
   const [searchParams, setSearchParams] = useSearchParams();
+  const hasBootstrappedRef = useRef(false);
 
   const { directorTaskId, workspaceTaskId: workflowTaskId } = readNovelEditWorkflowTaskIds(searchParams);
   const selectedVolumeId = searchParams.get("volumeId") ?? "";
@@ -56,6 +57,10 @@ export function useNovelEditWorkflow(novelId: string) {
     if (!novelId) {
       return;
     }
+    if (workflowTaskId && hasBootstrappedRef.current) {
+      return;
+    }
+    hasBootstrappedRef.current = true;
     bootstrapMutation.mutate();
   }, [novelId, workflowTaskId]);
 

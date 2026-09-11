@@ -41,7 +41,7 @@ export const AUTO_DIRECTOR_EVENT_OPTIONS: AutoDirectorEventOption[] = [
   {
     code: "auto_director.recovered",
     label: "异常恢复",
-    description: "之前异常的自动导演任务恢复执行时通知你。",
+    description: "异常中断的自动导演任务恢复执行时发送通知。",
   },
   {
     code: "auto_director.completed",

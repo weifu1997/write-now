@@ -60,7 +60,7 @@ export default function VolumePayoffOverviewCard(props: VolumePayoffOverviewCard
           <div>
             <CardTitle className="text-base">当前卷伏笔 / 回收参考</CardTitle>
             <div className="text-sm text-muted-foreground">
-              这里只看当前选中卷，用来核对本卷待兑现事项和章节兑现安排是否一致。全书级 canonical 账本已经挪到上方的独立模块。
+              核对当前卷待兑现事项与章节兑现安排的一致性。全书级标准账本请参考上方独立账本模块。
             </div>
           </div>
           <div className="flex flex-wrap gap-2">

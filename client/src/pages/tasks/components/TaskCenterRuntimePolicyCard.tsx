@@ -1,15 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
 import type {
   DirectorPolicyMode,
   DirectorRuntimeSnapshot,
 } from "@write-now/shared/types/directorRuntime";
-import { updateDirectorRuntimePolicy } from "@/api/novelDirector";
-import { queryKeys } from "@/api/queryKeys";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/toast";
-import SelectControl from "@/components/common/SelectControl";
 
 interface TaskCenterRuntimePolicyCardProps {
   taskId: string;
@@ -44,42 +38,20 @@ function formatPolicyMode(mode: DirectorPolicyMode): string {
 }
 
 export default function TaskCenterRuntimePolicyCard({
-  taskId,
   snapshot,
 }: TaskCenterRuntimePolicyCardProps) {
-  const queryClient = useQueryClient();
   const currentMode = snapshot?.policy.mode ?? "run_until_gate";
-  const [selectedMode, setSelectedMode] = useState<DirectorPolicyMode>(currentMode);
-  const [allowExpensiveReview, setAllowExpensiveReview] = useState(false);
-  const [mayOverwriteUserContent, setMayOverwriteUserContent] = useState(false);
   const selectedOption = useMemo(
-    () => POLICY_OPTIONS.find((item) => item.value === selectedMode) ?? POLICY_OPTIONS[2],
-    [selectedMode],
+    () => POLICY_OPTIONS.find((item) => item.value === currentMode) ?? POLICY_OPTIONS[2],
+    [currentMode],
   );
-  const mutation = useMutation({
-    mutationFn: () => updateDirectorRuntimePolicy(taskId, {
-      mode: selectedMode,
-      allowExpensiveReview,
-      mayOverwriteUserContent,
-    }),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.tasks.directorRuntime(taskId) });
-      toast.success("导演推进方式已更新");
-    },
-    onError: (error) => {
-      toast.error(error instanceof Error ? error.message : "更新导演推进方式失败");
-    },
-  });
-
-  useEffect(() => {
-    setSelectedMode(currentMode);
-    setAllowExpensiveReview(Boolean(snapshot?.policy.allowExpensiveReview));
-    setMayOverwriteUserContent(Boolean(snapshot?.policy.mayOverwriteUserContent));
-  }, [currentMode, snapshot?.policy.allowExpensiveReview, snapshot?.policy.mayOverwriteUserContent]);
 
   if (!snapshot) {
     return null;
   }
+
+  const allowExpensiveReview = Boolean(snapshot.policy.allowExpensiveReview);
+  const mayOverwriteUserContent = Boolean(snapshot.policy.mayOverwriteUserContent);
 
   return (
     <div className="rounded-md border bg-muted/20 p-3">
@@ -87,68 +59,28 @@ export default function TaskCenterRuntimePolicyCard({
         <div>
           <div className="font-medium">导演推进方式</div>
           <div className="mt-1 text-sm leading-6 text-muted-foreground">
-            选择系统接下来怎么推进这个导演任务。
+            {selectedOption.description}
           </div>
         </div>
         <Badge variant="outline">{formatPolicyMode(snapshot.policy.mode)}</Badge>
       </div>
-      <div className="mt-3 space-y-2">
-        <SelectControl
-          className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-          value={selectedMode}
-          onChange={(event) => setSelectedMode(event.target.value as DirectorPolicyMode)}
-        >
-          {POLICY_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>{option.label}</option>
-          ))}
-        </SelectControl>
-        <div className="text-xs leading-5 text-muted-foreground">{selectedOption.description}</div>
+
+      <div className="mt-3 space-y-2 rounded-md border bg-background/70 p-3 text-sm">
+        <div className="flex items-center justify-between">
+          <span className="text-muted-foreground">执行完整审校</span>
+          <Badge variant={allowExpensiveReview ? "default" : "secondary"}>
+            {allowExpensiveReview ? "允许" : "未开启"}
+          </Badge>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-muted-foreground">改写受保护内容</span>
+          <Badge variant={mayOverwriteUserContent ? "default" : "secondary"}>
+            {mayOverwriteUserContent ? "允许" : "未开启"}
+          </Badge>
+        </div>
       </div>
-      <div className="mt-3 space-y-2 rounded-md border bg-background/70 p-3">
-        <label className="flex items-start gap-2 text-sm">
-          <input
-            type="checkbox"
-            className="mt-1"
-            checked={allowExpensiveReview}
-            onChange={(event) => setAllowExpensiveReview(event.target.checked)}
-          />
-          <span>
-            <span className="block font-medium">允许执行更完整的审校</span>
-            <span className="block text-xs leading-5 text-muted-foreground">
-              用于章节质量检查、近期章节复盘等步骤，系统会在执行前记录策略。
-            </span>
-          </span>
-        </label>
-        <label className="flex items-start gap-2 text-sm">
-          <input
-            type="checkbox"
-            className="mt-1"
-            checked={mayOverwriteUserContent}
-            onChange={(event) => setMayOverwriteUserContent(event.target.checked)}
-          />
-          <span>
-            <span className="block font-medium">允许改写受保护的内容</span>
-            <span className="block text-xs leading-5 text-muted-foreground">
-              仅在你确认要让系统处理已编辑正文或关键设定时开启。
-            </span>
-          </span>
-        </label>
-      </div>
-      <div className="mt-3 flex flex-wrap gap-2">
-        <Button
-          size="sm"
-          onClick={() => mutation.mutate()}
-          disabled={
-            mutation.isPending
-            || (
-              selectedMode === snapshot.policy.mode
-              && allowExpensiveReview === Boolean(snapshot.policy.allowExpensiveReview)
-              && mayOverwriteUserContent === Boolean(snapshot.policy.mayOverwriteUserContent)
-            )
-          }
-        >
-          {mutation.isPending ? "保存中..." : "保存推进方式"}
-        </Button>
+      <div className="mt-2 text-xs leading-5 text-muted-foreground">
+        推进方式由工作台启动时配置；如需调整请在小说来源工作台重新设置。
       </div>
     </div>
   );

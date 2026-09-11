@@ -76,7 +76,7 @@ function summarizeStep(step: DirectorTaskFactInspectionStep): {
     return {
       tone: "done",
       title: "已确认完成",
-      detail: "系统已经找到这一步对应的真实产出，可以直接复用。",
+      detail: "系统已定位本步骤对应的真实产出，可直接复用。",
     };
   }
   if (!step.ready) {
@@ -96,7 +96,7 @@ function summarizeStep(step: DirectorTaskFactInspectionStep): {
   return {
     tone: "working",
     title: "还没闭环",
-    detail: step.progress?.label || "这一步已经具备执行条件，但事实还没有完全闭环。",
+    detail: step.progress?.label || "本步骤具备执行条件，待事实闭环。",
   };
 }
 
@@ -142,7 +142,7 @@ function StepFactCard({ step }: { step: DirectorTaskFactInspectionStep }) {
 
         <div className="grid gap-3 md:grid-cols-2">
           <div className="rounded-lg border border-border/70 bg-muted/10 p-3">
-            <div className="text-xs text-muted-foreground">现在能不能继续做</div>
+            <div className="text-xs text-muted-foreground">当前推进可行性</div>
             <div className="mt-1 text-sm font-medium text-foreground">
               {step.ready ? "可以开始或继续" : "还要先补前置事实"}
             </div>
@@ -163,7 +163,7 @@ function StepFactCard({ step }: { step: DirectorTaskFactInspectionStep }) {
 
         {step.blockers.length > 0 ? (
           <div className="space-y-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3">
-            <div className="text-sm font-medium text-destructive">现在卡住的原因</div>
+            <div className="text-sm font-medium text-destructive">阻断原因说明</div>
             <ul className="space-y-2 text-sm leading-6 text-destructive/90">
               {step.blockers.map((blocker) => (
                 <li key={`${step.stepId}:${blocker.code}`}>{blocker.reason}</li>
@@ -221,7 +221,7 @@ export default function DirectorFactDebugDialog(input: {
         <DialogHeader className="border-b border-border/70 px-6 py-5">
           <DialogTitle>导演步骤完整度检查</DialogTitle>
           <DialogDescription>
-            这里展示的是每一步基于真实产出的检查结果。你可以直接看到哪一步已经有结果、哪一步缺前置条件、系统现在准备先补哪里。
+            这里展示每一步基于真实产出的检查结果。清晰列出已具备的条件、缺失的前置以及系统接下来的建议补充项。
           </DialogDescription>
         </DialogHeader>
 

@@ -1,4 +1,4 @@
-﻿import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -29,11 +29,11 @@ export default function WritingFormulaBookStyleFlow(props: WritingFormulaBookSty
       <CardContent className="space-y-5">
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
           <div className="space-y-4 rounded-2xl border bg-slate-50/70 p-4">
-            <div className="text-sm font-medium text-slate-900">现在应该从哪里进入</div>
+            <div className="text-sm font-medium text-slate-900">推荐进入路径</div>
             <div className="rounded-2xl border bg-white p-4 text-sm leading-7 text-slate-700">
               {novelId
-                ? `当前小说${novelTitle ? `《${novelTitle}》` : ""}的“默认写法”已经放到小说基础信息页里。`
-                : "请先进入某本小说的基础信息页，在那里确认书级默认写法。"}
+                ? `当前小说${novelTitle ? `《${novelTitle}》` : ""}的书级默认写法位于小说基础信息页。`
+                : "请从小说基础信息页选择或确认书级默认写法。"}
             </div>
             <div className="rounded-2xl border bg-slate-950 p-4 text-white">
               <div className="text-sm font-medium">两个入口分别负责什么</div>

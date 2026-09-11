@@ -135,7 +135,7 @@ export default function BookPayoffLedgerCard(props: BookPayoffLedgerCardProps) {
                 <Badge variant="outline">{ledgerItems.length}</Badge>
               </div>
               <div className="mt-1 text-xs text-muted-foreground">
-                后续规划、写作、审查和修复优先消费这里的 canonical 结果，不再只盯某一处原始字段。
+                规划、写作、审查和修复统一消费标准账本数据，确保各环节口径一致。
               </div>
               <div className="mt-3 space-y-2 text-sm">
                 {hasCanonicalLedgerContent ? (
@@ -178,7 +178,7 @@ export default function BookPayoffLedgerCard(props: BookPayoffLedgerCardProps) {
                   ))
                 ) : (
                   <div className="rounded-lg border border-dashed border-border/70 bg-background p-3 text-xs text-muted-foreground">
-                    当前还没有可用的 canonical 伏笔账本。首次进入老项目时，系统会懒同步这份账本；如果现在仍为空，说明相关规划或状态材料还不够。
+                    当前暂无可用标准伏笔账本。项目规划或状态材料完备后，系统会自动汇总账本。
                   </div>
                 )}
               </div>

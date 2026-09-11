@@ -149,7 +149,7 @@ export default function CharacterDynamicsSection(props: CharacterDynamicsSection
           <div className="space-y-1">
             <CardTitle>动态角色系统</CardTitle>
             <div className="text-sm text-muted-foreground">
-              这里把卷级职责、缺席风险、新角色候选和关系阶段放回角色页主流程，不再依赖你自己手工追踪。
+              集中管理卷级职责、缺席风险、新角色候选与关系阶段，系统协助自动追踪角色动态。
             </div>
           </div>
           <div className="flex flex-wrap gap-2">

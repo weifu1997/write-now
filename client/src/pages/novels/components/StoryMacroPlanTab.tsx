@@ -35,7 +35,7 @@ export default function StoryMacroPlanTab(props: StoryMacroTabProps) {
     <div className="space-y-4">
       <DirectorTakeoverEntryPanel
         title="从故事宏观规划接管"
-        description="AI 会先判断 Story Macro / Book Contract 是否已经具备，再决定继续补缺失内容还是按你的选择重跑当前步。"
+        description="系统优先核查故事宏观设定与全书契约完整度，再按需补齐缺失项或重新执行当前规划。"
         entry={props.directorTakeoverEntry}
       />
       <StoryEngineStudio tab={props} />

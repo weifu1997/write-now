@@ -76,8 +76,8 @@ export default function DesktopLegacyDataImportCard({
   const hasSuggestedSource = Boolean(snapshot?.suggestedSourcePath);
   const title = hasSuggestedSource ? "检测到旧版本地数据库" : "导入旧版本地数据库";
   const description = hasSuggestedSource
-    ? "桌面版检测到了你之前 web/开发版使用的本地数据库，可以一键导入并接管原有小说、API Key 和知识库数据。"
-    : "桌面版默认使用独立数据目录。如果你之前在 web/开发版里已经有本地数据，可以选择旧的 dev.db 导入到桌面版。";
+    ? "桌面版检测到本地开发版数据库，可一键导入并接管小说、API Key 和知识库数据。"
+    : "桌面版默认使用独立数据目录。如需使用开发版数据，可选择 dev.db 文件导入到桌面版。";
 
   const importData = async (preferSuggested: boolean) => {
     try {

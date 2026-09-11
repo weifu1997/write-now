@@ -262,7 +262,7 @@ export default function WritingFormulaLanding(props: WritingFormulaLandingProps)
               <div className="space-y-4">
                 <DetailPanel
                   title="资产概览"
-                  description="这一列主要帮你判断这套写法现在成熟到什么程度。"
+                  description="辅助判断这套写法的成熟度与适配阶段。"
                 >
                   <div className="space-y-2">
                     <DetailStatRow label="来源" value={profile.sourceTypeLabel} />
@@ -291,7 +291,7 @@ export default function WritingFormulaLanding(props: WritingFormulaLandingProps)
 
                 <DetailPanel
                   title="下一步"
-                  description="三个按钮现在各自只负责一件事，不会再跳到同一块内容里。"
+                  description="按功能目标分别进入对应编辑、测试或去味界面。"
                 >
                   <div className="space-y-2 text-sm leading-6 text-slate-700">
                     <div>编辑设定：维护这套写法本身的说明、规则和反 AI 约束。</div>
