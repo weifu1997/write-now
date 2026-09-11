@@ -327,7 +327,7 @@ export default function SimpleNovelShelfPage() {
         <OnboardingTip
           storageKey="simple-creation-shelf"
           title="阅读已保存正文"
-          description="已经保存的正文会及时出现在书架；审校或修复中的章节仍可能更新，完成后会成为稳定成稿。"
+          description="已保存的正文会及时呈现在书架；审校或修复中的章节仍可能更新，完成后成为稳定成稿。"
           next="选择左侧章节即可阅读当前版本。"
         />
 

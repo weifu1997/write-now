@@ -153,7 +153,7 @@ export function getFollowUpActionConsequence(action: AutoDirectorAction): string
     return "补齐校验确认缺失的拆章资产，再继续当前导演任务。";
   }
   if (action.code === "dismiss_history") {
-    return "不再出现在导演跟进和角标里。不会删除小说，也不会改已保存章节。";
+    return "从导演跟进和角标列表中隐去。不会删除小说，也不会修改已保存章节。";
   }
   return "只执行校验声明为低风险的状态修复，不替用户确认候选或重写正文。";
 }

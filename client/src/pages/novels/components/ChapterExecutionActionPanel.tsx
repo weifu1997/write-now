@@ -117,7 +117,7 @@ function resolvePrimaryAction(params: {
   if (selectedChapter.chapterStatus === "needs_repair") {
     return {
       label: "打开章节编辑器",
-      reason: "这章已经有正文。即使审核发现问题，也不应阻塞继续编辑；你可以先进入编辑器，或在下方一键修复。",
+      reason: "本章已有正文。即使审核发现问题，也不影响继续编辑；可进入编辑器，或在下方使用一键修复。",
       variant: "default",
       href: `/novels/${novelId}/chapters/${selectedChapter.id}`,
     };
@@ -131,7 +131,7 @@ function resolvePrimaryAction(params: {
   ) {
     return {
       label: isRunningFullAudit ? "正在运行完整审校..." : "运行完整审校",
-      reason: "正文已经出来了，先做完整审校，再决定是修复还是继续改写。",
+      reason: "正文草稿已就绪，建议先执行完整审校，再决定后续修复或改写。",
       variant: "default",
       ai: true,
       onClick: onRunFullAudit,
@@ -153,7 +153,7 @@ function resolvePrimaryAction(params: {
   if (!selectedChapter.content?.trim() || selectedChapter.chapterStatus === "pending_generation") {
     return {
       label: isSelectedChapterStreaming ? "正在写本章..." : "写本章",
-      reason: "准备信息已经够用了，现在最值得做的是直接生成这一章的正文。",
+      reason: "前置设定已齐备，建议直接生成本章正文。",
       variant: "default",
       ai: true,
       onClick: onGenerateSelectedChapter,
@@ -163,7 +163,7 @@ function resolvePrimaryAction(params: {
 
   return {
     label: "打开章节编辑器",
-    reason: "这一章已经有正文，直接进入编辑器处理细修和恢复会更高效。",
+    reason: "本章已有正文，进入编辑器处理细节修润与恢复更为高效。",
     variant: "default",
     href: `/novels/${novelId}/chapters/${selectedChapter.id}`,
   };

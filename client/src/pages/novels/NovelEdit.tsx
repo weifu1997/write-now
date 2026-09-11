@@ -1,8 +1,7 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BOOK_ANALYSIS_SECTIONS } from "@write-now/shared/types/bookAnalysis";
-import type { NovelExportFormat, NovelExportScope } from "@write-now/shared/types/novelExport";
 import type {
   Chapter,
   PipelineRepairMode,
@@ -15,35 +14,14 @@ import type {
 } from "@write-now/shared/types/novel";
 import NovelEditView from "./components/NovelEditView";
 import NovelProductionExperienceHandoff from "./components/NovelProductionExperienceHandoff";
-import { getBaseCharacterList } from "@/api/character";
-import { flattenGenreTreeOptions, getGenreTree } from "@/api/genre";
-import { getDirectorBookAutomationProjection } from "@/api/novelDirector";
-import { getActiveAutoDirectorTask } from "@/api/novelWorkflow";
 import {
-  auditNovelChapter,
   backfillNovelCharacterResources,
   confirmCharacterResourceProposal,
   extractChapterResources,
-  rejectCharacterResourceProposal,
-  getChapterTimeline,
-  getChapterResourceContext,
-  generateChapterPlan,
-  getChapterAuditReports,
-  getChapterPlan,
-  getChapterStateSnapshot,
-  getLatestStateSnapshot,
-  getNovelCharacterResources,
-  getNovelPayoffLedger,
-  getNovelDetail,
-  setNovelCreationExperience,
-  downloadNovelExport,
   getNovelPipelineJob,
-  getNovelVolumeWorkspace,
-  getNovelQualityReport,
-  replanNovel,
+  rejectCharacterResourceProposal,
+  setNovelCreationExperience,
 } from "@/api/novel";
-import { flattenStoryModeTreeOptions, getStoryModeTree } from "@/api/storyMode";
-import { getWorldList } from "@/api/world";
 import { queryKeys } from "@/api/queryKeys";
 import { toast } from "@/components/ui/toast";
 import { useSSE } from "@/hooks/useSSE";
@@ -65,14 +43,10 @@ import { useNovelEditDirectorWorkspace } from "./hooks/useNovelEditDirectorWorks
 import { buildNovelEditPlanningTabs } from "./novelEditPlanningTabs";
 import { buildNovelEditExecutionTabs } from "./novelEditExecutionTabs";
 import type { ChapterReviewResult } from "./chapterPlanning.shared";
-import { isNovelWorkspaceFlowTab } from "./novelWorkspaceNavigation";
 import { canCancelDirectorTask } from "@/lib/novelWorkflowTaskUi";
 import { renderNovelEditTakeoverEntry, resolveActiveTakeoverStep } from "./novelEditTakeoverEntry";
-import {
-  createDownload,
-  parsePipelineBackgroundActivities,
-  resolveNovelExportFlags,
-} from "./novelEditPageHelpers";
+import { useNovelEditQueries, useNovelEditExport } from "./hooks/edit";
+import { parsePipelineBackgroundActivities } from "./novelEditPageHelpers";
 import {
   DEFAULT_ESTIMATED_CHAPTER_COUNT,
   createDefaultNovelBasicFormState,
@@ -85,7 +59,6 @@ import {
   buildOutlinePreviewFromVolumes,
   buildStructuredPreviewFromVolumes,
   buildVolumeSyncPreview,
-  type ExistingOutlineChapter,
   type VolumeSyncOptions,
 } from "./volumePlan.utils";
 
@@ -171,21 +144,54 @@ export default function NovelEdit() {
     currentState: "",
     currentGoal: "",
   });
-  const shouldLoadVolumeWorkspace = activeTab === "outline" || activeTab === "structured";
-  const shouldLoadStoryMacro = activeTab === "story_macro";
-  const shouldLoadWorldSlice = activeTab === "basic" || activeTab === "world";
-  const shouldLoadQualityReport = activeTab === "pipeline";
-  const shouldLoadLatestState = activeTab === "chapter" || activeTab === "pipeline";
-  const shouldLoadPayoffLedger = activeTab === "structured" || activeTab === "chapter" || activeTab === "pipeline";
-  const shouldLoadCharacterResources = activeTab === "character" || activeTab === "chapter" || activeTab === "pipeline";
-  const shouldLoadChapterContext = activeTab === "chapter" && Boolean(selectedChapterId);
-  const shouldLoadChapterTimeline = activeTab === "chapter" && Boolean(selectedChapterId);
-
-  const novelDetailQuery = useQuery({
-    queryKey: queryKeys.novels.detail(id),
-    queryFn: () => getNovelDetail(id),
-    enabled: Boolean(id),
+  const {
+    shouldLoadVolumeWorkspace,
+    shouldLoadStoryMacro,
+    shouldLoadWorldSlice,
+    shouldLoadQualityReport,
+    shouldLoadLatestState,
+    shouldLoadPayoffLedger,
+    shouldLoadCharacterResources,
+    shouldLoadChapterContext,
+    shouldLoadChapterTimeline,
+    novelDetailQuery,
+    qualityReportQuery,
+    volumeWorkspaceQuery,
+    latestStateSnapshotQuery,
+    chapterStateSnapshotQuery,
+    payoffLedgerChapterOrder,
+    payoffLedgerQuery,
+    characterResourcesQuery,
+    chapterResourceContextQuery,
+    chapterTimelineQuery,
+    activeAutoDirectorTaskQuery,
+    bookAutomationQuery,
+    chapterPlanQuery,
+    chapterAuditReportsQuery,
+    baseCharacterListQuery,
+    worldListQuery,
+    genreTreeQuery,
+    storyModeTreeQuery,
+    genreOptions,
+    storyModeOptions,
+    chapters,
+    outlineSyncChapters,
+    selectedChapter,
+    characters,
+    baseCharacters,
+    selectedCharacter,
+    selectedBaseCharacter,
+    importedBaseCharacterIds,
+    hasCharacters,
+    savedVolumeWorkspace,
+  } = useNovelEditQueries({
+    id,
+    activeTab,
+    selectedChapterId,
+    selectedCharacterId,
+    selectedBaseCharacterId,
   });
+
   const switchToSimpleMutation = useMutation({
     mutationFn: () => setNovelCreationExperience(id, "simple"),
     onSuccess: async () => {
@@ -200,102 +206,6 @@ export default function NovelEdit() {
       navigate(`/novels/${id}/simple`, { replace: true });
     }
   }, [id, navigate, novelDetailQuery.data?.data?.creationExperience]);
-  const qualityReportQuery = useQuery({
-    queryKey: queryKeys.novels.qualityReport(id),
-    queryFn: () => getNovelQualityReport(id),
-    enabled: Boolean(id && shouldLoadQualityReport),
-  });
-  const volumeWorkspaceQuery = useQuery({
-    queryKey: queryKeys.novels.volumeWorkspace(id),
-    queryFn: () => getNovelVolumeWorkspace(id),
-    enabled: Boolean(id && shouldLoadVolumeWorkspace),
-  });
-  const latestStateSnapshotQuery = useQuery({
-    queryKey: queryKeys.novels.latestStateSnapshot(id),
-    queryFn: () => getLatestStateSnapshot(id),
-    enabled: Boolean(id && shouldLoadLatestState),
-  });
-  const chapterStateSnapshotQuery = useQuery({
-    queryKey: queryKeys.novels.chapterStateSnapshot(id, selectedChapterId || "none"),
-    queryFn: () => getChapterStateSnapshot(id, selectedChapterId),
-    enabled: Boolean(id && selectedChapterId),
-  });
-  const payoffLedgerChapterOrder = useMemo(() => {
-    const orders = novelDetailQuery.data?.data?.chapters?.map((chapter) => chapter.order) ?? [];
-    return orders.length > 0 ? Math.max(...orders) : undefined;
-  }, [novelDetailQuery.data?.data?.chapters]);
-  const payoffLedgerQuery = useQuery({
-    queryKey: queryKeys.novels.payoffLedger(id, payoffLedgerChapterOrder),
-    queryFn: () => getNovelPayoffLedger(id, payoffLedgerChapterOrder),
-    enabled: Boolean(id && shouldLoadPayoffLedger),
-  });
-  const characterResourcesQuery = useQuery({
-    queryKey: queryKeys.novels.characterResources(id),
-    queryFn: () => getNovelCharacterResources(id),
-    enabled: Boolean(id && shouldLoadCharacterResources),
-  });
-  const chapterResourceContextQuery = useQuery({
-    queryKey: queryKeys.novels.characterResourceContext(id, selectedChapterId || "none"),
-    queryFn: () => getChapterResourceContext(id, selectedChapterId),
-    enabled: Boolean(id && shouldLoadChapterContext),
-  });
-  const chapterTimelineQuery = useQuery({
-    queryKey: queryKeys.novels.chapterTimeline(id, selectedChapterId || "none"),
-    queryFn: () => getChapterTimeline(id, selectedChapterId),
-    enabled: Boolean(id && shouldLoadChapterTimeline),
-  });
-  const activeAutoDirectorTaskQuery = useQuery({
-    queryKey: queryKeys.novels.autoDirectorTask(id),
-    queryFn: () => getActiveAutoDirectorTask(id),
-    enabled: Boolean(id),
-    refetchInterval: (query) => {
-      const task = query.state.data?.data;
-      return task && (task.status === "queued" || task.status === "running" || task.status === "waiting_approval")
-        ? 4000
-        : false;
-    },
-  });
-  const bookAutomationQuery = useQuery({
-    queryKey: queryKeys.novels.directorBookAutomation(id),
-    queryFn: () => getDirectorBookAutomationProjection(id),
-    enabled: Boolean(id),
-    retry: false,
-    refetchInterval: (query) => {
-      const status = query.state.data?.data?.projection.status;
-      return status === "queued" || status === "running" || status === "waiting_approval" ? 4000 : false;
-    },
-  });
-  const chapterPlanQuery = useQuery({
-    queryKey: queryKeys.novels.chapterPlan(id, selectedChapterId || "none"),
-    queryFn: () => getChapterPlan(id, selectedChapterId),
-    enabled: Boolean(id && shouldLoadChapterContext),
-  });
-  const chapterAuditReportsQuery = useQuery({
-    queryKey: queryKeys.novels.chapterAuditReports(id, selectedChapterId || "none"),
-    queryFn: () => getChapterAuditReports(id, selectedChapterId),
-    enabled: Boolean(id && shouldLoadChapterContext),
-  });
-  const baseCharacterListQuery = useQuery({
-    queryKey: queryKeys.baseCharacters.all,
-    queryFn: () => getBaseCharacterList(),
-  });
-  const worldListQuery = useQuery({
-    queryKey: queryKeys.worlds.all,
-    queryFn: getWorldList,
-  });
-  const genreTreeQuery = useQuery({
-    queryKey: queryKeys.genres.all,
-    queryFn: getGenreTree,
-  });
-  const storyModeTreeQuery = useQuery({
-    queryKey: queryKeys.storyModes.all,
-    queryFn: getStoryModeTree,
-  });
-  const genreOptions = useMemo(() => flattenGenreTreeOptions(genreTreeQuery.data?.data ?? []), [genreTreeQuery.data?.data]);
-  const storyModeOptions = useMemo(
-    () => flattenStoryModeTreeOptions(storyModeTreeQuery.data?.data ?? []),
-    [storyModeTreeQuery.data?.data],
-  );
 
   const {
     sourceBookAnalysesQuery,
@@ -354,73 +264,13 @@ export default function NovelEdit() {
       return false;
     },
   });
-  const exportNovelMutation = useMutation({
-    mutationFn: async (input: {
-      format: NovelExportFormat;
-      scope: NovelExportScope;
-      novelTitle: string;
-    }) => {
-      const exported = await downloadNovelExport(id, input.format, input.scope, input.novelTitle);
-      return {
-        ...exported,
-        scope: input.scope,
-        format: input.format,
-      };
-    },
-    onSuccess: ({ blob, fileName, scope }) => {
-      createDownload(blob, fileName);
-      toast.success(scope === "full" ? "整本书导出已开始。" : "当前步骤导出已开始。");
-    },
-    onError: (error) => {
-      toast.error(error instanceof Error ? error.message : "导出失败。");
-    },
+  const { exportControls } = useNovelEditExport({
+    id,
+    activeTab,
+    basicTitle: basicForm.title,
+    novelDetailTitle: novelDetailQuery.data?.data?.title,
   });
 
-  const chapters = useMemo(() => novelDetailQuery.data?.data?.chapters ?? [], [novelDetailQuery.data?.data?.chapters]);
-  const outlineSyncChapters = useMemo<ExistingOutlineChapter[]>(
-    () => chapters.map((chapter) => ({
-      id: chapter.id,
-      order: chapter.order,
-      title: chapter.title,
-      content: chapter.content ?? "",
-      expectation: chapter.expectation ?? "",
-      targetWordCount: chapter.targetWordCount ?? null,
-      conflictLevel: chapter.conflictLevel ?? null,
-      revealLevel: chapter.revealLevel ?? null,
-      mustAvoid: chapter.mustAvoid ?? null,
-      taskSheet: chapter.taskSheet ?? null,
-    })),
-    [chapters],
-  );
-  const selectedChapter = useMemo(
-    () => chapters.find((item) => item.id === selectedChapterId),
-    [chapters, selectedChapterId],
-  );
-  const characters = novelDetailQuery.data?.data?.characters ?? [];
-  const baseCharacters = baseCharacterListQuery.data?.data ?? [];
-  const selectedCharacter = useMemo(
-    () => characters.find((item) => item.id === selectedCharacterId),
-    [characters, selectedCharacterId],
-  );
-  const selectedBaseCharacter = useMemo(
-    () => baseCharacters.find((item) => item.id === selectedBaseCharacterId),
-    [baseCharacters, selectedBaseCharacterId],
-  );
-  const exportNovelTitle = useMemo(
-    () => basicForm.title.trim() || novelDetailQuery.data?.data?.title?.trim() || id,
-    [basicForm.title, novelDetailQuery.data?.data?.title, id],
-  );
-  const currentExportScope = isNovelWorkspaceFlowTab(activeTab) && activeTab !== "world" ? activeTab : null;
-  const importedBaseCharacterIds = useMemo(
-    () => new Set(
-      characters
-        .map((item) => item.baseCharacterId)
-        .filter((item): item is string => Boolean(item)),
-    ),
-    [characters],
-  );
-  const hasCharacters = characters.length > 0;
-  const savedVolumeWorkspace = volumeWorkspaceQuery.data?.data ?? null;
   const {
     normalizedVolumeDraft,
     hasUnsavedVolumeDraft,
@@ -1177,18 +1027,6 @@ export default function NovelEdit() {
     bookAutomationProjection,
     step: resolveActiveTakeoverStep(activeTab),
   });
-  const {
-    isExportingCurrentMarkdown,
-    isExportingCurrentJson,
-    isExportingFullMarkdown,
-    isExportingFullJson,
-    isExportingFullTxt,
-  } = resolveNovelExportFlags({
-    isPending: exportNovelMutation.isPending,
-    variables: exportNovelMutation.variables,
-    currentScope: currentExportScope,
-  });
-
   if (displayAutoDirectorTask?.checkpointType === "production_experience_required") {
     return (
       <NovelProductionExperienceHandoff
@@ -1205,31 +1043,7 @@ export default function NovelEdit() {
       activeTab={activeTab}
       workflowCurrentTab={workflowCurrentTab}
       onActiveTabChange={setActiveTab}
-      exportControls={{
-        canExportCurrentStep: Boolean(currentExportScope),
-        isExportingCurrentMarkdown,
-        isExportingCurrentJson,
-        isExportingFullMarkdown,
-        isExportingFullJson,
-        isExportingFullTxt,
-        onExportCurrent: (format) => {
-          if (!currentExportScope) {
-            return;
-          }
-          exportNovelMutation.mutate({
-            format,
-            scope: currentExportScope,
-            novelTitle: exportNovelTitle,
-          });
-        },
-        onExportFull: (format) => {
-          exportNovelMutation.mutate({
-            format,
-            scope: "full",
-            novelTitle: exportNovelTitle,
-          });
-        },
-      }}
+      exportControls={exportControls}
       basicTab={basicTab}
       worldTab={basicTab}
       storyMacroTab={storyMacroTab}

@@ -41,7 +41,7 @@ export default function TaskRecoveryDialog() {
     <Dialog open={isOpen} onOpenChange={(nextOpen) => { if (!nextOpen) closeDialog(); }}>
       <AppDialogContent
         title="检测到待恢复任务"
-        description="系统启动时发现有后台任务在服务重启前中断了。现在不会自动继续执行，你可以先逐个确认，再决定是否恢复。"
+        description="系统启动时发现有后台任务在服务重启时中断。请先确认各任务状态，按需手动恢复。"
         footer={(
           <>
             <Button variant="outline" onClick={closeDialog}>

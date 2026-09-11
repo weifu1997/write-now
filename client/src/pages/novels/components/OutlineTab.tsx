@@ -53,7 +53,7 @@ const readinessSteps = [
 
 function getNextOutlineAction(readiness: OutlineTabViewProps["readiness"]): string {
   if (!readiness.canGenerateStrategy) return "先生成卷战略建议";
-  if (!readiness.canGenerateSkeleton) return "现在适合生成全书卷骨架";
+  if (!readiness.canGenerateSkeleton) return "建议生成全书卷骨架";
   if (!readiness.canGenerateBeatSheet) return "卷骨架已准备好，下一步进入节奏 / 拆章";
   if (!readiness.canGenerateChapterList) return "先做当前卷节奏板，再拆当前卷章节";
   return "卷战略阶段已齐备，可以继续进入节奏 / 拆章";
