@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import AiButton from "@/components/common/AiButton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -93,7 +93,7 @@ function formatBeatChapterOrders(chapterOrders: number[]): string {
     : `第 ${sorted[0]}-${sorted[sorted.length - 1]} 章`;
 }
 
-export default function OutlineTab(props: OutlineTabViewProps) {
+function OutlineTab(props: OutlineTabViewProps) {
   const {
     worldInjectionSummary,
     hasCharacters,
@@ -618,3 +618,5 @@ export default function OutlineTab(props: OutlineTabViewProps) {
     </div>
   );
 }
+
+export default memo(OutlineTab);

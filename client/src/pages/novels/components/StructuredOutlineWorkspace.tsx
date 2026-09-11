@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import AiButton from "@/components/common/AiButton";
 import TensionCurvePanel, { type TensionCurveSeries, type TensionCurveViewportOption } from "@/components/tensionCurve/TensionCurvePanel";
 import { TensionCurveEditDialog } from "@/components/tensionCurve/TensionCurveEditDialog";
@@ -61,7 +61,7 @@ function chapterMatchesSelection(chapter: StructuredChapter, selectedId: string)
   return chapter.id === selectedId || chapter.chapterId === selectedId;
 }
 
-export default function StructuredOutlineWorkspace(props: StructuredTabViewProps) {
+function StructuredOutlineWorkspace(props: StructuredTabViewProps) {
   const {
     novelId,
     directorTakeoverEntry,
@@ -629,3 +629,5 @@ export default function StructuredOutlineWorkspace(props: StructuredTabViewProps
     </Card>
   );
 }
+
+export default memo(StructuredOutlineWorkspace);

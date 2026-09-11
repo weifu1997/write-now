@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { SSEFrame } from "@write-now/shared/types/api";
 import type { ChapterRuntimePackage } from "@write-now/shared/types/chapterRuntime";
 import type { AuditReport, Chapter, StoryStateSnapshot } from "@write-now/shared/types/novel";
@@ -169,7 +170,7 @@ function resolvePrimaryAction(params: {
   };
 }
 
-export default function ChapterExecutionActionPanel(props: ChapterExecutionActionPanelProps) {
+function ChapterExecutionActionPanel(props: ChapterExecutionActionPanelProps) {
   const {
     novelId,
     selectedChapter,
@@ -476,3 +477,5 @@ export default function ChapterExecutionActionPanel(props: ChapterExecutionActio
     </Card>
   );
 }
+
+export default memo(ChapterExecutionActionPanel);

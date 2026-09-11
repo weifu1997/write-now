@@ -123,7 +123,7 @@ function WorldSignal(props: {
   const Icon = props.icon;
 
   return (
-    <div className="rounded-xl bg-background/75 p-3 shadow-sm ring-1 ring-border/30">
+    <div className="rounded-xl bg-background/75 p-3 ring-1 ring-border/30">
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <Icon className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
         {props.label}
@@ -139,7 +139,7 @@ function GenerationChain() {
     <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
       {["本书世界", "角色", "大纲", "章节"].map((item, index, array) => (
         <span key={item} className="flex items-center gap-2">
-          <span className="rounded-full bg-background/80 px-2 py-1 shadow-sm ring-1 ring-border/25">{item}</span>
+          <span className="rounded-full bg-background/80 px-2 py-1 ring-1 ring-border/25">{item}</span>
           {index < array.length - 1 ? <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" /> : null}
         </span>
       ))}
@@ -210,7 +210,7 @@ export default function NovelWorldManagerCard(props: NovelWorldManagerCardProps)
 
   return (
     <section className="space-y-5">
-      <section className="overflow-hidden rounded-2xl bg-muted/10 shadow-sm ring-1 ring-border/35">
+      <section className="overflow-hidden rounded-2xl bg-muted/10 ring-1 ring-border/35">
         <div className="grid gap-5 p-5 xl:grid-cols-[minmax(0,1.25fr)_420px]">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
@@ -294,7 +294,7 @@ export default function NovelWorldManagerCard(props: NovelWorldManagerCardProps)
             </div>
           </div>
 
-          <aside className="space-y-4 rounded-2xl bg-background/65 p-4 shadow-sm ring-1 ring-border/30">
+          <aside className="space-y-4 rounded-2xl bg-background/65 p-4 ring-1 ring-border/30">
             <div>
               <div className="text-sm font-medium text-foreground">世界约束条</div>
               <div className="mt-1 text-sm leading-6 text-muted-foreground">
